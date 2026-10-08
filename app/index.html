@@ -1086,6 +1086,18 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 </head>
 
 <body>
+<div id="roleGate" class="role-gate">
+  <div class="role-card">
+    <div class="logo" style="margin-bottom:18px">Celu <i>Piezaz</i> Dot Com</div>
+    <h1>¿Cómo quieres entrar?</h1>
+    <p>Elige el tipo de usuario que quieres probar. Verás únicamente la experiencia correspondiente.</p>
+    <div class="role-list">
+      <button class="role-btn" onclick="enterRole('technician')"><strong class="role-icon">T</strong><span><b>Técnico</b>Buscar repuestos, comprar y consultar pedidos.</span></button>
+      <button class="role-btn" onclick="enterRole('shop')"><strong class="role-icon">E</strong><span><b>Tienda</b>Gestionar pedidos, inventario, ventas y catálogo.</span></button>
+      <button class="role-btn" onclick="enterRole('admin')"><strong class="role-icon">A</strong><span><b>Administrador</b>Gestionar la plataforma y el catálogo maestro.</span></button>
+    </div>
+  </div>
+</div>
 <header class="top"><div class="topin"><div class="logo">Celu <i>Piezaz</i> Dot Com</div><button class="back" onclick="openPage('admin')">Mi tienda</button></div></header>
 
 <main><div class="tech-banner"><b>Modo Técnico</b> · Esta versión está aislada para probar únicamente la experiencia del técnico.</div>
@@ -1870,30 +1882,38 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
 
 const smartSearch=document.getElementById("q");
-if(smartSearch){
-  smartSearch.addEventListener("input",()=>{ techSelectedModel=""; techSelectedPart=""; techSelectedVariant=""; renderMarket(); });
+if(smartSearch) smartSearch.addEventListener("input",()=>{techSelectedModel="";techSelectedPart="";techSelectedVariant="";renderMarket();});
+
+function enterRole(role){
+  state.role=role;
+  state.mode=role==="technician"?"technician":role;
+  save();
+  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
+  document.body.classList.add("role-active","role-"+role);
+  if(role==="technician"){openPage("market");renderMarket();renderOrders();}
+  else {openPage("admin");adminTab(role==="admin"?"catalog":"inv");renderAdminV38();}
 }
+function showRoleGate(){
+  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
+  document.getElementById("roleGate").style.display="flex";
+}
+function changeRole(){showRoleGate();}
+document.addEventListener("keydown",e=>{if(e.key==="Escape" && document.body.classList.contains("role-active")) showRoleGate();});
 
-document.getElementById("q").value="";
-document.getElementById("modeShop").classList.toggle("active",state.mode==="shop");
-document.getElementById("modeAdmin").classList.toggle("active",state.mode==="admin");
-document.getElementById("modeTech").classList.toggle("active",state.mode==="technician");
-document.getElementById("currentModeLabel").textContent=state.mode==="admin"?"Modo administrador":state.mode==="technician"?"Modo técnico":"Modo tienda";
-renderMarket();renderAdmin();renderOrders();
-
-/* Técnico v1 — aislamiento de rol */
 function resetTechTest(){
   state.orders=[];
   save();
   renderOrders();
   toast("Pedidos de prueba reiniciados");
 }
-(function initTechnicianOnly(){
-  document.body.classList.add("tech-only");
-  state.mode="technician";
-  if(typeof renderMarket==="function") renderMarket();
-  if(typeof renderOrders==="function") renderOrders();
-  openPage("market");
-})();
+
+if(typeof renderAdminV38==="function") renderAdminV38();
+
+const savedRole=state.role;
+if(savedRole==="technician"||savedRole==="shop"||savedRole==="admin"){
+  enterRole(savedRole);
+}else{
+  showRoleGate();
+}
 </script>
 </body></html>
