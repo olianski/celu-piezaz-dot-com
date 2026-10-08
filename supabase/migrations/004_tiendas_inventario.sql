@@ -4,8 +4,16 @@
 create extension if not exists unaccent;
 
 create or replace function public.normalize_search_text(p_text text)
-returns text language sql immutable strict
-as $$ select regexp_replace(unaccent(lower(trim(p_text))), '\\s+', ' ', 'g'); $$;
+returns text
+language sql
+immutable
+strict
+as $
+  select regexp_replace(
+    replace(replace(replace(replace(replace(unaccent(lower(trim(p_text))), 'display','pantalla'), 'lcd','pantalla'), 'battery','bateria'), 'charging port','puerto de carga'), 'back cover','tapa trasera'),
+    '\\s+', ' ', 'g'
+  );
+$;
 
 -- Alta segura: el registro público siempre nace como técnico.
 create or replace function public.handle_new_user()
@@ -173,3 +181,33 @@ begin
 end; $$;
 revoke all on function public.place_order(uuid,text,text,jsonb) from public;
 grant execute on function public.place_order(uuid,text,text,jsonb) to authenticated;
+
+-- Búsqueda backend: soporta varias palabras, tildes, alias y sinónimos básicos.
+create or replace function public.search_products(p_query text)
+returns table(id uuid,display_name text,normalized_search text,brand text,model text,part_type text,variant text)
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+with q as (select public.normalize_search_text(coalesce(p_query,'')) as text),
+tokens as (select token from q,cross join lateral regexp_split_to_table(q.text,'\\s+') token where token<>'')
+select p.id,p.display_name,p.normalized_search,pm.brand,pm.model,pt.name,pv.name
+from public.products p
+join public.phone_models pm on pm.id=p.phone_model_id
+join public.part_types pt on pt.id=p.part_type_id
+join public.part_variants pv on pv.id=p.part_variant_id
+where p.active=true and pm.active=true and pt.active=true and pv.active=true
+  and exists(select 1 from q where q.text<>'')
+  and not exists(
+    select 1 from tokens t
+    where not(
+      p.normalized_search ilike '%'||t.token||'%'
+      or public.normalize_search_text(pm.brand) ilike '%'||t.token||'%'
+      or public.normalize_search_text(pm.model) ilike '%'||t.token||'%'
+      or exists(select 1 from public.phone_model_aliases a where a.phone_model_id=pm.id and a.active=true and a.normalized_alias ilike '%'||t.token||'%')
+    )
+  )
+order by pm.brand,pm.model,pt.name,pv.name
+limit 100;
+$$;
