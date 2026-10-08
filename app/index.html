@@ -1083,22 +1083,38 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 }
 
 </style>
-</head>
+<style id="real-auth-css">
+.auth-gate{position:fixed;inset:0;z-index:100;background:#f6f8fc;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.auth-card{width:min(430px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:20px;padding:24px;box-shadow:0 12px 35px #10182812}
+.auth-card h1{margin:0 0 7px;font-size:26px}.auth-card p{margin:0 0 18px;color:#667085;font-size:13px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.auth-tabs button{border:1px solid #e4e7ec;background:#fff;border-radius:10px;padding:10px;font-weight:700;color:#667085}
+.auth-tabs button.active{background:#eaf2ff;border-color:#c7dcff;color:#0b63f6}
+.auth-form{display:grid;gap:10px}.auth-form label{font-size:12px;font-weight:700;color:#475467}.auth-form input{width:100%;padding:12px;border:1px solid #dfe4ea;border-radius:11px;outline:0;margin-top:5px}.auth-submit{border:0;background:#0b63f6;color:#fff;border-radius:11px;padding:13px;font-weight:850;margin-top:3px}
+.auth-msg{font-size:12px;color:#667085;min-height:17px;margin-top:8px}.auth-msg.error{color:#b42318}
+</style></head>
 
 <body>
-<div id="roleGate" class="role-gate">
-  <div class="role-card">
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
     <div class="logo" style="margin-bottom:18px">Celu <i>Piezaz</i> Dot Com</div>
-    <h1>¿Cómo quieres entrar?</h1>
-    <p>Elige el tipo de usuario que quieres probar. Verás únicamente la experiencia correspondiente.</p>
-    <div class="role-list">
-      <button class="role-btn" onclick="enterRole('technician')"><strong class="role-icon">T</strong><span><b>Técnico</b>Buscar repuestos, comprar y consultar pedidos.</span></button>
-      <button class="role-btn" onclick="enterRole('shop')"><strong class="role-icon">E</strong><span><b>Tienda</b>Gestionar pedidos, inventario, ventas y catálogo.</span></button>
-      <button class="role-btn" onclick="enterRole('admin')"><strong class="role-icon">A</strong><span><b>Administrador</b>Gestionar la plataforma y el catálogo maestro.</span></button>
+    <h1 id="authTitle">Iniciar sesión</h1>
+    <p id="authSubtitle">Entra con tu cuenta para acceder a tu área.</p>
+    <div class="auth-tabs">
+      <button id="loginTab" class="active" onclick="setAuthMode('login')">Iniciar sesión</button>
+      <button id="signupTab" onclick="setAuthMode('signup')">Crear cuenta</button>
     </div>
+    <form class="auth-form" onsubmit="submitAuth(event)">
+      <label>Correo<input id="authEmail" type="email" autocomplete="email" required></label>
+      <label id="authNameWrap" style="display:none">Nombre<input id="authName" autocomplete="name"></label>
+      <label id="authPhoneWrap" style="display:none">Teléfono<input id="authPhone" autocomplete="tel"></label>
+      <label>Contraseña<input id="authPassword" type="password" minlength="6" autocomplete="current-password" required></label>
+      <button class="auth-submit" id="authSubmit" type="submit">Entrar</button>
+    </form>
+    <div id="authMsg" class="auth-msg"></div>
   </div>
 </div>
-<header class="top"><div class="topin"><div class="logo">Celu <i>Piezaz</i> Dot Com</div><button class="back" onclick="openPage('admin')">Mi tienda</button></div></header>
+<header class="top"><div class="topin"><div class="logo">Celu <i>Piezaz</i> Dot Com</div><button class="back" id="accountBtn" onclick="doLogout()">Salir</button></div></header>
 
 <main><div class="tech-banner"><b>Modo Técnico</b> · Esta versión está aislada para probar únicamente la experiencia del técnico.</div>
 <section id="market" class="page active">
@@ -1912,22 +1928,69 @@ function resetTechTest(){
 
 if(typeof renderAdminV38==="function") renderAdminV38();
 
-const savedRole=state.role;
-if(savedRole==="technician"||savedRole==="shop"||savedRole==="admin"){
-  enterRole(savedRole);
-}else{
-  showRoleGate();
+let authMode="login";
+function setAuthMode(mode){
+  authMode=mode;
+  document.getElementById("loginTab").classList.toggle("active",mode==="login");
+  document.getElementById("signupTab").classList.toggle("active",mode==="signup");
+  document.getElementById("authTitle").textContent=mode==="login"?"Iniciar sesión":"Crear cuenta";
+  document.getElementById("authSubtitle").textContent=mode==="login"?"Entra con tu cuenta para acceder a tu área.":"Crea tu cuenta de técnico.";
+  document.getElementById("authSubmit").textContent=mode==="login"?"Entrar":"Crear cuenta";
+  document.getElementById("authNameWrap").style.display=mode==="signup"?"block":"none";
+  document.getElementById("authPhoneWrap").style.display=mode==="signup"?"block":"none";
+  document.getElementById("authPassword").autocomplete=mode==="login"?"current-password":"new-password";
+  document.getElementById("authMsg").textContent="";
+  document.getElementById("authMsg").className="auth-msg";
 }
-
-// Backend real: conexión preparada con Supabase.
-(function initRealBackend(){
+async function submitAuth(e){
+  e.preventDefault();
+  const msg=document.getElementById("authMsg"),btn=document.getElementById("authSubmit");
+  msg.textContent="";msg.className="auth-msg";btn.disabled=true;btn.textContent="Conectando…";
   try{
-    if(window.supabase && window.CELU_SUPABASE_CONFIG){
-      const client=window.supabase.createClient(window.CELU_SUPABASE_CONFIG.url,window.CELU_SUPABASE_CONFIG.anonKey);
-      window.CeluPiezazBackend.configure(client);
-      window.CeluPiezazBackendReady=true;
-    }
-  }catch(e){ console.warn("Backend Supabase no disponible",e); }
-})();
+    let r;
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    if(authMode==="login") r=await CeluPiezazBackend.signIn(email,password);
+    else r=await CeluPiezazBackend.signUp(email,password,document.getElementById("authName").value.trim(),document.getElementById("authPhone").value.trim());
+    if(r.error) throw r.error;
+    if(authMode==="signup" && !r.data?.session){
+      msg.textContent="Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.";
+      msg.className="auth-msg"; setAuthMode("login");
+    }else await bootAuthenticated();
+  }catch(err){
+    msg.textContent=err?.message||"No se pudo completar la operación.";
+    msg.className="auth-msg error";
+  }finally{btn.disabled=false;btn.textContent=authMode==="login"?"Entrar":"Crear cuenta";}
+}
+async function bootAuthenticated(){
+  const p=await CeluPiezazBackend.profile();
+  if(p.error||!p.data||!p.data.length) throw new Error("No se encontró el perfil del usuario.");
+  const role=p.data[0].role;
+  state.role=role;state.mode=role==="technician"?"technician":role;save();
+  document.getElementById("authGate").style.display="none";
+  document.body.classList.add("role-active","role-"+role);
+  if(role==="technician"){openPage("market");renderMarket();renderOrders();}
+  else {openPage("admin");adminTab(role==="admin"?"catalog":"inv");renderAdminV38();}
+}
+async function doLogout(){
+  try{await CeluPiezazBackend.signOut();}catch(e){}
+  state.role=null;save();
+  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
+  document.getElementById("authGate").style.display="flex";
+}
+function showRoleGate(){document.getElementById("authGate").style.display="flex";}
+async function initRealBackend(){
+  try{
+    if(!window.supabase||!window.CELU_SUPABASE_CONFIG) throw new Error("Backend no configurado");
+    const client=window.supabase.createClient(window.CELU_SUPABASE_CONFIG.url,window.CELU_SUPABASE_CONFIG.anonKey);
+    CeluPiezazBackend.configure(client);window.CeluPiezazBackendReady=true;
+    const s=await CeluPiezazBackend.session();
+    if(s.data?.session) await bootAuthenticated(); else showRoleGate();
+  }catch(e){
+    console.error(e);document.getElementById("authMsg").textContent="No se pudo conectar con el servidor.";
+    document.getElementById("authMsg").className="auth-msg error";showRoleGate();
+  }
+}
+initRealBackend();
 </script>
 </body></html>
