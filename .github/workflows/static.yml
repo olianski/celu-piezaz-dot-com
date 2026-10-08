@@ -14,5 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Run static checks
+      - name: Run frontend checks
         run: node tests/static-v39.js app/index.html
+      - name: Run backend checks
+        run: node tests/backend-static.js supabase/migrations/001_initial_schema.sql supabase/migrations/002_order_transaction.sql supabase/migrations/003_auth_profile.sql supabase/migrations/004_tiendas_inventario.sql supabase/seed/002_catalog_master.sql

@@ -859,3 +859,65 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   window.renderStoreProductPicker=function(){
     const current=prod.value;
+    prod.innerHTML=state.catalog.filter(p=>p.active).map(p=>`<option value="${p.id}">${esc(p.type)} ${esc(p.model)} · ${esc(p.variant)}</option>`).join("");
+    if(current) prod.value=current;
+    renderModels();
+  };
+
+  search.addEventListener("input",renderModels);
+  document.getElementById("spRequest").onclick=()=>toast("Solicitud enviada: indícale al administrador el modelo que necesitas.");
+  saveBtn.onclick=function(){
+    const p=Number(price.value), q=Number(qty.value);
+    if(!prod.value){toast("Primero elige un producto.");return;}
+    if(!p || p<0){toast("Indica un precio.");price.focus();return;}
+    if(!Number.isInteger(q) || q<0){toast("Indica una cantidad válida.");qty.focus();return;}
+    const existing=state.inventory.find(i=>i.shopId==="shop1"&&String(i.productId)===String(prod.value)&&i.active);
+    if(existing){
+      existing.price=p;
+      existing.qty=q;
+      save(); renderAdmin(); renderMarket();
+      toast("Producto actualizado ✓");
+    }else{
+      saveStock();
+      toast("Producto agregado ✓");
+    }
+    price.value=""; qty.value="";
+    search.value="";
+    clearSelection();
+    renderModels();
+    search.focus();
+  };
+
+  window.renderStoreProductPicker();
+})();
+
+
+
+const smartSearch=document.getElementById("q");
+if(smartSearch){
+  smartSearch.addEventListener("input",()=>{ techSelectedModel=""; techSelectedPart=""; techSelectedVariant=""; renderMarket(); });
+}
+
+document.getElementById("q").value="";
+document.getElementById("modeShop").classList.toggle("active",state.mode==="shop");
+document.getElementById("modeAdmin").classList.toggle("active",state.mode==="admin");
+document.getElementById("modeTech").classList.toggle("active",state.mode==="technician");
+document.getElementById("currentModeLabel").textContent=state.mode==="admin"?"Modo administrador":state.mode==="technician"?"Modo técnico":"Modo tienda";
+renderMarket();renderAdmin();renderOrders();
+
+/* Técnico v1 — aislamiento de rol */
+function resetTechTest(){
+  state.orders=[];
+  save();
+  renderOrders();
+  toast("Pedidos de prueba reiniciados");
+}
+(function initTechnicianOnly(){
+  document.body.classList.add("tech-only");
+  state.mode="technician";
+  if(typeof renderMarket==="function") renderMarket();
+  if(typeof renderOrders==="function") renderOrders();
+  openPage("market");
+})();
+</script>
+</body></html>
