@@ -20,10 +20,10 @@ assert(!html.includes("/* v6 — tienda: selector amigable del catálogo maestro
 assert(!html.includes("spSearchBtn"),
   "Quedó referencia al botón legacy spSearchBtn.");
 
-assert(!html.includes("renderStoreProductPicker=function"),
-  "Quedó una segunda arquitectura de picker legacy.");
+assert(html.includes("window.renderStoreProductPicker=function"),
+  "Falta el picker activo de tienda.");
 
 assert(html.includes('String(x.productId)===String(productId)'),
   "inventoryFor debe normalizar IDs.");
 
-console.log("PASS: estructura HTML, código legacy e IDs");
+console.log("PASS: estructura HTML, picker activo, código legacy e IDs");
