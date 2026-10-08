@@ -47,7 +47,7 @@ window.CeluPiezazBackend = (() => {
     return requireClient().from('phone_models').select('id,brand,model,normalized_name,active').order('brand').order('model').limit(500);
   }
   async function adminCreateModel(brand,model){
-    const normalized_name=(String(brand||'')+' '+String(model||'')).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim().replace(/\\s+/g,' ');
+    const normalized_name=(String(brand||'')+' '+String(model||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
     return requireClient().from('phone_models').insert({brand:String(brand||'').trim(),model:String(model||'').trim(),normalized_name,active:true}).select().single();
   }
   async function adminSetModelActive(id,active){
