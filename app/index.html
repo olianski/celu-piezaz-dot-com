@@ -1116,7 +1116,7 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 </div>
 <header class="top"><div class="topin"><div class="logo">Celu <i>Piezaz</i> Dot Com</div><button class="back" id="accountBtn" onclick="doLogout()">Salir</button></div></header>
 
-<main><div class="tech-banner"><b>Modo Técnico</b> · Esta versión está aislada para probar únicamente la experiencia del técnico.</div>
+<main><div class="tech-banner" id="techBanner"><b>Modo Técnico</b> · Esta versión está aislada para probar únicamente la experiencia del técnico.</div>
 <section id="market" class="page active">
 <div class="hero"><h1>Encuentra tu repuesto</h1><p>Disponibilidad y precio, en un solo lugar.</p></div>
 <div class="searchbox"><span>⌕</span><input id="q" autocomplete="off" placeholder="Busca: A15, pantalla, batería..." oninput="renderMarket()"><div id="qHint" class="tiny" style="margin-top:7px"></div></div>
@@ -1882,6 +1882,41 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   }
 
   function renderAdminV38(){
+    const isAdmin = state.role === "admin";
+    const banner = document.getElementById("techBanner");
+    if (banner) banner.style.display = isAdmin ? "none" : "";
+    const heading = document.querySelector("#admin .shop-topbar .eyebrow");
+    const title = document.querySelector("#admin .shop-topbar h1");
+    const subtitle = document.querySelector("#admin .shop-topbar p");
+    const pending = document.getElementById("pendingCount");
+    if (isAdmin) {
+      if (heading) heading.textContent = "ADMINISTRACIÓN";
+      if (title) title.textContent = "Panel de administración";
+      if (subtitle) subtitle.textContent = "Gestiona el catálogo maestro de repuestos.";
+      if (pending) pending.style.display = "none";
+      ["Orders","Inventory","Sales"].forEach(s => {
+        const tab = document.getElementById("shopTab"+s);
+        if (tab) tab.style.display = "none";
+      });
+      const catalogTab = document.getElementById("shopTabCatalog");
+      if (catalogTab) { catalogTab.style.display = ""; catalogTab.textContent = "Catálogo maestro"; catalogTab.classList.add("active"); }
+      document.getElementById("shopSectionOrders").classList.remove("active");
+      document.getElementById("shopSectionInventory").classList.remove("active");
+      document.getElementById("shopSectionSales").classList.remove("active");
+      document.getElementById("shopSectionCatalog").classList.add("active");
+      renderShopCatalog();
+      return;
+    }
+    if (heading) heading.textContent = "MI TIENDA";
+    if (title) title.textContent = "Pedidos";
+    if (subtitle) subtitle.textContent = "Revisa y completa tus pedidos primero.";
+    if (pending) pending.style.display = "";
+    ["Orders","Inventory","Sales","Catalog"].forEach(s => {
+      const tab = document.getElementById("shopTab"+s);
+      if (tab) tab.style.display = "";
+    });
+    const catalogTab = document.getElementById("shopTabCatalog");
+    if (catalogTab) catalogTab.textContent = "Catálogo";
     renderShopOrdersV38();
     document.getElementById("shopSectionOrders").classList.add("active");
     document.getElementById("shopSectionInventory").classList.remove("active");
