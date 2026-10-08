@@ -1,0 +1,1200 @@
+{
+  "version": "2.0",
+  "country_focus": "Colombia",
+  "note": "Catálogo maestro inicial priorizado; no significa que todos los repuestos estén disponibles. Las tiendas publican inventario solo seleccionando productos maestros.",
+  "brands": {
+    "Samsung": [
+      "Galaxy A05",
+      "Galaxy A05s",
+      "Galaxy A06",
+      "Galaxy A14",
+      "Galaxy A15",
+      "Galaxy A16 4G",
+      "Galaxy A24",
+      "Galaxy A25",
+      "Galaxy A34",
+      "Galaxy A35",
+      "Galaxy A36",
+      "Galaxy A54",
+      "Galaxy A55",
+      "Galaxy A56",
+      "Galaxy S21",
+      "Galaxy S22",
+      "Galaxy S23",
+      "Galaxy S24",
+      "Galaxy S25",
+      "Galaxy S25 FE",
+      "Galaxy S25 Plus",
+      "Galaxy S25 Ultra"
+    ],
+    "Xiaomi": [
+      "Redmi 13C",
+      "Redmi 14C",
+      "Redmi 15C 4G",
+      "Redmi 10",
+      "Redmi Note 11",
+      "Redmi Note 12",
+      "Redmi Note 13",
+      "Redmi Note 14",
+      "Redmi Note 15",
+      "Redmi Note 15 Pro",
+      "Redmi 15 4G",
+      "Poco C71",
+      "Poco C85",
+      "Poco X3 Pro",
+      "Poco X5 Pro",
+      "Xiaomi 15T"
+    ],
+    "Motorola": [
+      "Moto G05",
+      "Moto G15 4G",
+      "Moto G20",
+      "Moto G30",
+      "Moto G32",
+      "Moto G35 5G",
+      "Moto G52",
+      "Moto G54",
+      "Moto G84",
+      "Edge 30",
+      "Edge 40",
+      "Edge 50",
+      "Razr 40"
+    ],
+    "Apple": [
+      "iPhone X",
+      "iPhone XR",
+      "iPhone 11",
+      "iPhone 12",
+      "iPhone 13",
+      "iPhone 14",
+      "iPhone 15",
+      "iPhone 16",
+      "iPhone 16e",
+      "iPhone 17",
+      "iPhone 17 Pro Max"
+    ],
+    "HONOR": [
+      "X5 Plus",
+      "X6",
+      "X7",
+      "X8",
+      "X8b",
+      "X9b",
+      "200 Lite",
+      "200",
+      "Magic7 Lite"
+    ],
+    "TECNO": [
+      "Spark 10",
+      "Spark 20",
+      "Spark 20C",
+      "Spark 30",
+      "Camon 20",
+      "Camon 30",
+      "Pop 9"
+    ],
+    "Infinix": [
+      "Hot 30",
+      "Hot 40",
+      "Hot 50",
+      "Hot 50i",
+      "Note 30",
+      "Note 40"
+    ],
+    "OPPO": [
+      "A38",
+      "A58",
+      "A60",
+      "A78",
+      "A79",
+      "Reno 11",
+      "Reno 12"
+    ],
+    "realme": [
+      "C55",
+      "C61",
+      "C67",
+      "C75",
+      "Note 50",
+      "11 Pro"
+    ],
+    "Huawei": [
+      "Y9a",
+      "Nova 9",
+      "Nova 11",
+      "P30 Lite",
+      "P40 Lite"
+    ],
+    "ZTE": [
+      "Blade A34",
+      "Blade A54",
+      "Blade A55",
+      "Blade V40"
+    ],
+    "TCL": [
+      "30 SE",
+      "40 SE",
+      "50 5G"
+    ]
+  },
+  "part_types": {
+    "Pantalla": [
+      "Incell",
+      "OLED",
+      "AMOLED",
+      "Original",
+      "Compatible"
+    ],
+    "Batería": [
+      "Compatible",
+      "Alta capacidad",
+      "Original"
+    ],
+    "Puerto de carga": [
+      "Flex completo",
+      "Placa/Flex compatible",
+      "Original"
+    ],
+    "Cámara": [
+      "Frontal",
+      "Trasera",
+      "Original"
+    ],
+    "Tapa trasera": [
+      "Compatible",
+      "Original"
+    ],
+    "Parlante": [
+      "Compatible",
+      "Original"
+    ],
+    "Auricular": [
+      "Compatible",
+      "Original"
+    ],
+    "Micrófono": [
+      "Compatible",
+      "Original"
+    ],
+    "Flex": [
+      "Encendido",
+      "Volumen",
+      "Carga",
+      "Sensor proximidad",
+      "Huella",
+      "Otro"
+    ],
+    "Marco / Chasis": [
+      "Compatible",
+      "Original"
+    ],
+    "Botones": [
+      "Encendido",
+      "Volumen",
+      "Compatible"
+    ],
+    "Vibrador": [
+      "Compatible",
+      "Original"
+    ],
+    "Conector / FPC": [
+      "Compatible",
+      "Original"
+    ]
+  },
+  "model_count": 109,
+  "brand_count": 12,
+  "models": [
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A05",
+      "search_aliases": [
+        "galaxy a05",
+        "samsung galaxy a05"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A05s",
+      "search_aliases": [
+        "galaxy a05s",
+        "samsung galaxy a05s"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A06",
+      "search_aliases": [
+        "galaxy a06",
+        "samsung galaxy a06"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A14",
+      "search_aliases": [
+        "galaxy a14",
+        "samsung galaxy a14"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A15",
+      "search_aliases": [
+        "galaxy a15",
+        "samsung galaxy a15"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A16 4G",
+      "search_aliases": [
+        "galaxy a16 4g",
+        "samsung galaxy a16 4g"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A24",
+      "search_aliases": [
+        "galaxy a24",
+        "samsung galaxy a24"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A25",
+      "search_aliases": [
+        "galaxy a25",
+        "samsung galaxy a25"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A34",
+      "search_aliases": [
+        "galaxy a34",
+        "samsung galaxy a34"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A35",
+      "search_aliases": [
+        "galaxy a35",
+        "samsung galaxy a35"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A36",
+      "search_aliases": [
+        "galaxy a36",
+        "samsung galaxy a36"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A54",
+      "search_aliases": [
+        "galaxy a54",
+        "samsung galaxy a54"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A55",
+      "search_aliases": [
+        "galaxy a55",
+        "samsung galaxy a55"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A56",
+      "search_aliases": [
+        "galaxy a56",
+        "samsung galaxy a56"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S21",
+      "search_aliases": [
+        "galaxy s21",
+        "samsung galaxy s21"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S22",
+      "search_aliases": [
+        "galaxy s22",
+        "samsung galaxy s22"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S23",
+      "search_aliases": [
+        "galaxy s23",
+        "samsung galaxy s23"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S24",
+      "search_aliases": [
+        "galaxy s24",
+        "samsung galaxy s24"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S25",
+      "search_aliases": [
+        "galaxy s25",
+        "samsung galaxy s25"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S25 FE",
+      "search_aliases": [
+        "galaxy s25 fe",
+        "samsung galaxy s25 fe"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S25 Plus",
+      "search_aliases": [
+        "galaxy s25 plus",
+        "samsung galaxy s25 plus"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy S25 Ultra",
+      "search_aliases": [
+        "galaxy s25 ultra",
+        "samsung galaxy s25 ultra"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi 13C",
+      "search_aliases": [
+        "redmi 13c",
+        "xiaomi redmi 13c"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi 14C",
+      "search_aliases": [
+        "redmi 14c",
+        "xiaomi redmi 14c"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi 15C 4G",
+      "search_aliases": [
+        "redmi 15c 4g",
+        "xiaomi redmi 15c 4g"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi 10",
+      "search_aliases": [
+        "redmi 10",
+        "xiaomi redmi 10"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 11",
+      "search_aliases": [
+        "redmi note 11",
+        "xiaomi redmi note 11"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 12",
+      "search_aliases": [
+        "redmi note 12",
+        "xiaomi redmi note 12"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 13",
+      "search_aliases": [
+        "redmi note 13",
+        "xiaomi redmi note 13"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 14",
+      "search_aliases": [
+        "redmi note 14",
+        "xiaomi redmi note 14"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 15",
+      "search_aliases": [
+        "redmi note 15",
+        "xiaomi redmi note 15"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 15 Pro",
+      "search_aliases": [
+        "redmi note 15 pro",
+        "xiaomi redmi note 15 pro"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi 15 4G",
+      "search_aliases": [
+        "redmi 15 4g",
+        "xiaomi redmi 15 4g"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Poco C71",
+      "search_aliases": [
+        "poco c71",
+        "xiaomi poco c71"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Poco C85",
+      "search_aliases": [
+        "poco c85",
+        "xiaomi poco c85"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Poco X3 Pro",
+      "search_aliases": [
+        "poco x3 pro",
+        "xiaomi poco x3 pro"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Poco X5 Pro",
+      "search_aliases": [
+        "poco x5 pro",
+        "xiaomi poco x5 pro"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Xiaomi 15T",
+      "search_aliases": [
+        "xiaomi 15t",
+        "xiaomi xiaomi 15t"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G05",
+      "search_aliases": [
+        "moto g05",
+        "motorola moto g05"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G15 4G",
+      "search_aliases": [
+        "moto g15 4g",
+        "motorola moto g15 4g"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G20",
+      "search_aliases": [
+        "moto g20",
+        "motorola moto g20"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G30",
+      "search_aliases": [
+        "moto g30",
+        "motorola moto g30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G32",
+      "search_aliases": [
+        "moto g32",
+        "motorola moto g32"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G35 5G",
+      "search_aliases": [
+        "moto g35 5g",
+        "motorola moto g35 5g"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G52",
+      "search_aliases": [
+        "moto g52",
+        "motorola moto g52"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G54",
+      "search_aliases": [
+        "moto g54",
+        "motorola moto g54"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G84",
+      "search_aliases": [
+        "moto g84",
+        "motorola moto g84"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Edge 30",
+      "search_aliases": [
+        "edge 30",
+        "motorola edge 30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Edge 40",
+      "search_aliases": [
+        "edge 40",
+        "motorola edge 40"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Edge 50",
+      "search_aliases": [
+        "edge 50",
+        "motorola edge 50"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Motorola",
+      "model": "Razr 40",
+      "search_aliases": [
+        "razr 40",
+        "motorola razr 40"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone X",
+      "search_aliases": [
+        "iphone x",
+        "apple iphone x"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone XR",
+      "search_aliases": [
+        "iphone xr",
+        "apple iphone xr"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 11",
+      "search_aliases": [
+        "iphone 11",
+        "apple iphone 11"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 12",
+      "search_aliases": [
+        "iphone 12",
+        "apple iphone 12"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 13",
+      "search_aliases": [
+        "iphone 13",
+        "apple iphone 13"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 14",
+      "search_aliases": [
+        "iphone 14",
+        "apple iphone 14"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 15",
+      "search_aliases": [
+        "iphone 15",
+        "apple iphone 15"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 16",
+      "search_aliases": [
+        "iphone 16",
+        "apple iphone 16"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 16e",
+      "search_aliases": [
+        "iphone 16e",
+        "apple iphone 16e"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 17",
+      "search_aliases": [
+        "iphone 17",
+        "apple iphone 17"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 17 Pro Max",
+      "search_aliases": [
+        "iphone 17 pro max",
+        "apple iphone 17 pro max"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X5 Plus",
+      "search_aliases": [
+        "x5 plus",
+        "honor x5 plus"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X6",
+      "search_aliases": [
+        "x6",
+        "honor x6"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X7",
+      "search_aliases": [
+        "x7",
+        "honor x7"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X8",
+      "search_aliases": [
+        "x8",
+        "honor x8"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X8b",
+      "search_aliases": [
+        "x8b",
+        "honor x8b"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "X9b",
+      "search_aliases": [
+        "x9b",
+        "honor x9b"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "200 Lite",
+      "search_aliases": [
+        "200 lite",
+        "honor 200 lite"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "200",
+      "search_aliases": [
+        "200",
+        "honor 200"
+      ],
+      "active": true
+    },
+    {
+      "brand": "HONOR",
+      "model": "Magic7 Lite",
+      "search_aliases": [
+        "magic7 lite",
+        "honor magic7 lite"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Spark 10",
+      "search_aliases": [
+        "spark 10",
+        "tecno spark 10"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Spark 20",
+      "search_aliases": [
+        "spark 20",
+        "tecno spark 20"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Spark 20C",
+      "search_aliases": [
+        "spark 20c",
+        "tecno spark 20c"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Spark 30",
+      "search_aliases": [
+        "spark 30",
+        "tecno spark 30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Camon 20",
+      "search_aliases": [
+        "camon 20",
+        "tecno camon 20"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Camon 30",
+      "search_aliases": [
+        "camon 30",
+        "tecno camon 30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TECNO",
+      "model": "Pop 9",
+      "search_aliases": [
+        "pop 9",
+        "tecno pop 9"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Hot 30",
+      "search_aliases": [
+        "hot 30",
+        "infinix hot 30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Hot 40",
+      "search_aliases": [
+        "hot 40",
+        "infinix hot 40"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Hot 50",
+      "search_aliases": [
+        "hot 50",
+        "infinix hot 50"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Hot 50i",
+      "search_aliases": [
+        "hot 50i",
+        "infinix hot 50i"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Note 30",
+      "search_aliases": [
+        "note 30",
+        "infinix note 30"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Infinix",
+      "model": "Note 40",
+      "search_aliases": [
+        "note 40",
+        "infinix note 40"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "A38",
+      "search_aliases": [
+        "a38",
+        "oppo a38"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "A58",
+      "search_aliases": [
+        "a58",
+        "oppo a58"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "A60",
+      "search_aliases": [
+        "a60",
+        "oppo a60"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "A78",
+      "search_aliases": [
+        "a78",
+        "oppo a78"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "A79",
+      "search_aliases": [
+        "a79",
+        "oppo a79"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "Reno 11",
+      "search_aliases": [
+        "reno 11",
+        "oppo reno 11"
+      ],
+      "active": true
+    },
+    {
+      "brand": "OPPO",
+      "model": "Reno 12",
+      "search_aliases": [
+        "reno 12",
+        "oppo reno 12"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "C55",
+      "search_aliases": [
+        "c55",
+        "realme c55"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "C61",
+      "search_aliases": [
+        "c61",
+        "realme c61"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "C67",
+      "search_aliases": [
+        "c67",
+        "realme c67"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "C75",
+      "search_aliases": [
+        "c75",
+        "realme c75"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "Note 50",
+      "search_aliases": [
+        "note 50",
+        "realme note 50"
+      ],
+      "active": true
+    },
+    {
+      "brand": "realme",
+      "model": "11 Pro",
+      "search_aliases": [
+        "11 pro",
+        "realme 11 pro"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Huawei",
+      "model": "Y9a",
+      "search_aliases": [
+        "y9a",
+        "huawei y9a"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Huawei",
+      "model": "Nova 9",
+      "search_aliases": [
+        "nova 9",
+        "huawei nova 9"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Huawei",
+      "model": "Nova 11",
+      "search_aliases": [
+        "nova 11",
+        "huawei nova 11"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Huawei",
+      "model": "P30 Lite",
+      "search_aliases": [
+        "p30 lite",
+        "huawei p30 lite"
+      ],
+      "active": true
+    },
+    {
+      "brand": "Huawei",
+      "model": "P40 Lite",
+      "search_aliases": [
+        "p40 lite",
+        "huawei p40 lite"
+      ],
+      "active": true
+    },
+    {
+      "brand": "ZTE",
+      "model": "Blade A34",
+      "search_aliases": [
+        "blade a34",
+        "zte blade a34"
+      ],
+      "active": true
+    },
+    {
+      "brand": "ZTE",
+      "model": "Blade A54",
+      "search_aliases": [
+        "blade a54",
+        "zte blade a54"
+      ],
+      "active": true
+    },
+    {
+      "brand": "ZTE",
+      "model": "Blade A55",
+      "search_aliases": [
+        "blade a55",
+        "zte blade a55"
+      ],
+      "active": true
+    },
+    {
+      "brand": "ZTE",
+      "model": "Blade V40",
+      "search_aliases": [
+        "blade v40",
+        "zte blade v40"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TCL",
+      "model": "30 SE",
+      "search_aliases": [
+        "30 se",
+        "tcl 30 se"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TCL",
+      "model": "40 SE",
+      "search_aliases": [
+        "40 se",
+        "tcl 40 se"
+      ],
+      "active": true
+    },
+    {
+      "brand": "TCL",
+      "model": "50 5G",
+      "search_aliases": [
+        "50 5g",
+        "tcl 50 5g"
+      ],
+      "active": true
+    }
+  ],
+  "product_key": "brand + model + part_type + variant",
+  "rules": [
+    "No permitir nombres libres para productos publicados por tiendas.",
+    "Permitir al administrador crear un nuevo modelo, tipo o variante.",
+    "Normalizar tildes, mayúsculas, espacios y alias de búsqueda.",
+    "Una tienda publica precio y cantidad sobre un producto maestro.",
+    "Un producto sin inventario activo no aparece como disponible.",
+    "Una búsqueda sin disponibilidad puede crear una solicitud de demanda."
+  ],
+  "sources_note": "La selección prioriza marcas/modelos con presencia relevante en LATAM/Colombia y modelos recientes; validar localmente antes del lanzamiento."
+}
