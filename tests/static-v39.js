@@ -40,5 +40,10 @@ assert(html.includes('adminConsoleNav(\'catalog\')'), "Falta la navegación del 
 assert(adapter.includes("adminSetShopStatus"), "Falta la gestión de estados de tiendas.");
 assert(adapter.includes("adminCreateProduct"), "Falta la creación de productos maestros.");
 assert(adapter.includes("adminSetUserRole"), "Falta la gestión de roles.");
+assert(!html.includes('id="signupTab"'), "El registro público sigue visible.");
+assert(!adapter.includes("auth.signUp"), "El adaptador todavía permite registro público.");
+assert(html.includes("adminConsoleCreateAccount"), "Falta el formulario de alta administrativa.");
+assert(adapter.includes("functions.invoke('admin-create-account'"), "El alta no usa la función segura del servidor.");
 
-console.log("PASS: HTML/IDs, sintaxis JS, consola admin y funciones Supabase");
+
+console.log("PASS: HTML/IDs, sintaxis JS, consola admin, registro privado y funciones Supabase");
