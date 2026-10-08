@@ -1092,6 +1092,103 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 .auth-tabs button.active{background:#eaf2ff;border-color:#c7dcff;color:#0b63f6}
 .auth-form{display:grid;gap:10px}.auth-form label{font-size:12px;font-weight:700;color:#475467}.auth-form input{width:100%;padding:12px;border:1px solid #dfe4ea;border-radius:11px;outline:0;margin-top:5px}.auth-submit{border:0;background:#0b63f6;color:#fff;border-radius:11px;padding:13px;font-weight:850;margin-top:3px}
 .auth-msg{font-size:12px;color:#667085;min-height:17px;margin-top:8px}.auth-msg.error{color:#b42318}
+
+/* Consola de administración — interfaz operativa independiente */
+body.role-admin .bottom{display:none!important}
+body.role-admin #techBanner{display:none!important}
+#acConsole{max-width:1020px;margin:0 auto;padding:8px 0 36px}
+.ac-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:4px 0 22px}
+.ac-eyebrow{display:block;color:#3157d5;font-size:11px;letter-spacing:1.5px;font-weight:900;margin-bottom:7px}
+.ac-hero h1{font-size:30px;line-height:1.06;letter-spacing:-.8px;margin:0 0 8px}
+.ac-hero p{color:#667085;font-size:14px;margin:0;max-width:550px}
+.ac-refresh{flex:none;border:1px solid #dbe4f0;background:#fff;color:#344054;border-radius:12px;padding:11px 13px;font-size:13px;font-weight:800}
+.ac-tabs{display:flex;gap:7px;overflow:auto;margin:0 -2px 18px;padding:3px 2px 8px;scrollbar-width:none}
+.ac-tabs::-webkit-scrollbar{display:none}
+.ac-tab{flex:0 0 auto;border:1px solid #e1e7ef;background:#fff;color:#667085;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800}
+.ac-tab.active{background:#eaf2ff;border-color:#c7dcff;color:#0b63f6}
+.ac-notice{display:none;padding:12px 14px;background:#ecfdf3;border:1px solid #abefc6;color:#067647;border-radius:12px;font-size:13px;margin-bottom:14px}
+.ac-notice.error{display:block;background:#fff1f0;border-color:#fecdca;color:#b42318}
+.ac-content-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:2px 0 13px}
+.ac-content-head h2{margin:0;font-size:22px;letter-spacing:-.4px}
+.ac-content-head p{margin:5px 0 0;color:#667085;font-size:13px}
+.ac-actions{display:flex;flex-wrap:wrap;gap:8px}
+.ac-btn{border:1px solid #dfe5ed;background:#fff;color:#344054;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:800}
+.ac-btn.primary{border-color:#0b63f6;background:#0b63f6;color:#fff}
+.ac-btn.danger{background:#fff2f0;border-color:#fecdca;color:#b42318}
+.ac-btn.success{background:#ecfdf3;border-color:#abefc6;color:#067647}
+.ac-btn:disabled{opacity:.5;cursor:not-allowed}
+.ac-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.ac-metric{background:#fff;border:1px solid #e4e9f1;border-radius:16px;padding:15px;min-width:0}
+.ac-metric span{display:block;color:#667085;font-size:11px;font-weight:700}
+.ac-metric b{display:block;font-size:25px;letter-spacing:-.6px;margin-top:7px;overflow-wrap:anywhere}
+.ac-metric small{display:block;color:#667085;font-size:11px;margin-top:2px}
+.ac-panel{background:#fff;border:1px solid #e4e9f1;border-radius:16px;padding:15px;margin:0 0 13px;min-width:0}
+.ac-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.ac-panel-head h3{margin:0;font-size:15px}
+.ac-panel-head p{margin:4px 0 0;color:#667085;font-size:12px}
+.ac-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ac-shortcut{border:1px solid #e2e8f0;background:#fff;border-radius:14px;padding:14px;text-align:left;min-width:0}
+.ac-shortcut b{display:block;font-size:13px}
+.ac-shortcut span{display:block;color:#667085;font-size:12px;line-height:1.35;margin-top:5px}
+.ac-filterbar{display:flex;gap:8px;align-items:center;margin-bottom:13px;flex-wrap:wrap}
+.ac-input,.ac-select{width:100%;min-width:0;border:1px solid #dfe5ed;border-radius:11px;background:#fff;padding:12px 13px;color:#101828;font-size:14px;outline:none}
+.ac-input:focus,.ac-select:focus{border-color:#8eafff;box-shadow:0 0 0 3px #eaf2ff}
+.ac-filterbar .ac-input{flex:1 1 220px}
+.ac-filterbar .ac-select{width:auto;flex:0 1 180px}
+.ac-list{display:grid;gap:9px}
+.ac-item{background:#fff;border:1px solid #e4e9f1;border-radius:15px;padding:14px;min-width:0}
+.ac-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ac-item-title{font-size:14px;font-weight:850;line-height:1.35;overflow-wrap:anywhere}
+.ac-item-sub{color:#667085;font-size:12px;line-height:1.45;margin-top:4px;overflow-wrap:anywhere}
+.ac-item-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ac-badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900;background:#f2f4f7;color:#475467}
+.ac-badge.ok{background:#ecfdf3;color:#067647}
+.ac-badge.warn{background:#fff6ed;color:#b54708}
+.ac-badge.bad{background:#fff1f0;color:#b42318}
+.ac-item-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.ac-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ac-form{display:grid;gap:9px}
+.ac-form label{display:block;color:#475467;font-size:11px;font-weight:800}
+.ac-form label .ac-input,.ac-form label .ac-select{margin-top:6px}
+.ac-subtabs{display:flex;gap:7px;overflow:auto;padding:1px 0 12px;margin-bottom:8px}
+.ac-subtab{border:1px solid #e1e7ef;background:#fff;color:#667085;border-radius:999px;padding:8px 12px;font-size:12px;white-space:nowrap;font-weight:800}
+.ac-subtab.active{background:#eef4ff;color:#3157d5;border-color:#b9ccff}
+.ac-empty{border:1px dashed #cfd8e3;background:#fff;border-radius:15px;padding:25px 15px;text-align:center;color:#667085;font-size:13px}
+.ac-empty b{display:block;color:#344054;margin-bottom:5px;font-size:14px}
+.ac-muted{color:#667085;font-size:12px}
+.ac-table-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid #eef1f5;align-items:center}
+.ac-table-row:last-child{border-bottom:0}
+.ac-role-editor{display:flex;align-items:center;gap:7px;min-width:0}
+.ac-role-editor .ac-select{max-width:140px;padding:9px 10px;font-size:12px}
+.ac-inline-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+.ac-inline-form.triple{grid-template-columns:1fr 1fr 1fr auto}
+.ac-inline-form label{display:block;font-size:11px;font-weight:800;color:#475467;min-width:0}
+.ac-inline-form label .ac-input,.ac-inline-form label .ac-select{margin-top:6px}
+.ac-pending-line{display:flex;gap:9px;align-items:flex-start;justify-content:space-between}
+.ac-pending-line+.ac-pending-line{border-top:1px solid #eef1f5;padding-top:11px;margin-top:11px}
+.ac-footer-note{font-size:11px;color:#667085;line-height:1.45;margin-top:12px}
+@media(min-width:760px){
+  #acConsole{padding-top:15px}
+  .ac-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ac-dashboard-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:13px;align-items:start}
+}
+@media(max-width:560px){
+  #acConsole{padding-top:3px}
+  .ac-hero h1{font-size:27px}
+  .ac-hero{margin-bottom:17px}
+  .ac-refresh{padding:10px;font-size:12px}
+  .ac-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .ac-metric{padding:13px}
+  .ac-metric b{font-size:23px}
+  .ac-shortcuts{grid-template-columns:1fr 1fr}
+  .ac-content-head{align-items:flex-start;flex-direction:column}
+  .ac-two{grid-template-columns:1fr}
+  .ac-inline-form,.ac-inline-form.triple{grid-template-columns:1fr}
+  .ac-table-row{grid-template-columns:1fr}
+  .ac-role-editor .ac-select{max-width:none;flex:1}
+  .ac-panel{padding:13px}
+}
+
 </style></head>
 
 <body>
@@ -1161,6 +1258,26 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 <section id="orders" class="page"><div class="panel" style="margin-bottom:12px"><div class="tiny">Pruebas del técnico</div><button class="remove" type="button" onclick="resetTechTest()">Reiniciar mis pedidos de prueba</button></div>
 <div class="hero"><h1>Mis pedidos</h1><p>Consulta el estado de tus pedidos recientes.</p></div>
 <div id="orderList"></div>
+</section>
+
+
+<section id="adminConsole" class="page">
+  <div id="acConsole">
+    <div class="ac-hero">
+      <div><span class="ac-eyebrow">ADMINISTRACIÓN</span><h1>Centro de control</h1><p>Gestiona la operación, las tiendas y el catálogo maestro desde un solo lugar.</p></div>
+      <button class="ac-refresh" type="button" onclick="adminConsoleRefresh()">↻ Actualizar</button>
+    </div>
+    <nav class="ac-tabs" aria-label="Administración">
+      <button class="ac-tab active" data-ac-tab="overview" onclick="adminConsoleNav('overview')">Resumen</button>
+      <button class="ac-tab" data-ac-tab="shops" onclick="adminConsoleNav('shops')">Tiendas</button>
+      <button class="ac-tab" data-ac-tab="catalog" onclick="adminConsoleNav('catalog')">Catálogo</button>
+      <button class="ac-tab" data-ac-tab="users" onclick="adminConsoleNav('users')">Usuarios</button>
+      <button class="ac-tab" data-ac-tab="orders" onclick="adminConsoleNav('orders')">Pedidos</button>
+      <button class="ac-tab" data-ac-tab="requests" onclick="adminConsoleNav('requests')">Solicitudes</button>
+    </nav>
+    <div id="acNotice" class="ac-notice" role="status"></div>
+    <div id="acContent"><div class="ac-empty"><b>Cargando panel</b>Conectando con los datos reales...</div></div>
+  </div>
 </section>
 
 <section id="admin" class="page">
@@ -1701,7 +1818,7 @@ function openPage(id){
   document.getElementById(id).classList.add("active");
   document.getElementById("navMarket").classList.toggle("active",id==="market");
   document.getElementById("navOrders").classList.toggle("active",id==="orders");
-  document.getElementById("navAdmin").classList.toggle("active",id==="admin");
+  document.getElementById("navAdmin").classList.toggle("active",id==="admin"||id==="adminConsole");
   if(id==="admin")renderAdmin();
   if(id==="orders")renderOrders();
   scrollTo(0,0);
@@ -1997,15 +2114,351 @@ async function submitAuth(e){
     msg.className="auth-msg error";
   }finally{btn.disabled=false;btn.textContent=authMode==="login"?"Entrar":"Crear cuenta";}
 }
+
+/* Centro de control administrativo, conectado a Supabase y protegido por RLS. */
+(function(){
+  const A={section:'overview',catalogMode:'products',overview:null,shops:[],products:[],models:[],types:[],variants:[],users:[],orders:[],requests:[],uid:null,catalogRefsLoaded:false};
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v===null||v===undefined?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const cash=v=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(Number(v||0));
+  const date=v=>{if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});};
+  const obj=v=>Array.isArray(v)?(v[0]||{}):(v||{});
+  const labelStatus=v=>({pending:'Pendiente',approved:'Aprobada',suspended:'Suspendida',active:'Activo',inactive:'Inactivo',technician:'Técnico',shop:'Tienda',admin:'Administrador',accepted:'Aceptado',preparing:'Preparando',out_for_delivery:'En camino',delivered:'Entregado',rejected:'Rechazado',cancelled:'Cancelado',open:'Abierta',notified:'Notificada',closed:'Cerrada'}[v]||v||'—');
+  const badge=v=>'<span class="ac-badge '+(['approved','active','accepted','delivered','notified'].includes(v)?'ok':['pending','open','preparing','out_for_delivery'].includes(v)?'warn':['suspended','inactive','rejected','cancelled','closed'].includes(v)?'bad':'')+'">'+esc(labelStatus(v))+'</span>';
+  const empty=(title,desc)=>'<div class="ac-empty"><b>'+esc(title)+'</b>'+esc(desc||'No hay elementos para mostrar.')+'</div>';
+  const notice=(message,isError)=>{const n=$('acNotice');if(!n)return;n.textContent=message||'';n.className='ac-notice'+(isError?' error':'');n.style.display=message?'block':'none';};
+  const checked=async p=>{const r=await p;if(r&&r.error)throw r.error;return r&&Object.prototype.hasOwnProperty.call(r,'data')?r.data:r;};
+  const errorText=e=>String(e&&e.message||e||'Ocurrió un error.').replace(/^Error:\s*/,'');
+  function setTab(){
+    document.querySelectorAll('[data-ac-tab]').forEach(b=>b.classList.toggle('active',b.dataset.acTab===A.section));
+  }
+  function heading(title,desc,extra){return '<div class="ac-content-head"><div><h2>'+esc(title)+'</h2><p>'+esc(desc||'')+'</p></div>'+(extra||'')+'</div>';}
+  function item(title,sub,meta,actions){return '<article class="ac-item"><div class="ac-item-top"><div><div class="ac-item-title">'+title+'</div><div class="ac-item-sub">'+(sub||'')+'</div></div>'+(meta||'')+'</div>'+(actions?'<div class="ac-item-actions">'+actions+'</div>':'')+'</article>';}
+  function metric(title,value,detail){return '<div class="ac-metric"><span>'+esc(title)+'</span><b>'+esc(value)+'</b><small>'+esc(detail||'')+'</small></div>';}
+  async function ensureCatalogRefs(){
+    if(A.catalogRefsLoaded)return;
+    const r=await Promise.all([checked(CeluPiezazBackend.adminListModels()),checked(CeluPiezazBackend.adminListTypes()),checked(CeluPiezazBackend.adminListVariants())]);
+    A.models=r[0]||[];A.types=r[1]||[];A.variants=r[2]||[];A.catalogRefsLoaded=true;
+  }
+  async function init(){
+    if(!state||state.role!=='admin'){notice('Esta sección requiere una cuenta de administrador.',true);return;}
+    try{const sess=await CeluPiezazBackend.session();A.uid=sess&&sess.data&&sess.data.session&&sess.data.session.user?sess.data.session.user.id:null;}catch(e){}
+    await refresh();
+  }
+  async function refresh(){
+    notice('');
+    $('acContent').innerHTML=empty('Actualizando información','Consultando Supabase…');
+    try{
+      if(A.section==='overview')await renderOverview();
+      else if(A.section==='shops')await renderShops();
+      else if(A.section==='catalog')await renderCatalog();
+      else if(A.section==='users')await renderUsers();
+      else if(A.section==='orders')await renderOrders();
+      else if(A.section==='requests')await renderRequests();
+      setTab();
+    }catch(e){$('acContent').innerHTML=empty('No se pudo cargar la información',errorText(e));notice('Revisa tu conexión. Si el problema continúa, valida los permisos de administrador en Supabase.',true);}
+  }
+  async function renderOverview(){
+    const d=await checked(Promise.resolve(CeluPiezazBackend.adminOverview()));A.overview=d;
+    const [shops,orders,requests]=await Promise.all([
+      checked(CeluPiezazBackend.adminListShops('pending')),
+      checked(CeluPiezazBackend.adminListOrders()),
+      checked(CeluPiezazBackend.adminListDemandRequests())
+    ]);
+    A.shops=shops||[];A.orders=orders||[];A.requests=requests||[];
+    const activeOrders=A.orders.filter(o=>['pending','accepted','preparing','out_for_delivery'].includes(o.status));
+    const recent=activeOrders.slice(0,4).map(o=>{
+      const sh=obj(o.shops),u=obj(o.users);
+      const acts=o.status==='pending'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+o.id+'\',\'rejected\')">Rechazar</button>':o.status==='accepted'?'<button class="ac-btn primary" onclick="adminConsoleOrder(\''+o.id+'\',\'delivered\')">Marcar entregado</button>':'';
+      return item('Pedido · '+esc(sh.name||'Tienda')+' · '+cash(o.total),esc(u.name||'Técnico')+' · '+date(o.created_at),badge(o.status),acts);
+    }).join('');
+    const pending=A.shops.filter(x=>x.status==='pending').slice(0,4).map(x=>{
+      const u=obj(x.users);
+      return '<div class="ac-pending-line"><div><div class="ac-item-title">'+esc(x.name)+'</div><div class="ac-item-sub">'+esc(u.name||'Responsable no registrado')+' · '+esc(x.address||'Sin dirección')+'</div></div><button class="ac-btn success" onclick="adminConsoleShopStatus(\''+x.id+'\',\'approved\')">Aprobar</button></div>';
+    }).join('');
+    const openReq=A.requests.filter(x=>x.status==='open').length;
+    $('acContent').innerHTML=
+      '<div class="ac-metrics">'+
+      metric('Usuarios registrados',d.users,'Todos los perfiles')+
+      metric('Tiendas registradas',d.shops,'Incluye suspendidas')+
+      metric('Tiendas por revisar',d.pendingShops,'Requieren aprobación')+
+      metric('Productos maestros',d.products,'Modelos y repuestos')+
+      metric('Modelos',d.models,'Teléfonos registrados')+
+      metric('Pedidos activos',d.openOrders,'Pendientes de completar')+
+      metric('Solicitudes abiertas',d.openRequests,'Demanda sin resolver')+
+      metric('Ventas entregadas',cash(d.deliveredRevenue),'Suma de pedidos entregados')+
+      '</div><div class="ac-dashboard-grid"><div class="ac-panel"><div class="ac-panel-head"><div><h3>Accesos rápidos</h3><p>Entra directamente al área que necesita atención.</p></div></div><div class="ac-shortcuts">'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'shops\')"><b>Revisar tiendas</b><span>Validar solicitudes, aprobar o suspender.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'catalog\')"><b>Editar catálogo</b><span>Modelos, repuestos, variantes y productos.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'users\')"><b>Administrar usuarios</b><span>Consultar perfiles y asignar roles.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'orders\')"><b>Supervisar pedidos</b><span>Consultar estados y resolver pendientes.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'requests\')"><b>Ver demanda</b><span>Revisar repuestos solicitados.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleExport(\'overview\')"><b>Exportar resumen</b><span>Descargar indicadores en CSV.</span></button>'+
+      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Tiendas por aprobar</h3><p>Las nuevas tiendas no deberían operar hasta revisarlas.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'shops\')">Ver todas</button></div>'+
+      (pending||empty('No hay tiendas pendientes','Las solicitudes nuevas aparecerán aquí.'))+
+      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Pedidos que requieren atención</h3><p>Acciones disponibles según el estado del pedido.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'orders\')">Ver pedidos</button></div>'+
+      (recent||empty('Todo al día','No hay pedidos activos pendientes de gestión.'))+
+      '</div>';
+  }
+  async function renderShops(){
+    const data=await checked(CeluPiezazBackend.adminListShops('all'));A.shops=data||[];
+    $('acContent').innerHTML=heading('Tiendas','Aprobación, estado de operación y datos de contacto.','<button class="ac-btn" onclick="adminConsoleExport(\'shops\')">Exportar CSV</button>')+
+      '<div class="ac-filterbar"><input id="acShopSearch" class="ac-input" placeholder="Buscar tienda, responsable o dirección" oninput="adminConsoleFilterShops()"><select id="acShopStatus" class="ac-select" onchange="adminConsoleFilterShops()"><option value="all">Todos los estados</option><option value="pending">Por revisar</option><option value="approved">Aprobadas</option><option value="suspended">Suspendidas</option></select></div>'+
+      '<div id="acShopList" class="ac-list"></div>';
+    filterShops();
+  }
+  function filterShops(){
+    const q=norm($('acShopSearch')&&$('acShopSearch').value),status=$('acShopStatus')&&$('acShopStatus').value||'all';
+    const rows=A.shops.filter(x=>{const u=obj(x.users);return (!q||norm([x.name,x.address,u.name,u.phone].join(' ')).includes(q))&&(status==='all'||x.status===status);});
+    $('acShopList').innerHTML=rows.length?rows.map(x=>{
+      const u=obj(x.users);
+      const next=x.status==='pending'?'approved':x.status==='approved'?'suspended':'approved';
+      const actionLabel=x.status==='pending'?'Aprobar tienda':x.status==='approved'?'Suspender':'Reactivar';
+      const actionClass=x.status==='approved'?'danger':'success';
+      return item(esc(x.name||'Tienda sin nombre'),esc(u.name||'Responsable sin nombre')+' · '+esc(u.phone||'Sin teléfono')+'<br>'+esc(x.address||'Dirección pendiente'),badge(x.status),
+        '<span class="ac-muted">Registro: '+esc(date(x.created_at))+'</span><span class="ac-muted">Entrega local: '+cash(x.delivery_local_fee)+' · Fuera de zona: '+cash(x.delivery_outside_fee)+'</span>',
+        '<button class="ac-btn '+actionClass+'" onclick="adminConsoleShopStatus(\''+x.id+'\',\''+next+'\')">'+actionLabel+'</button>');
+    }).join(''):empty('No se encontraron tiendas','Cambia el filtro o revisa la búsqueda.');
+  }
+  async function shopStatus(id,status){
+    const action=status==='suspended'?'suspender esta tienda':status==='approved'?'aprobar/reactivar esta tienda':'cambiar el estado';
+    if(!confirm('¿Confirmas '+action+'?'))return;
+    await checked(CeluPiezazBackend.adminSetShopStatus(id,status));
+    notice('Estado de la tienda actualizado.');
+    await refresh();
+  }
+  async function renderCatalog(){
+    await ensureCatalogRefs();
+    const tabs=[['products','Productos'],['models','Modelos'],['types','Tipos de repuesto'],['variants','Variantes']];
+    $('acContent').innerHTML=heading('Catálogo maestro','La lista oficial que las tiendas usan para publicar inventario.')+
+      '<div class="ac-subtabs">'+tabs.map(t=>'<button class="ac-subtab '+(A.catalogMode===t[0]?'active':'')+'" onclick="adminConsoleCatalogMode(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div><div id="acCatalogBody"></div>';
+    if(A.catalogMode==='products')renderProducts();
+    else if(A.catalogMode==='models')renderModels();
+    else if(A.catalogMode==='types')renderTypes();
+    else renderVariants();
+  }
+  async function catalogMode(mode){A.catalogMode=mode;await renderCatalog();}
+  async function renderProducts(){
+    const modelOptions=A.models.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+esc(x.brand+' '+x.model)+'</option>').join('');
+    const typeOptions=A.types.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+    const variantOptions=A.variants.filter(x=>x.active).map(x=>'<option value="'+x.id+'" data-type="'+x.part_type_id+'">'+esc(obj(x.part_types).name||x.name)+' · '+esc(x.name)+'</option>').join('');
+    $('acCatalogBody').innerHTML=
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Crear producto maestro</h3><p>Selecciona modelo, tipo y variante. No se crean nombres libres para las tiendas.</p></div></div>'+
+      '<form class="ac-form" onsubmit="adminConsoleCreateProduct(event)"><div class="ac-two"><label>Modelo<select required id="acProductModel" class="ac-select"><option value="">Seleccionar modelo</option>'+modelOptions+'</select></label><label>Tipo de repuesto<select required id="acProductType" class="ac-select"><option value="">Seleccionar tipo</option>'+typeOptions+'</select></label></div>'+
+      '<label>Variante<select id="acProductVariant" class="ac-select"><option value="">Sin variante específica</option>'+variantOptions+'</select></label><button class="ac-btn primary" type="submit">Crear producto maestro</button></form></div>'+
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Buscar productos</h3><p>Hay muchos registros; busca por modelo, repuesto o nombre del producto.</p></div><button class="ac-btn" onclick="adminConsoleExport(\'products\')">Exportar resultados</button></div>'+
+      '<div class="ac-filterbar"><input id="acProductSearch" class="ac-input" placeholder="Ej. Galaxy A15, pantalla OLED"><select id="acProductActive" class="ac-select"><option value="all">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option></select><button class="ac-btn primary" onclick="adminConsoleFindProducts()">Buscar</button></div><div id="acProductList" class="ac-list">'+empty('Busca un producto','Escribe al menos 2 caracteres y pulsa Buscar.')+'</div></div>';
+    $('acProductType').addEventListener('change',syncProductVariants);
+    syncProductVariants();
+    A.products=[];
+  }
+  function syncProductVariants(){
+    const type=$('acProductType')&&$('acProductType').value,sel=$('acProductVariant');
+    if(!sel)return;
+    Array.from(sel.options).forEach((o,i)=>{if(i>0)o.hidden=!!type&&o.dataset.type!==type;});
+    if(sel.selectedOptions[0]&&sel.selectedOptions[0].hidden)sel.value='';
+  }
+  async function findProducts(){
+    const search=($('acProductSearch').value||'').trim();
+    if(search.length<2){notice('Escribe al menos 2 caracteres para buscar productos.',true);return;}
+    notice('');
+    $('acProductList').innerHTML=empty('Buscando productos','Consultando catálogo maestro...');
+    const r=await checked(CeluPiezazBackend.adminListProducts(search,$('acProductActive').value));A.products=r||[];
+    $('acProductList').innerHTML=A.products.length?A.products.map(p=>{
+      const m=obj(p.phone_models),t=obj(p.part_types),v=obj(p.part_variants);
+      const status=p.active?'active':'inactive';
+      return item(esc(p.display_name||[m.brand,m.model,t.name,v.name].filter(Boolean).join(' · ')),esc(m.brand+' '+m.model)+' · '+esc(t.name)+' · '+esc(v.name||'Sin variante'),badge(status),'<span class="ac-muted">ID: '+esc(p.id.slice(0,8))+'…</span>',
+        '<button class="ac-btn '+(p.active?'danger':'success')+'" onclick="adminConsoleProductActive(\''+p.id+'\','+(!p.active)+')">'+(p.active?'Desactivar':'Activar')+'</button>');
+    }).join(''):empty('Sin resultados','No encontramos productos con esos criterios.');
+  }
+  async function createProduct(e){
+    e.preventDefault();
+    const mid=$('acProductModel').value,tid=$('acProductType').value,vid=$('acProductVariant').value||null;
+    const m=A.models.find(x=>x.id===mid),t=A.types.find(x=>x.id===tid),v=A.variants.find(x=>x.id===vid);
+    if(!m||!t){notice('Selecciona un modelo y un tipo de repuesto válidos.',true);return;}
+    if(v&&v.part_type_id!==tid){notice('La variante elegida no corresponde al tipo de repuesto.',true);return;}
+    const display_name=[m.brand,m.model,t.name,v&&v.name].filter(Boolean).join(' · ');
+    const normalized_search=norm(display_name);
+    await checked(CeluPiezazBackend.adminCreateProduct({phone_model_id:mid,part_type_id:tid,part_variant_id:vid,display_name,normalized_search,active:true}));
+    notice('Producto agregado al catálogo maestro.');
+    $('acProductSearch').value=display_name;
+    await findProducts();
+  }
+  async function productActive(id,active){
+    if(!confirm(active?'¿Activar este producto para que pueda aparecer en búsquedas?':'¿Desactivar este producto del catálogo público?'))return;
+    await checked(CeluPiezazBackend.adminSetProductActive(id,active));
+    notice('Estado del producto actualizado.');await findProducts();
+  }
+  async function renderModels(){
+    $('acCatalogBody').innerHTML='<div class="ac-panel"><div class="ac-panel-head"><div><h3>Añadir modelo de teléfono</h3><p>El modelo estará disponible en el selector del catálogo.</p></div></div><form class="ac-inline-form" onsubmit="adminConsoleCreateModel(event)"><label>Marca<input id="acModelBrand" class="ac-input" required placeholder="Ej. Samsung"></label><label>Modelo<input id="acModelName" class="ac-input" required placeholder="Ej. Galaxy A57"></label><button class="ac-btn primary" type="submit">Añadir modelo</button></form></div>'+
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Modelos registrados</h3><p>'+A.models.length+' modelos</p></div><button class="ac-btn" onclick="adminConsoleExport(\'models\')">Exportar CSV</button></div><input id="acModelSearch" class="ac-input" placeholder="Filtrar modelos..." oninput="adminConsoleFilterModels()"><div id="acModelList" class="ac-list" style="margin-top:10px"></div></div>';
+    filterModels();
+  }
+  function filterModels(){
+    const q=norm($('acModelSearch')&&$('acModelSearch').value);
+    const rows=A.models.filter(x=>!q||norm(x.brand+' '+x.model).includes(q));
+    $('acModelList').innerHTML=rows.length?rows.map(x=>item(esc(x.brand+' '+x.model),esc(x.normalized_name),badge(x.active?'active':'inactive'),'<span class="ac-muted">'+esc(x.id.slice(0,8))+'…</span>',
+      '<button class="ac-btn '+(x.active?'danger':'success')+'" onclick="adminConsoleModelActive(\''+x.id+'\','+(!x.active)+')">'+(x.active?'Desactivar':'Activar')+'</button>')).join(''):empty('Sin modelos','No coincide ningún modelo.');
+  }
+  async function createModel(e){
+    e.preventDefault();const brand=$('acModelBrand').value.trim(),model=$('acModelName').value.trim();
+    if(A.models.some(x=>norm(x.brand)===norm(brand)&&norm(x.model)===norm(model))){notice('Ese modelo ya está registrado.',true);return;}
+    await checked(CeluPiezazBackend.adminCreateModel(brand,model));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Modelo añadido correctamente.');await renderCatalog();
+  }
+  async function modelActive(id,active){
+    if(!confirm(active?'¿Reactivar este modelo?':'¿Desactivar modelo y ocultar sus productos del catálogo público?'))return;
+    await checked(CeluPiezazBackend.adminSetModelActive(id,active));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Estado del modelo actualizado.');await renderCatalog();
+  }
+  async function renderTypes(){
+    $('acCatalogBody').innerHTML='<div class="ac-panel"><div class="ac-panel-head"><div><h3>Añadir tipo de repuesto</h3><p>Ejemplos: pantalla, batería, cámara o puerto de carga.</p></div></div><form class="ac-inline-form" onsubmit="adminConsoleCreateType(event)"><label>Nombre del tipo<input id="acTypeName" class="ac-input" required placeholder="Ej. Sensor de huella"></label><div></div><button class="ac-btn primary" type="submit">Añadir tipo</button></form></div>'+
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Tipos registrados</h3><p>'+A.types.length+' tipos</p></div><button class="ac-btn" onclick="adminConsoleExport(\'types\')">Exportar CSV</button></div><div class="ac-list">'+
+      (A.types.length?A.types.map(x=>item(esc(x.name),'Tipo maestro',badge(x.active?'active':'inactive'),'', '<button class="ac-btn '+(x.active?'danger':'success')+'" onclick="adminConsoleTypeActive(\''+x.id+'\','+(!x.active)+')">'+(x.active?'Desactivar':'Activar')+'</button>')).join(''):empty('Sin tipos','Añade el primer tipo de repuesto.'))+'</div></div>';
+  }
+  async function createType(e){
+    e.preventDefault();const name=$('acTypeName').value.trim();
+    if(A.types.some(x=>norm(x.name)===norm(name))){notice('Ese tipo ya existe.',true);return;}
+    await checked(CeluPiezazBackend.adminCreateType(name));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Tipo de repuesto añadido.');await renderCatalog();
+  }
+  async function typeActive(id,active){
+    if(!confirm(active?'¿Reactivar este tipo?':'¿Desactivar tipo y ocultar sus productos del catálogo público?'))return;
+    await checked(CeluPiezazBackend.adminSetTypeActive(id,active));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Estado del tipo actualizado.');await renderCatalog();
+  }
+  async function renderVariants(){
+    const opts=A.types.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+    $('acCatalogBody').innerHTML='<div class="ac-panel"><div class="ac-panel-head"><div><h3>Añadir variante o calidad</h3><p>La variante debe estar asociada a un tipo de repuesto.</p></div></div><form class="ac-inline-form triple" onsubmit="adminConsoleCreateVariant(event)"><label>Tipo<select id="acVariantType" class="ac-select" required><option value="">Seleccionar tipo</option>'+opts+'</select></label><label>Variante<input id="acVariantName" class="ac-input" required placeholder="Ej. OLED"></label><div></div><button class="ac-btn primary" type="submit">Añadir variante</button></form></div>'+
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Variantes registradas</h3><p>'+A.variants.length+' variantes</p></div><button class="ac-btn" onclick="adminConsoleExport(\'variants\')">Exportar CSV</button></div><div class="ac-list">'+
+      (A.variants.length?A.variants.map(x=>item(esc(x.name),esc(obj(x.part_types).name||'Tipo sin nombre'),badge(x.active?'active':'inactive'),'', '<button class="ac-btn '+(x.active?'danger':'success')+'" onclick="adminConsoleVariantActive(\''+x.id+'\','+(!x.active)+')">'+(x.active?'Desactivar':'Activar')+'</button>')).join(''):empty('Sin variantes','Añade la primera variante.'))+'</div></div>';
+  }
+  async function createVariant(e){
+    e.preventDefault();const typeId=$('acVariantType').value,name=$('acVariantName').value.trim();
+    if(A.variants.some(x=>x.part_type_id===typeId&&norm(x.name)===norm(name))){notice('Esa variante ya existe para el tipo seleccionado.',true);return;}
+    await checked(CeluPiezazBackend.adminCreateVariant(typeId,name));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Variante añadida.');await renderCatalog();
+  }
+  async function variantActive(id,active){
+    if(!confirm(active?'¿Reactivar esta variante?':'¿Desactivar variante y ocultar sus productos del catálogo público?'))return;
+    await checked(CeluPiezazBackend.adminSetVariantActive(id,active));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Estado de la variante actualizado.');await renderCatalog();
+  }
+  async function renderUsers(){
+    const data=await checked(CeluPiezazBackend.adminListUsers());A.users=data||[];
+    $('acContent').innerHTML=heading('Usuarios','Consulta perfiles y gestiona permisos de la plataforma.','<button class="ac-btn" onclick="adminConsoleExport(\'users\')">Exportar CSV</button>')+
+      '<div class="ac-filterbar"><input id="acUserSearch" class="ac-input" placeholder="Buscar nombre, teléfono o rol" oninput="adminConsoleFilterUsers()"></div><div id="acUserList" class="ac-list"></div>'+
+      '<div class="ac-footer-note">Por seguridad, tu propio rol de administrador no se puede cambiar desde esta pantalla.</div>';
+    filterUsers();
+  }
+  function filterUsers(){
+    const q=norm($('acUserSearch')&&$('acUserSearch').value);
+    const rows=A.users.filter(x=>!q||norm([x.name,x.phone,x.role].join(' ')).includes(q));
+    $('acUserList').innerHTML=rows.length?rows.map(x=>{
+      const self=x.id===A.uid;
+      const edit='<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop','admin'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar</button></div>';
+      return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · '+esc(date(x.created_at)),badge(x.role),'',edit);
+    }).join(''):empty('Sin usuarios','No coincide ninguna cuenta.');
+  }
+  async function userRole(id){
+    const role=$('acRole-'+id).value;
+    if(!confirm('¿Cambiar el rol de esta cuenta a "'+labelStatus(role)+'"?'))return;
+    await checked(CeluPiezazBackend.adminSetUserRole(id,role));notice('Rol del usuario actualizado.');await renderUsers();
+  }
+  async function renderOrders(){
+    A.orders=await checked(CeluPiezazBackend.adminListOrders())||[];
+    $('acContent').innerHTML=heading('Pedidos','Supervisa pedidos de todas las tiendas y técnicos.','<button class="ac-btn" onclick="adminConsoleExport(\'orders\')">Exportar CSV</button>')+
+      '<div class="ac-filterbar"><input id="acOrderSearch" class="ac-input" placeholder="Buscar tienda, técnico o estado" oninput="adminConsoleFilterOrders()"><select id="acOrderStatus" class="ac-select" onchange="adminConsoleFilterOrders()"><option value="all">Todos los estados</option>'+['pending','accepted','preparing','out_for_delivery','delivered','rejected','cancelled'].map(x=>'<option value="'+x+'">'+esc(labelStatus(x))+'</option>').join('')+'</select></div><div id="acOrderList" class="ac-list"></div>';
+    filterOrders();
+  }
+  function filterOrders(){
+    const q=norm($('acOrderSearch')&&$('acOrderSearch').value),status=$('acOrderStatus')&&$('acOrderStatus').value||'all';
+    const rows=A.orders.filter(x=>{const u=obj(x.users),s=obj(x.shops);return (!q||norm([u.name,s.name,x.status,x.delivery_address].join(' ')).includes(q))&&(status==='all'||x.status===status);});
+    $('acOrderList').innerHTML=rows.length?rows.map(x=>{
+      const u=obj(x.users),sh=obj(x.shops);
+      let actions='';
+      if(x.status==='pending')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+x.id+'\',\'rejected\')">Rechazar y devolver stock</button>';
+      else if(x.status==='accepted')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'delivered\')">Marcar entregado</button>';
+      return item('Pedido · '+cash(x.total),esc(sh.name||'Tienda')+' · '+esc(u.name||'Técnico')+' · '+esc(date(x.created_at)),badge(x.status),
+        '<span class="ac-muted">Entrega: '+esc(x.delivery_type==='pickup'?'Recoger en tienda':x.delivery_type==='outside_zone'?'Fuera de zona':'Local')+' · '+cash(x.delivery_fee)+'</span>'+(x.delivery_address?'<span class="ac-muted">Dirección: '+esc(x.delivery_address)+'</span>':''),actions);
+    }).join(''):empty('No hay pedidos','Los pedidos aparecerán aquí cuando se registren.');
+  }
+  async function orderAction(id,next){
+    const action=next==='accepted'?'aceptar':next==='rejected'?'rechazar y devolver las cantidades al inventario':'marcar como entregado';
+    if(!confirm('¿Confirmas '+action+' este pedido?'))return;
+    await checked(CeluPiezazBackend.updateOrderStatus(id,next));notice('Pedido actualizado correctamente.');await refresh();
+  }
+  async function renderRequests(){
+    A.requests=await checked(CeluPiezazBackend.adminListDemandRequests())||[];
+    $('acContent').innerHTML=heading('Solicitudes de repuestos','Consultas de técnicos cuando no encuentran un producto.','<button class="ac-btn" onclick="adminConsoleExport(\'requests\')">Exportar CSV</button>')+
+      '<div class="ac-filterbar"><select id="acRequestStatus" class="ac-select" onchange="adminConsoleFilterRequests()"><option value="all">Todos los estados</option><option value="open">Abiertas</option><option value="notified">Notificadas</option><option value="closed">Cerradas</option></select></div><div id="acRequestList" class="ac-list"></div>';
+    filterRequests();
+  }
+  function filterRequests(){
+    const status=$('acRequestStatus')&&$('acRequestStatus').value||'all';
+    const rows=A.requests.filter(x=>status==='all'||x.status===status);
+    $('acRequestList').innerHTML=rows.length?rows.map(x=>{
+      const u=obj(x.users),p=obj(x.products),m=obj(p.phone_models),t=obj(p.part_types),v=obj(p.part_variants);
+      const next=x.status==='open'?'notified':x.status==='notified'?'closed':'open';
+      const action=x.status==='open'?'Marcar notificada':x.status==='notified'?'Cerrar solicitud':'Reabrir';
+      return item(esc(p.display_name||'Repuesto solicitado'),esc(u.name||'Técnico')+' · '+esc(u.phone||'Sin teléfono')+' · '+esc(date(x.created_at)),badge(x.status),
+        '<span class="ac-muted">'+esc(m.brand||'')+' '+esc(m.model||'')+' · '+esc(t.name||'')+' · '+esc(v.name||'')+'</span>',
+        '<button class="ac-btn '+(x.status==='open'?'success':'')+'" onclick="adminConsoleRequestStatus(\''+x.id+'\',\''+next+'\')">'+action+'</button>');
+    }).join(''):empty('Sin solicitudes','No hay solicitudes para este estado.');
+  }
+  async function requestStatus(id,status){
+    await checked(CeluPiezazBackend.adminSetDemandStatus(id,status));notice('Estado de la solicitud actualizado.');await refresh();
+  }
+  async function exportCsv(kind){
+    let rows=[],name=kind;
+    if(kind==='overview'){rows=[A.overview||{}];name='resumen-administracion';}
+    if(kind==='shops')rows=A.shops.map(x=>({tienda:x.name,direccion:x.address,estado:x.status,activa:x.active,tarifa_local:x.delivery_local_fee,tarifa_fuera_zona:x.delivery_outside_fee,creada:x.created_at}));
+    if(kind==='products')rows=A.products.map(x=>({producto:x.display_name,activo:x.active,modelo:obj(x.phone_models).model,marca:obj(x.phone_models).brand,tipo:obj(x.part_types).name,variante:obj(x.part_variants).name,id:x.id}));
+    if(kind==='models')rows=A.models.map(x=>({marca:x.brand,modelo:x.model,normalizado:x.normalized_name,activo:x.active,id:x.id}));
+    if(kind==='types')rows=A.types.map(x=>({tipo:x.name,activo:x.active,id:x.id}));
+    if(kind==='variants')rows=A.variants.map(x=>({tipo:obj(x.part_types).name,variante:x.name,activo:x.active,id:x.id}));
+    if(kind==='users')rows=A.users.map(x=>({nombre:x.name,telefono:x.phone,rol:x.role,creado:x.created_at,id:x.id}));
+    if(kind==='orders')rows=A.orders.map(x=>({tienda:obj(x.shops).name,tecnico:obj(x.users).name,estado:x.status,total:x.total,entrega:x.delivery_type,fecha:x.created_at,id:x.id}));
+    if(kind==='requests')rows=A.requests.map(x=>({producto:obj(x.products).display_name,tecnico:obj(x.users).name,estado:x.status,fecha:x.created_at,id:x.id}));
+    if(!rows.length){notice('No hay datos cargados para exportar. Abre el listado primero.',true);return;}
+    const cols=Array.from(rows.reduce((set,row)=>{Object.keys(row).forEach(k=>set.add(k));return set;},new Set()));
+    const csv=[cols.join(','),...rows.map(row=>cols.map(k=>'"'+String(row[k]===undefined?'':row[k]).replace(/"/g,'""')+'"').join(','))].join('\r\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name+'.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    notice('Archivo CSV preparado.');
+  }
+  function nav(section){A.section=section;notice('');setTab();refresh();}
+  window.adminConsoleInit=init;
+  window.adminConsoleRefresh=refresh;
+  window.adminConsoleNav=nav;
+  window.adminConsoleCatalogMode=catalogMode;
+  window.adminConsoleFilterShops=filterShops;
+  window.adminConsoleShopStatus=(id,status)=>shopStatus(id,status).catch(e=>notice(errorText(e),true));
+  window.adminConsoleFindProducts=()=>findProducts().catch(e=>notice(errorText(e),true));
+  window.adminConsoleCreateProduct=e=>createProduct(e).catch(e2=>notice(errorText(e2),true));
+  window.adminConsoleProductActive=(id,active)=>productActive(id,active).catch(e=>notice(errorText(e),true));
+  window.adminConsoleFilterModels=filterModels;
+  window.adminConsoleCreateModel=e=>createModel(e).catch(e2=>notice(errorText(e2),true));
+  window.adminConsoleModelActive=(id,active)=>modelActive(id,active).catch(e=>notice(errorText(e),true));
+  window.adminConsoleCreateType=e=>createType(e).catch(e2=>notice(errorText(e2),true));
+  window.adminConsoleTypeActive=(id,active)=>typeActive(id,active).catch(e=>notice(errorText(e),true));
+  window.adminConsoleCreateVariant=e=>createVariant(e).catch(e2=>notice(errorText(e2),true));
+  window.adminConsoleVariantActive=(id,active)=>variantActive(id,active).catch(e=>notice(errorText(e),true));
+  window.adminConsoleFilterUsers=filterUsers;
+  window.adminConsoleUserRole=id=>userRole(id).catch(e=>notice(errorText(e),true));
+  window.adminConsoleFilterOrders=filterOrders;
+  window.adminConsoleOrder=(id,next)=>orderAction(id,next).catch(e=>notice(errorText(e),true));
+  window.adminConsoleFilterRequests=filterRequests;
+  window.adminConsoleRequestStatus=(id,status)=>requestStatus(id,status).catch(e=>notice(errorText(e),true));
+  window.adminConsoleExport=kind=>exportCsv(kind);
+})();
+
 async function bootAuthenticated(){
   const p=await CeluPiezazBackend.profile();
   if(p.error||!p.data||!p.data.length) throw new Error("No se encontró el perfil del usuario.");
   const role=p.data[0].role;
   state.role=role;state.mode=role==="technician"?"technician":role;save();
   document.getElementById("authGate").style.display="none";
+  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
   document.body.classList.add("role-active","role-"+role);
   if(role==="technician"){openPage("market");renderMarket();renderOrders();}
-  else {openPage("admin");adminTab(role==="admin"?"catalog":"inv");renderAdminV38();}
+  else if(role==="admin"){openPage("adminConsole");if(window.adminConsoleInit)await window.adminConsoleInit();}
+  else {openPage("admin");adminTab("inv");renderAdminV38();}
 }
 async function doLogout(){
   try{await CeluPiezazBackend.signOut();}catch(e){}
