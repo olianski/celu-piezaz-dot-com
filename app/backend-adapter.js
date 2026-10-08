@@ -18,5 +18,108 @@ window.CeluPiezazBackend = (() => {
   async function placeOrder(shopId,deliveryType,deliveryAddress,items){ return requireClient().rpc('place_order',{p_shop_id:shopId,p_delivery_type:deliveryType,p_delivery_address:deliveryAddress||null,p_items:items}); }
   async function updateOrderStatus(orderId,nextStatus){ return requireClient().rpc('update_order_status',{p_order_id:orderId,p_next_status:nextStatus}); }
   async function listMyOrders(){ return requireClient().from('orders').select('id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops(id,name,address)').order('created_at',{ascending:false}); }
-  return {configure,ready,signIn,signUp,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders};
+  // Funciones del panel administrativo: las políticas RLS de Supabase restringen estas operaciones a admins.
+  async function adminOverview(){
+    const c=requireClient();
+    const [users,shops,pendingShops,products,models,openOrders,openRequests,deliveredOrders]=await Promise.all([
+      c.from('users').select('id',{count:'exact',head:true}),
+      c.from('shops').select('id',{count:'exact',head:true}),
+      c.from('shops').select('id',{count:'exact',head:true}).eq('status','pending'),
+      c.from('products').select('id',{count:'exact',head:true}),
+      c.from('phone_models').select('id',{count:'exact',head:true}),
+      c.from('orders').select('id',{count:'exact',head:true}).in('status',['pending','accepted','preparing','out_for_delivery']),
+      c.from('demand_requests').select('id',{count:'exact',head:true}).eq('status','open'),
+      c.from('orders').select('total').eq('status','delivered').limit(1000)
+    ]);
+    for(const r of [users,shops,pendingShops,products,models,openOrders,openRequests,deliveredOrders]) if(r.error) throw r.error;
+    return {users:users.count||0,shops:shops.count||0,pendingShops:pendingShops.count||0,products:products.count||0,models:models.count||0,openOrders:openOrders.count||0,openRequests:openRequests.count||0,deliveredRevenue:(deliveredOrders.data||[]).reduce((a,x)=>a+Number(x.total||0),0)};
+  }
+  async function adminListShops(status){
+    let q=requireClient().from('shops').select('id,user_id,name,address,delivery_local_fee,delivery_outside_fee,active,status,created_at,users!shops_user_id_fkey(id,name,phone,role)').order('created_at',{ascending:false}).limit(300);
+    if(status&&status!=='all') q=q.eq('status',status);
+    return q;
+  }
+  async function adminSetShopStatus(id,status){
+    if(!['pending','approved','suspended'].includes(status)) throw new Error('Estado de tienda no válido');
+    return requireClient().from('shops').update({status,active:status==='approved'}).eq('id',id).select().single();
+  }
+  async function adminListModels(){
+    return requireClient().from('phone_models').select('id,brand,model,normalized_name,active').order('brand').order('model').limit(500);
+  }
+  async function adminCreateModel(brand,model){
+    const normalized_name=(String(brand||'')+' '+String(model||'')).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim().replace(/\\s+/g,' ');
+    return requireClient().from('phone_models').insert({brand:String(brand||'').trim(),model:String(model||'').trim(),normalized_name,active:true}).select().single();
+  }
+  async function adminSetModelActive(id,active){
+    const c=requireClient();
+    const r=await c.from('phone_models').update({active}).eq('id',id).select().single();
+    if(r.error) return r;
+    if(!active){const p=await c.from('products').update({active:false}).eq('phone_model_id',id);if(p.error)return p;}
+    return r;
+  }
+  async function adminListTypes(){
+    return requireClient().from('part_types').select('id,name,active').order('name');
+  }
+  async function adminCreateType(name){
+    return requireClient().from('part_types').insert({name:String(name||'').trim(),active:true}).select().single();
+  }
+  async function adminSetTypeActive(id,active){
+    const c=requireClient();
+    const r=await c.from('part_types').update({active}).eq('id',id).select().single();
+    if(r.error)return r;
+    if(!active){const p=await c.from('products').update({active:false}).eq('part_type_id',id);if(p.error)return p;}
+    return r;
+  }
+  async function adminListVariants(){
+    return requireClient().from('part_variants').select('id,part_type_id,name,active,part_types!part_variants_part_type_id_fkey(name)').order('name');
+  }
+  async function adminCreateVariant(typeId,name){
+    return requireClient().from('part_variants').insert({part_type_id:typeId,name:String(name||'').trim(),active:true}).select().single();
+  }
+  async function adminSetVariantActive(id,active){
+    const c=requireClient();
+    const r=await c.from('part_variants').update({active}).eq('id',id).select().single();
+    if(r.error)return r;
+    if(!active){const p=await c.from('products').update({active:false}).eq('part_variant_id',id);if(p.error)return p;}
+    return r;
+  }
+  async function adminListProducts(search,active){
+    let q=requireClient().from('products').select('id,display_name,normalized_search,active,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model,active),part_types!products_part_type_id_fkey(name,active),part_variants!products_part_variant_id_fkey(name,active)').order('display_name').limit(250);
+    if(search) q=q.ilike('display_name','%'+String(search).trim()+'%');
+    if(active==='active') q=q.eq('active',true);
+    if(active==='inactive') q=q.eq('active',false);
+    return q;
+  }
+  async function adminCreateProduct(fields){
+    const c=requireClient();
+    let q=c.from('products').select('id',{count:'exact',head:true}).eq('phone_model_id',fields.phone_model_id).eq('part_type_id',fields.part_type_id);
+    q=fields.part_variant_id?q.eq('part_variant_id',fields.part_variant_id):q.is('part_variant_id',null);
+    const check=await q;
+    if(check.error)throw check.error;
+    if((check.count||0)>0)throw new Error('Ese producto ya existe en el catálogo.');
+    return c.from('products').insert(fields).select().single();
+  }
+  async function adminSetProductActive(id,active){
+    return requireClient().from('products').update({active}).eq('id',id).select().single();
+  }
+  async function adminListUsers(){
+    return requireClient().from('users').select('id,role,name,phone,created_at').order('created_at',{ascending:false}).limit(500);
+  }
+  async function adminSetUserRole(id,role){
+    if(!['technician','shop','admin'].includes(role))throw new Error('Rol no válido');
+    const u=await requireClient().auth.getUser();
+    if(u.data?.user?.id===id&&role!=='admin')throw new Error('No puedes quitarte tu propio rol de administrador.');
+    return requireClient().from('users').update({role}).eq('id',id).select().single();
+  }
+  async function adminListOrders(){
+    return requireClient().from('orders').select('id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops!orders_shop_id_fkey(name),users!orders_technician_id_fkey(name,phone)').order('created_at',{ascending:false}).limit(300);
+  }
+  async function adminListDemandRequests(){
+    return requireClient().from('demand_requests').select('id,status,created_at,users!demand_requests_technician_id_fkey(name,phone),products!demand_requests_product_id_fkey(display_name,phone_models(brand,model),part_types(name),part_variants(name))').order('created_at',{ascending:false}).limit(300);
+  }
+  async function adminSetDemandStatus(id,status){
+    if(!['open','notified','closed'].includes(status))throw new Error('Estado de solicitud no válido');
+    return requireClient().from('demand_requests').update({status}).eq('id',id).select().single();
+  }
+  return {configure,ready,signIn,signUp,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders ,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
 })();
