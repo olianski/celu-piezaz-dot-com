@@ -50,6 +50,30 @@ alter table public.shops
   add column if not exists approved_at timestamptz,
   add column if not exists approved_by uuid references public.users(id);
 create index if not exists idx_shops_status on public.shops(status,active);
+
+-- El dueño puede editar datos operativos, pero nunca aprobar/suspender su propia tienda.
+create or replace function public.protect_shop_control_fields()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $
+begin
+  if public.current_user_role() <> 'admin' then
+    new.user_id := old.user_id;
+    new.status := old.status;
+    new.active := old.active;
+    new.approved_at := old.approved_at;
+    new.approved_by := old.approved_by;
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists protect_shop_control_fields on public.shops;
+create trigger protect_shop_control_fields
+before update on public.shops
+for each row execute function public.protect_shop_control_fields();
 update public.shops set status='approved', approved_at=coalesce(approved_at,now()) where status='pending' and active=true;
 
 create or replace function public.shop_is_approved(p_shop_id uuid)
@@ -127,6 +151,7 @@ begin
   elsif public.current_user_role()='technician' then
     if v_order.technician_id <> auth.uid() or p_next_status <> 'cancelled' or v_order.status not in ('pending','accepted') then raise exception 'No puedes modificar este pedido'; end if;
   elsif public.current_user_role() <> 'admin' then raise exception 'No autorizado'; end if;
+  if public.current_user_role()='shop' and p_next_status='cancelled' then raise exception 'La tienda no puede cancelar pedidos'; end if;
   if p_next_status in ('rejected','cancelled') and v_order.status in ('pending','accepted') then
     for v_item in select * from public.order_items where order_id=v_order.id loop
       update public.inventory set quantity=quantity+v_item.quantity,active=true where id=v_item.inventory_id;
