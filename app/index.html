@@ -1189,6 +1189,7 @@ body.role-admin #techBanner{display:none!important}
   .ac-panel{padding:13px}
 }
 
+.auth-subnote{margin:14px 0 0!important;color:#667085!important;font-size:12px!important;line-height:1.45}
 </style></head>
 
 <body>
@@ -1198,9 +1199,9 @@ body.role-admin #techBanner{display:none!important}
     <h1 id="authTitle">Iniciar sesión</h1>
     <p id="authSubtitle">Entra con tu cuenta para acceder a tu área.</p>
     <div class="auth-tabs">
-      <button id="loginTab" class="active" onclick="setAuthMode('login')">Iniciar sesión</button>
-      <button id="signupTab" onclick="setAuthMode('signup')">Crear cuenta</button>
+      <button id="loginTab" class="active" type="button">Iniciar sesión</button>
     </div>
+    <p class="auth-subnote">El acceso es privado. Las cuentas de técnicos y tiendas son creadas por el administrador.</p>
     <form class="auth-form" onsubmit="submitAuth(event)">
       <label>Correo<input id="authEmail" type="email" autocomplete="email" required></label>
       <label id="authNameWrap" style="display:none">Nombre<input id="authName" autocomplete="name"></label>
@@ -1272,6 +1273,7 @@ body.role-admin #techBanner{display:none!important}
       <button class="ac-tab" data-ac-tab="shops" onclick="adminConsoleNav('shops')">Tiendas</button>
       <button class="ac-tab" data-ac-tab="catalog" onclick="adminConsoleNav('catalog')">Catálogo</button>
       <button class="ac-tab" data-ac-tab="users" onclick="adminConsoleNav('users')">Usuarios</button>
+      <button class="ac-tab" data-ac-tab="createAccount" onclick="adminConsoleNav('createAccount')">Crear perfil</button>
       <button class="ac-tab" data-ac-tab="orders" onclick="adminConsoleNav('orders')">Pedidos</button>
       <button class="ac-tab" data-ac-tab="requests" onclick="adminConsoleNav('requests')">Solicitudes</button>
     </nav>
@@ -2080,39 +2082,20 @@ function resetTechTest(){
 
 if(typeof renderAdminV38==="function") renderAdminV38();
 
-let authMode="login";
-function setAuthMode(mode){
-  authMode=mode;
-  document.getElementById("loginTab").classList.toggle("active",mode==="login");
-  document.getElementById("signupTab").classList.toggle("active",mode==="signup");
-  document.getElementById("authTitle").textContent=mode==="login"?"Iniciar sesión":"Crear cuenta";
-  document.getElementById("authSubtitle").textContent=mode==="login"?"Entra con tu cuenta para acceder a tu área.":"Crea tu cuenta de técnico.";
-  document.getElementById("authSubmit").textContent=mode==="login"?"Entrar":"Crear cuenta";
-  document.getElementById("authNameWrap").style.display=mode==="signup"?"block":"none";
-  document.getElementById("authPhoneWrap").style.display=mode==="signup"?"block":"none";
-  document.getElementById("authPassword").autocomplete=mode==="login"?"current-password":"new-password";
-  document.getElementById("authMsg").textContent="";
-  document.getElementById("authMsg").className="auth-msg";
-}
 async function submitAuth(e){
   e.preventDefault();
   const msg=document.getElementById("authMsg"),btn=document.getElementById("authSubmit");
   msg.textContent="";msg.className="auth-msg";btn.disabled=true;btn.textContent="Conectando…";
   try{
-    let r;
     const email=document.getElementById("authEmail").value.trim();
     const password=document.getElementById("authPassword").value;
-    if(authMode==="login") r=await CeluPiezazBackend.signIn(email,password);
-    else r=await CeluPiezazBackend.signUp(email,password,document.getElementById("authName").value.trim(),document.getElementById("authPhone").value.trim());
+    const r=await CeluPiezazBackend.signIn(email,password);
     if(r.error) throw r.error;
-    if(authMode==="signup" && !r.data?.session){
-      msg.textContent="Cuenta creada. Revisa tu correo para confirmar y luego inicia sesión.";
-      msg.className="auth-msg"; setAuthMode("login");
-    }else await bootAuthenticated();
+    await bootAuthenticated();
   }catch(err){
-    msg.textContent=err?.message||"No se pudo completar la operación.";
+    msg.textContent=err?.message||"No se pudo iniciar sesión.";
     msg.className="auth-msg error";
-  }finally{btn.disabled=false;btn.textContent=authMode==="login"?"Entrar":"Crear cuenta";}
+  }finally{btn.disabled=false;btn.textContent="Entrar";}
 }
 
 /* Centro de control administrativo, conectado a Supabase y protegido por RLS. */
@@ -2154,6 +2137,7 @@ async function submitAuth(e){
       else if(A.section==='shops')await renderShops();
       else if(A.section==='catalog')await renderCatalog();
       else if(A.section==='users')await renderUsers();
+      else if(A.section==='createAccount')renderCreateAccount();
       else if(A.section==='orders')await renderOrders();
       else if(A.section==='requests')await renderRequests();
       setTab();
@@ -2339,6 +2323,40 @@ async function submitAuth(e){
     if(!confirm(active?'¿Reactivar esta variante?':'¿Desactivar variante y ocultar sus productos del catálogo público?'))return;
     await checked(CeluPiezazBackend.adminSetVariantActive(id,active));A.catalogRefsLoaded=false;await ensureCatalogRefs();notice('Estado de la variante actualizado.');await renderCatalog();
   }
+  function renderCreateAccount(){
+    $('acContent').innerHTML=heading('Crear perfil','Solo tú puedes dar de alta técnicos y tiendas. No se permite crear otros administradores.')+
+      '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Datos de acceso</h3><p>Entrega las credenciales directamente a la persona o tienda.</p></div></div>'+
+      '<form class="ac-form" id="acCreateAccountForm" onsubmit="adminConsoleCreateAccount(event)">'+
+      '<div class="ac-two"><label>Tipo de perfil<select id="acNewRole" class="ac-select" required onchange="adminConsoleNewRoleChanged()"><option value="technician">Técnico</option><option value="shop">Tienda</option></select></label>'+
+      '<label>Nombre del responsable<input id="acNewName" class="ac-input" required maxlength="120" autocomplete="name" placeholder="Nombre y apellido"></label></div>'+
+      '<div class="ac-two"><label>Correo de acceso<input id="acNewEmail" class="ac-input" type="email" required autocomplete="off" placeholder="persona@correo.com"></label>'+
+      '<label>Teléfono<input id="acNewPhone" class="ac-input" maxlength="40" autocomplete="off" placeholder="Número de contacto"></label></div>'+
+      '<label>Contraseña inicial<input id="acNewPassword" class="ac-input" type="password" required minlength="10" autocomplete="new-password" placeholder="Mínimo 10 caracteres"></label>'+
+      '<div id="acNewShopFields" style="display:none"><div class="ac-two"><label>Nombre comercial de la tienda<input id="acNewShopName" class="ac-input" maxlength="160" placeholder="Nombre del negocio"></label><label>Dirección<input id="acNewShopAddress" class="ac-input" maxlength="240" placeholder="Dirección del local"></label></div>'+
+      '<p class="ac-footer-note">Las tiendas nuevas quedarán pendientes de aprobación y no estarán activas hasta que las revises.</p></div>'+
+      '<button class="ac-btn primary" id="acCreateAccountSubmit" type="submit">Crear perfil</button></form></div>'+
+      '<div class="ac-panel"><h3 style="margin:0 0 7px">Control de acceso</h3><p class="ac-item-sub">El registro público está bloqueado también en el servidor. Esta pantalla no permite crear administradores ni asignar roles por cuenta propia.</p></div>';
+  }
+  function newRoleChanged(){
+    const isShop=$('acNewRole').value==='shop';
+    $('acNewShopFields').style.display=isShop?'block':'none';
+    $('acNewShopName').required=isShop;
+  }
+  async function createAccount(e){
+    e.preventDefault();
+    const btn=$('acCreateAccountSubmit');
+    const role=$('acNewRole').value;
+    const payload={role,name:$('acNewName').value.trim(),email:$('acNewEmail').value.trim(),phone:$('acNewPhone').value.trim(),password:$('acNewPassword').value};
+    if(role==='shop'){payload.shopName=$('acNewShopName').value.trim();payload.address=$('acNewShopAddress').value.trim();}
+    if(payload.password.length<10){notice('La contraseña inicial debe tener al menos 10 caracteres.',true);return;}
+    if(role==='shop'&&!payload.shopName){notice('Indica el nombre comercial de la tienda.',true);return;}
+    btn.disabled=true;btn.textContent='Creando perfil…';notice('');
+    try{
+      const r=await checked(CeluPiezazBackend.adminCreateAccount(payload));
+      $('acCreateAccountForm').reset();newRoleChanged();
+      notice(role==='shop'?'Tienda creada y enviada a aprobación.':'Perfil de técnico creado correctamente.');
+    }finally{btn.disabled=false;btn.textContent='Crear perfil';}
+  }
   async function renderUsers(){
     const data=await checked(CeluPiezazBackend.adminListUsers());A.users=data||[];
     $('acContent').innerHTML=heading('Usuarios','Consulta perfiles y gestiona permisos de la plataforma.','<button class="ac-btn" onclick="adminConsoleExport(\'users\')">Exportar CSV</button>')+
@@ -2439,6 +2457,8 @@ async function submitAuth(e){
   window.adminConsoleTypeActive=(id,active)=>typeActive(id,active).catch(e=>notice(errorText(e),true));
   window.adminConsoleCreateVariant=e=>createVariant(e).catch(e2=>notice(errorText(e2),true));
   window.adminConsoleVariantActive=(id,active)=>variantActive(id,active).catch(e=>notice(errorText(e),true));
+  window.adminConsoleNewRoleChanged=newRoleChanged;
+  window.adminConsoleCreateAccount=e=>createAccount(e).catch(e2=>notice(errorText(e2),true));
   window.adminConsoleFilterUsers=filterUsers;
   window.adminConsoleUserRole=id=>userRole(id).catch(e=>notice(errorText(e),true));
   window.adminConsoleFilterOrders=filterOrders;
