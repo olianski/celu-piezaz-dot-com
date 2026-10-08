@@ -11,8 +11,8 @@ const counts = ids.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{});
 const duplicateIds = Object.entries(counts).filter(([,n])=>n>1);
 assert.deepStrictEqual(duplicateIds, [], "Hay IDs HTML duplicados.");
 
-assert.strictEqual((script.match(/function\s+renderModels\s*\(/g)||[]).length, 1,
-  "Debe existir una sola función renderModels.");
+assert(script.includes("function bootAuthenticated"),
+  "Falta el arranque autenticado de la aplicación.");
 
 assert(!html.includes("/* v6 — tienda: selector amigable del catálogo maestro */"),
   "Quedó código legacy v6.");
