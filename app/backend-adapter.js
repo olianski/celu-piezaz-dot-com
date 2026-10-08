@@ -6,6 +6,7 @@ window.CeluPiezazBackend = (() => {
   function ready(){ return !!client; }
   function requireClient(){ if(!client) throw new Error('Backend no configurado'); return client; }
   async function signIn(email,password){ return requireClient().auth.signInWithPassword({email,password}); }
+  async function profile(){ return requireClient().rpc('get_my_profile'); }
   async function signOut(){ return requireClient().auth.signOut(); }
   async function session(){ if(!client) return {data:{session:null},error:null}; return client.auth.getSession(); }
   async function searchProducts(search){ return requireClient().rpc('search_products',{p_query:String(search||'').trim()}); }
@@ -16,5 +17,5 @@ window.CeluPiezazBackend = (() => {
   async function placeOrder(shopId,deliveryType,deliveryAddress,items){ return requireClient().rpc('place_order',{p_shop_id:shopId,p_delivery_type:deliveryType,p_delivery_address:deliveryAddress||null,p_items:items}); }
   async function updateOrderStatus(orderId,nextStatus){ return requireClient().rpc('update_order_status',{p_order_id:orderId,p_next_status:nextStatus}); }
   async function listMyOrders(){ return requireClient().from('orders').select('id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops(id,name,address)').order('created_at',{ascending:false}); }
-  return {configure,ready,signIn,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders};
+  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders};
 })();
