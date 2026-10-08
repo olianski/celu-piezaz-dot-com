@@ -2134,7 +2134,7 @@ async function submitAuth(e){
     document.querySelectorAll('[data-ac-tab]').forEach(b=>b.classList.toggle('active',b.dataset.acTab===A.section));
   }
   function heading(title,desc,extra){return '<div class="ac-content-head"><div><h2>'+esc(title)+'</h2><p>'+esc(desc||'')+'</p></div>'+(extra||'')+'</div>';}
-  function item(title,sub,meta,actions){return '<article class="ac-item"><div class="ac-item-top"><div><div class="ac-item-title">'+title+'</div><div class="ac-item-sub">'+(sub||'')+'</div></div>'+(meta||'')+'</div>'+(actions?'<div class="ac-item-actions">'+actions+'</div>':'')+'</article>';}
+  function item(title,sub,meta,extra,actions){if(actions===undefined){actions=extra;extra='';}return '<article class="ac-item"><div class="ac-item-top"><div><div class="ac-item-title">'+title+'</div><div class="ac-item-sub">'+(sub||'')+'</div></div>'+(meta||'')+'</div>'+(extra?'<div class="ac-item-meta">'+extra+'</div>':'')+(actions?'<div class="ac-item-actions">'+actions+'</div>':'')+'</article>';}
   function metric(title,value,detail){return '<div class="ac-metric"><span>'+esc(title)+'</span><b>'+esc(value)+'</b><small>'+esc(detail||'')+'</small></div>';}
   async function ensureCatalogRefs(){
     if(A.catalogRefsLoaded)return;
