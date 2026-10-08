@@ -1,0 +1,103 @@
+{
+  "brand": "Celu Piezaz Dot Com",
+  "purpose": "Catálogo maestro inicial; ampliar y validar antes de producción.",
+  "part_types": [
+    {
+      "name": "Pantalla",
+      "variants": [
+        "Incell",
+        "OLED",
+        "Original"
+      ]
+    },
+    {
+      "name": "Batería",
+      "variants": [
+        "Compatible",
+        "Alta capacidad",
+        "Original"
+      ]
+    },
+    {
+      "name": "Puerto de carga",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    },
+    {
+      "name": "Cámara",
+      "variants": [
+        "Trasera",
+        "Frontal",
+        "Original"
+      ]
+    },
+    {
+      "name": "Tapa trasera",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    },
+    {
+      "name": "Parlante",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    },
+    {
+      "name": "Auricular",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    },
+    {
+      "name": "Micrófono",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    },
+    {
+      "name": "Flex",
+      "variants": [
+        "Encendido",
+        "Volumen",
+        "Carga",
+        "Otro"
+      ]
+    },
+    {
+      "name": "Marco / Chasis",
+      "variants": [
+        "Compatible",
+        "Original"
+      ]
+    }
+  ],
+  "sample_phone_models": [
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A15"
+    },
+    {
+      "brand": "Samsung",
+      "model": "Galaxy A24"
+    },
+    {
+      "brand": "Xiaomi",
+      "model": "Redmi Note 12"
+    },
+    {
+      "brand": "Motorola",
+      "model": "Moto G54"
+    },
+    {
+      "brand": "Apple",
+      "model": "iPhone 11"
+    }
+  ]
+}

@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b63f6">
+<title>Celu Piezaz Dot Com</title>
+<style>
+:root{--blue:#0b63f6;--blue2:#084dcc;--ink:#101828;--muted:#667085;--bg:#f6f8fc;--card:#fff;--line:#e7ebf2;--green:#087443;--orange:#b54708}
+*{box-sizing:border-box}html{font-size:16px}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:78px}
+button,input,select{font:inherit}button{cursor:pointer}.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px}.topin{max-width:760px;margin:auto;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:950;letter-spacing:-.5px}.logo i{font-style:normal;color:var(--blue)}
+main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.hero h1{font-size:29px;line-height:1.08;margin:0 0 7px;letter-spacing:-.8px}.hero p{margin:0;color:var(--muted);font-size:14px}
+.searchbox{margin:16px 0 12px;background:#fff;border:1px solid var(--line);border-radius:15px;display:flex;align-items:center;padding:0 12px;box-shadow:0 4px 16px #1018280a}.searchbox span{color:#98a2b3}.searchbox input{width:100%;border:0;outline:0;padding:15px 9px;background:transparent;font-size:16px}
+.quick{display:flex;gap:8px;overflow:auto;padding-bottom:4px;scrollbar-width:none}.quick::-webkit-scrollbar{display:none}.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;color:#475467;font-weight:700;font-size:13px}.chip.active{background:#eaf2ff;border-color:#c7dcff;color:var(--blue)}
+.section{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}.section h2{font-size:17px;margin:0}.section small{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:11px;box-shadow:0 3px 12px #10182808}.cardtop{display:flex;justify-content:space-between;gap:12px}.title{font-weight:850;font-size:15px;line-height:1.25}.sub{font-size:13px;color:var(--muted);margin-top:4px}.badge{flex:none;height:max-content;font-size:11px;font-weight:850;border-radius:999px;padding:5px 8px;background:#ecfdf3;color:var(--green)}.badge.one{background:#fff6ed;color:var(--orange)}.badge.off{background:#f2f4f7;color:#667085}.meta{display:flex;align-items:end;justify-content:space-between;margin-top:13px}.price{font-size:22px;font-weight:950;letter-spacing:-.5px}.shop{font-size:12px;color:var(--muted);margin-top:3px}.buy{border:0;background:var(--blue);color:white;border-radius:11px;padding:11px 15px;font-weight:850}.buy:disabled{background:#eaecf0;color:#98a2b3}
+.empty{padding:25px 12px;text-align:center;color:var(--muted)}.empty b{display:block;color:var(--ink);margin-bottom:5px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:30;padding:8px max(12px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom))}.bottomin{max-width:760px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}.navbtn{border:0;background:transparent;color:#667085;padding:8px;font-weight:800}.navbtn.active{color:var(--blue)}
+.page{display:none}.page.active{display:block}
+.adminhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.back{border:0;background:#eaf2ff;color:var(--blue);border-radius:10px;padding:9px 12px;font-weight:800}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}.stat span{display:block;color:var(--muted);font-size:11px}.stat b{display:block;font-size:21px;margin-top:3px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:12px}.panel h3{margin:0 0 12px;font-size:15px}.form{display:grid;gap:9px}.field{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:0}.save{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:12px;font-weight:850}.inv{display:grid;gap:8px}.invrow{padding:12px;border:1px solid var(--line);border-radius:12px}.invtop{display:flex;justify-content:space-between;gap:10px}.invprice{font-weight:850}.tiny{font-size:12px;color:var(--muted)}.remove{margin-top:8px;border:0;background:#fff0f0;color:#b42318;border-radius:8px;padding:7px 10px;font-weight:800}
+.toast{position:fixed;left:16px;right:16px;bottom:86px;background:#101828;color:#fff;padding:13px 15px;border-radius:12px;text-align:center;z-index:50;display:none;font-size:13px}
+@media(min-width:700px){body{padding-bottom:0}.bottom{position:static;border:0;background:transparent;padding:0}.bottomin{display:flex;justify-content:flex-end;max-width:760px}.navbtn{display:none}.top{position:sticky}.desktopAdmin{display:block}}
+
+/* v6 — selector de producto para tienda */
+.product-picker {
+  display: grid;
+  gap: 14px;
+}
+.picker-step {
+  background: #fff;
+  border: 1px solid #e8edf3;
+  border-radius: 16px;
+  padding: 14px;
+}
+.picker-step.is-disabled {
+  opacity: .55;
+  pointer-events: none;
+}
+.picker-label {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px;
+  font-weight:700;
+  font-size:13px;
+}
+.picker-search {
+  position:relative;
+}
+.picker-search input {
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid #dce3eb;
+  border-radius:12px;
+  padding:12px 13px 12px 38px;
+  font-size:14px;
+  outline:none;
+  background:#f8fafc;
+}
+.picker-search input:focus { border-color:#9fb5ff; background:#fff; }
+.picker-search span {
+  position:absolute; left:13px; top:11px; opacity:.55;
+}
+.picker-results {
+  display:grid;
+  gap:7px;
+  margin-top:9px;
+  max-height:230px;
+  overflow:auto;
+}
+.picker-option {
+  width:100%;
+  text-align:left;
+  border:1px solid #e5eaf0;
+  background:#fff;
+  border-radius:12px;
+  padding:11px 12px;
+  cursor:pointer;
+}
+.picker-option:hover { border-color:#b8c8ff; background:#f8faff; }
+.picker-option strong { display:block; font-size:14px; }
+.picker-option small { color:#718096; display:block; margin-top:2px; }
+.picker-empty {
+  color:#718096;
+  font-size:13px;
+  padding:8px 2px;
+}
+.picker-selected {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  background:#f3f6ff;
+  border:1px solid #dbe3ff;
+  border-radius:12px;
+  padding:11px 12px;
+}
+.picker-selected strong { display:block; }
+.picker-selected small { color:#667085; }
+.picker-change {
+  border:0;
+  background:transparent;
+  color:#3157d5;
+  font-weight:700;
+  cursor:pointer;
+}
+.picker-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.picker-grid button {
+  border:1px solid #e0e6ee;
+  background:#fff;
+  border-radius:11px;
+  padding:10px;
+  text-align:left;
+  cursor:pointer;
+  font-size:13px;
+}
+.picker-grid button.active {
+  border-color:#3157d5;
+  background:#f1f4ff;
+  color:#2345b5;
+  font-weight:700;
+}
+.picker-helper {
+  font-size:12px;
+  color:#718096;
+  margin-top:7px;
+}
+.picker-summary {
+  background:#f8fafc;
+  border-radius:13px;
+  padding:12px;
+  border:1px solid #e8edf3;
+}
+.picker-summary-row {
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:4px 0;
+  font-size:13px;
+}
+.picker-summary-row strong { text-align:right; }
+.picker-new-request {
+  margin-top:9px;
+  border:1px dashed #b8c3d1;
+  background:#fff;
+  color:#445;
+  border-radius:12px;
+  padding:10px 12px;
+  width:100%;
+  text-align:left;
+  cursor:pointer;
+}
+@media (max-width: 430px) {
+  .picker-grid { grid-template-columns:1fr; }
+}
+
+
+/* v7 UX refinements */
+.product-summary { margin-top: 2px; }
+.product-summary strong { font-size:14px; }
+.product-summary small { display:block; margin-top:3px; color:#667085; }
+#spChoices button { min-height:44px; }
+#spDataStep .form { gap:9px; }
+#spSave { min-height:46px; }
+</style>
+
+<style id="v4-organization">
+/* v4 — organización y respiración visual; identidad original conservada */
+.page{padding-bottom:92px}
+.panel,.card,.invrow{border-radius:16px}
+.section{margin-top:24px}
+.section h2{margin-bottom:4px}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.quick .chip{min-height:38px}
+.adminhead{margin-bottom:14px}
+.adminhead+.panel{margin-top:0}
+.invrow{position:relative;padding:15px 14px;margin-bottom:10px;background:#fff;border:1px solid #edf0f3}
+.invtop{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.invprice{font-weight:800;white-space:nowrap}
+.remove{margin-top:10px}
+.admin-tabs{display:flex;gap:7px;overflow:auto;padding:3px 1px 8px;margin-bottom:14px;scrollbar-width:none}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tabs .chip{flex:0 0 auto}
+.formgroup{background:#fff;border:1px solid #edf0f3;border-radius:16px;padding:14px;margin-bottom:12px}
+.formgroup label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#69717b}
+.formgroup input,.formgroup select{width:100%;box-sizing:border-box}
+.empty{padding:22px;text-align:center}
+.empty span{display:block;color:#7b838d;margin-top:6px}
+.hidden{display:none!important}
+@media(min-width:700px){
+  .results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .results-grid .card{margin:0}
+}
+
+/* v2 — reorganización completa del área de tienda */
+.shop-home{
+  display:grid;
+  gap:14px;
+}
+.shop-welcome{
+  padding:6px 0 2px;
+}
+.shop-welcome h1{
+  margin:0;
+  font-size:28px;
+  line-height:1.08;
+  letter-spacing:-.7px;
+}
+.shop-welcome p{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+.shop-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.shop-stat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+}
+.shop-stat span{display:block;color:var(--muted);font-size:11px}
+.shop-stat b{display:block;font-size:21px;margin-top:4px}
+.shop-action{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:17px;
+  padding:16px;
+}
+.shop-action h2{
+  margin:0;
+  font-size:18px;
+  letter-spacing:-.2px;
+}
+.shop-action p{
+  margin:5px 0 13px;
+  color:var(--muted);
+  font-size:13px;
+}
+.shop-action .save{
+  min-height:46px;
+}
+.shop-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:10px;
+  margin:5px 0 8px;
+}
+.shop-section-head h2{margin:0;font-size:17px}
+.shop-section-head span{font-size:12px;color:var(--muted)}
+.shop-list{
+  display:grid;
+  gap:9px;
+}
+.shop-inv-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:13px 14px;
+}
+.shop-inv-main{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+}
+.shop-inv-main b{font-size:14px;line-height:1.25}
+.shop-inv-main .price{font-size:17px;white-space:nowrap}
+.shop-inv-meta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:12px;
+}
+.shop-alert{
+  color:var(--orange);
+  font-weight:800;
+}
+.shop-remove{
+  margin-top:10px;
+  border:0;
+  background:#fff0f0;
+  color:#b42318;
+  border-radius:9px;
+  padding:7px 10px;
+  font-weight:800;
+}
+.shop-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin:2px 0 16px;
+}
+.shop-tabs .chip{
+  width:100%;
+  padding:10px 7px;
+}
+.shop-tab-panel{display:none}
+.shop-tab-panel.active{display:block}
+.shop-order-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:10px;
+}
+.shop-order-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.shop-order-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:12px;
+}
+.shop-order-actions .buy,
+.shop-order-actions .remove{margin:0}
+.shop-catalog-head{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:12px;
+}
+.shop-catalog-head h2{margin:0;font-size:18px}
+.shop-catalog-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.shop-catalog-tools{
+  display:flex;
+  gap:8px;
+  margin-top:13px;
+}
+.shop-catalog-tools .field{flex:1}
+.shop-catalog-list{display:grid;gap:8px}
+.shop-catalog-item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:12px 13px;
+}
+.shop-catalog-item b{font-size:13px}
+.shop-catalog-item .tiny{margin-top:3px}
+.shop-request{
+  margin-top:10px;
+  border:1px dashed #b8c3d1;
+  background:#fff;
+  color:#445;
+  border-radius:11px;
+  padding:10px 12px;
+  width:100%;
+  text-align:left;
+  font-weight:700;
+}
+.shop-form-divider{
+  height:1px;
+  background:var(--line);
+  margin:15px 0;
+}
+@media(max-width:430px){
+  .shop-stats{gap:6px}
+  .shop-stat{padding:11px 9px}
+  .shop-stat b{font-size:19px}
+}
+
+
+/* v3 tienda: secciones */
+.shop-shell{display:grid;gap:14px}.shop-topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:4px 0}.shop-topbar h1{margin:2px 0 0;font-size:29px;letter-spacing:-.7px}.shop-topbar p{margin:6px 0 0;color:var(--muted);font-size:13px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:1.2px;color:var(--muted)}.shop-pending{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 11px;font-size:12px;font-weight:800;white-space:nowrap}
+.shop-main-tabs{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:5px;background:#eef1f5;padding:4px;border-radius:13px;position:sticky;top:58px;z-index:5}.shop-main-tab{border:0;background:transparent;border-radius:10px;padding:11px 5px;font-weight:800;color:#657080;font-size:12px}.shop-main-tab.active{background:#fff;color:#111827;box-shadow:0 1px 4px rgba(0,0,0,.07)}.shop-main-section{display:none}.shop-main-section.active{display:block}
+.inventory-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.inventory-choice{border:1px solid var(--line);background:#fff;border-radius:16px;text-align:left;padding:16px;display:grid;gap:5px}.inventory-choice b{font-size:15px}.inventory-choice span{font-size:12px;color:var(--muted);line-height:1.35}.inventory-subsection{display:none}.inventory-subsection.active{display:block}.shop-stats.compact{margin:0 0 12px}.sales-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+@media(max-width:430px){.shop-main-tabs{grid-template-columns:repeat(4,1fr)}.shop-main-tab{font-size:11px;padding:10px 2px}.inventory-choice-grid{grid-template-columns:1fr}.shop-topbar h1{font-size:27px}}
+
+
+/* v4 — crear inventario limpio */
+#inventoryCreate .picker-results:empty{display:none}
+#inventoryCreate .picker-results{margin-top:8px}
+#inventoryCreate .picker-new-request{display:none}
+#inventoryCreate .picker-step:first-child{padding-bottom:0}
+
+
+.shop-order-items{display:grid;gap:7px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.shop-order-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0}
+.shop-order-item b{font-size:13px}.shop-order-item strong{font-size:13px;white-space:nowrap}
+
+
+/* v8 — crear inventario limpio y estable */
+.shop-create-flow{display:grid;gap:10px}
+.shop-select-row{width:100%;border:1px solid var(--line);background:#fff;border-radius:15px;padding:14px 15px;display:flex;justify-content:space-between;align-items:center;text-align:left;gap:12px}
+.shop-select-row span{display:grid;gap:3px}.shop-select-row b{font-size:14px}.shop-select-row small{font-size:12px;color:var(--muted)}.shop-select-row strong{font-size:18px;color:#667085}
+.shop-select-row.disabled{opacity:.55;pointer-events:none}.shop-select-row.open{border-radius:15px 15px 10px 10px}
+.shop-dropdown-panel{display:none;background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 15px 15px;padding:8px;margin-top:-10px}
+.shop-dropdown-panel.open{display:block}.shop-dropdown-panel .picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.shop-dropdown-panel .picker-grid button{min-height:45px;text-align:left}
+.shop-variant-box{display:grid;gap:0}.shop-variant-box:empty{display:none}.shop-variant-box .shop-select-row{border-radius:15px 15px 10px 10px}.shop-variant-box .shop-dropdown-panel{margin-top:-1px}
+.shop-create-flow .picker-results:empty{display:none}
+@media(max-width:430px){.shop-dropdown-panel .picker-grid{grid-template-columns:1fr}}
+
+</style>
+
+<style id="inventory-flow-v12">
+/* Crear inventario: flujo progresivo, simétrico y respirado */
+#storePicker{
+  max-width: 720px;
+  margin: 0 auto;
+}
+#storePicker .sp-flow{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+#storePicker .sp-step{
+  width:100%;
+  margin:0;
+  box-sizing:border-box;
+}
+#storePicker .sp-step[hidden],
+#storePicker .sp-step.is-hidden{display:none!important}
+#storePicker .sp-control,
+#storePicker input,
+#storePicker select,
+#storePicker button{
+  width:100%;
+  box-sizing:border-box;
+}
+#storePicker .sp-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  width:100%;
+}
+#storePicker .sp-row > *{min-width:0}
+#storePicker .sp-step-title{
+  margin:0 0 8px;
+  line-height:1.25;
+}
+#storePicker .sp-model-results,
+#storePicker .sp-choice-list,
+#storePicker .sp-variant-list{
+  margin-top:12px;
+}
+#storePicker .sp-summary{
+  margin-top:0;
+  width:100%;
+  box-sizing:border-box;
+}
+#storePicker .sp-actions{
+  display:flex;
+  gap:12px;
+  margin-top:0;
+}
+#storePicker .sp-actions > *{flex:1}
+@media (max-width:560px){
+  #storePicker{max-width:none}
+  #storePicker .sp-row{grid-template-columns:1fr}
+  #storePicker .sp-flow{gap:14px}
+  #storePicker .sp-actions{gap:10px}
+}
+</style>
+
+<style id="inventory-v16-css">
+.inventory-back{width:100%;margin:0 0 14px;min-height:46px}
+#inventoryView.inventory-subsection:not(.active),
+#inventoryCreate.inventory-subsection:not(.active){display:none!important}
+</style>
+
+<style id="inventory-back-v19">
+#inventoryBackReal.inventory-back{
+  display:inline-flex;
+  align-items:center;
+  width:auto;
+  min-height:0;
+  margin:0 0 12px;
+  padding:4px 0;
+  border:0;
+  background:transparent;
+  color:#667085;
+  font-size:13px;
+  font-weight:600;
+  line-height:18px;
+  text-align:left;
+  box-shadow:none;
+  cursor:pointer;
+}
+#inventoryBackReal.inventory-back:hover{
+  color:#344054;
+  background:transparent;
+}
+</style>
+
+<style id="inventory-focus-v20">
+#shopSectionInventory .inventory-choice-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:8px;
+}
+#shopSectionInventory .inventory-choice{
+  min-height:150px;
+  padding:24px 22px;
+  border-radius:22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:flex-start;
+  text-align:left;
+  gap:9px;
+  background:#fff;
+  border:1px solid var(--line,#e4e7ec);
+  box-shadow:0 2px 8px rgba(16,24,40,.04);
+}
+#shopSectionInventory .inventory-choice b{
+  font-size:20px;
+  line-height:1.2;
+}
+#shopSectionInventory .inventory-choice span{
+  font-size:14px;
+  line-height:1.45;
+  color:var(--muted,#667085);
+}
+#shopSectionInventory .inventory-choice:active{
+  transform:translateY(1px);
+}
+#inventoryBackReal.inventory-back{
+  display:none;
+}
+@media(max-width:560px){
+  #shopSectionInventory .inventory-choice-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  #shopSectionInventory .inventory-choice{
+    min-height:126px;
+    padding:22px 20px;
+  }
+}
+</style>
+
+<style id="inventory-v21-visual">
+.money-field{
+  width:100%;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:52px;
+  padding:0 14px;
+  background:#fff;
+  border:1px solid #e4e7ec;
+  border-radius:15px;
+}
+.money-field:focus-within{
+  border-color:#b7c7e8;
+  box-shadow:0 0 0 3px rgba(37,99,235,.07);
+}
+.money-field .money-symbol{
+  flex:0 0 auto;
+  color:#667085;
+  font-size:18px;
+  font-weight:700;
+}
+.money-field input#price{
+  min-width:0;
+  width:100%;
+  border:0!important;
+  outline:0;
+  box-shadow:none!important;
+  padding:0!important;
+  background:transparent;
+  font-size:17px;
+  font-weight:600;
+}
+</style>
+
+<style id="inventory-v22-quality">
+#spVariantStep{
+  margin-top:14px;
+}
+#spVariantStep .shop-select-row{
+  width:100%;
+}
+#variantPanel .picker-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+#variantPanel .picker-grid button{
+  width:100%;
+  min-height:46px;
+}
+</style>
+
+<style id="inventory-v23-compact">
+/* Flujo de inventario compacto: activo protagonista, pasos completados resumidos */
+#inventoryCreate .shop-action{
+  padding:14px;
+}
+#inventoryCreate .shop-action>h2{
+  margin-bottom:3px;
+}
+#inventoryCreate .shop-action>p{
+  margin-bottom:12px;
+}
+#inventoryCreate #storePicker{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* Paso de búsqueda */
+#inventoryCreate #storePicker>.picker-step{
+  margin:0;
+  padding:12px;
+  border-radius:16px;
+}
+#inventoryCreate .picker-label{
+  margin-bottom:7px;
+}
+#inventoryCreate .picker-label span{
+  font-size:15px;
+}
+
+/* Resultado del modelo: menos tarjeta, más resumen */
+#inventoryCreate .picker-selected{
+  border-radius:14px;
+  padding:10px 12px;
+}
+#inventoryCreate .picker-selected strong{
+  font-size:15px;
+}
+#inventoryCreate .picker-selected small{
+  font-size:12px;
+}
+#inventoryCreate .picker-change{
+  font-size:13px;
+  padding:4px 6px;
+}
+
+/* Repuesto: compacto */
+#inventoryCreate #partPickerBtn{
+  min-height:58px;
+  border-radius:15px;
+  padding:10px 13px;
+}
+#inventoryCreate #partPickerBtn b{
+  font-size:15px;
+}
+#inventoryCreate #partPickerBtn small{
+  font-size:12px;
+}
+
+/* Calidad: opciones compactas */
+#inventoryCreate #spVariantStep{
+  margin:0;
+}
+#inventoryCreate #spVariantStep .shop-select-row{
+  min-height:58px;
+  border-radius:15px;
+  padding:10px 13px;
+}
+#inventoryCreate #spVariantStep .shop-select-row b{
+  font-size:15px;
+}
+#inventoryCreate #spVariantStep .shop-select-row small{
+  font-size:12px;
+}
+#inventoryCreate #variantPanel{
+  margin-top:6px;
+  padding:8px;
+  border-radius:14px;
+}
+#inventoryCreate #variantPanel .picker-grid{
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+}
+#inventoryCreate #variantPanel .picker-grid button{
+  min-height:42px;
+  border-radius:11px;
+  padding:8px 6px;
+  font-size:13px;
+}
+
+/* Una vez elegida la calidad, el resumen queda pequeño */
+#inventoryCreate #spVariantStep .picker-selected{
+  min-height:0;
+  padding:9px 11px;
+  border-radius:13px;
+}
+#inventoryCreate #spVariantStep .picker-selected strong{
+  font-size:14px;
+}
+
+/* Precio + cantidad juntos */
+#inventoryCreate #spDataStep{
+  padding:12px;
+  border-radius:16px;
+}
+#inventoryCreate #spDataStep .form{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:9px;
+}
+#inventoryCreate #spDataStep .money-field,
+#inventoryCreate #spDataStep #qty{
+  min-height:48px;
+}
+#inventoryCreate #spDataStep #spSave{
+  grid-column:1 / -1;
+  min-height:48px;
+  border-radius:13px;
+}
+#inventoryCreate #spDataStep .picker-label span{
+  font-size:15px;
+}
+@media(max-width:430px){
+  #inventoryCreate #variantPanel .picker-grid{
+    grid-template-columns:1fr 1fr 1fr;
+  }
+}
+</style>
+
+<style id="inventory-v24">
+#inventoryView .inventory-manager{
+  max-width:720px;
+  margin:0 auto;
+}
+#inventoryView .inventory-search-head{
+  margin-bottom:12px;
+}
+#inventoryView .inventory-search-head h2{
+  margin:0;
+  font-size:21px;
+  letter-spacing:-.3px;
+}
+#inventoryView .inventory-search-head p{
+  margin:5px 0 0;
+  color:var(--muted,#667085);
+  font-size:13px;
+}
+#inventoryView .inventory-search-box{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:52px;
+  padding:0 14px;
+  box-sizing:border-box;
+  background:#fff;
+  border:1px solid var(--line,#e4e7ec);
+  border-radius:15px;
+}
+#inventoryView .inventory-search-box span{
+  color:#667085;
+  font-size:22px;
+}
+#inventoryView .inventory-search-box input{
+  width:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+  font-size:16px;
+}
+#inventoryView .inventory-results{
+  margin-top:12px;
+  display:grid;
+  gap:9px;
+}
+#inventoryView .inventory-empty-state{
+  padding:25px 14px;
+  text-align:center;
+  color:var(--muted,#667085);
+}
+#inventoryView .inventory-empty-state b{
+  display:block;
+  color:#344054;
+  margin-bottom:4px;
+}
+#inventoryView .inventory-card{
+  background:#fff;
+  border:1px solid var(--line,#e4e7ec);
+  border-radius:16px;
+  padding:14px;
+}
+#inventoryView .inventory-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+#inventoryView .inventory-card-title b{
+  display:block;
+  font-size:16px;
+}
+#inventoryView .inventory-card-title small{
+  display:block;
+  margin-top:4px;
+  color:var(--muted,#667085);
+  font-size:13px;
+}
+#inventoryView .inventory-price{
+  font-size:17px;
+  font-weight:800;
+  white-space:nowrap;
+}
+#inventoryView .inventory-stock{
+  margin-top:10px;
+  color:#667085;
+  font-size:13px;
+}
+#inventoryView .inventory-edit-btn{
+  margin-top:11px;
+  width:100%;
+  min-height:43px;
+  border:1px solid #dbe3ef;
+  background:#f8fafc;
+  border-radius:12px;
+  color:#245dcc;
+  font-weight:700;
+}
+#inventoryView .inventory-edit-form{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #edf0f3;
+}
+#inventoryView .inventory-edit-grid{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:9px;
+}
+#inventoryView .inventory-edit-grid label{
+  display:block;
+  font-size:11px;
+  font-weight:700;
+  color:#667085;
+  margin:0 0 5px;
+}
+#inventoryView .inventory-edit-grid input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:48px;
+  border:1px solid #e4e7ec;
+  border-radius:13px;
+  padding:0 12px;
+  font-size:16px;
+}
+#inventoryView .inventory-edit-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:9px;
+}
+#inventoryView .inventory-edit-actions button{
+  min-height:44px;
+  border-radius:12px;
+}
+#inventoryView .inventory-save{
+  border:0;
+  background:#1463e8;
+  color:#fff;
+  font-weight:700;
+}
+#inventoryView .inventory-cancel{
+  border:1px solid #e4e7ec;
+  background:#fff;
+  color:#667085;
+  font-weight:700;
+}
+@media(max-width:430px){
+  #inventoryView .inventory-edit-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+<header class="top"><div class="topin"><div class="logo">Celu <i>Piezaz</i> Dot Com</div><button class="back" onclick="openPage('admin')">Mi tienda</button></div></header>
+
+<main>
+<section id="market" class="page active">
+<div class="hero"><h1>Encuentra tu repuesto.</h1><p>Disponibilidad y precio de las tiendas participantes, en un solo lugar.</p></div>
+<div class="searchbox"><span>⌕</span><input id="q" autocomplete="off" placeholder="Busca: A15, pantalla, batería..." oninput="renderMarket()"></div>
+<div class="quick" id="chips"></div>
+<div id="step" class="section"><h2>Disponibles ahora</h2><small id="count"></small></div>
+<div id="results"></div>
+</section>
+
+<section id="product" class="page">
+<div class="adminhead"><button class="back" onclick="openPage('market')">← Volver</button><div></div></div>
+<div id="productDetail"></div>
+</section>
+
+<section id="checkout" class="page">
+<div class="adminhead"><button class="back" onclick="openPage('product')">← Repuesto</button><div></div></div>
+<div class="panel"><h2 style="margin:0 0 5px">Confirmar pedido</h2><div class="tiny">Revisa los datos antes de enviarlo.</div></div>
+<div id="checkoutCard"></div>
+<div class="panel"><h3>Entrega</h3>
+<select id="delivery" class="field" onchange="deliveryChanged()">
+<option value="local">Domicilio local — gratis</option>
+<option value="far">Domicilio fuera de zona — $5.000</option>
+<option value="pickup">Recoger en tienda — gratis</option>
+</select>
+<input id="address" class="field" style="margin-top:9px" placeholder="Dirección o referencia del taller">
+</div>
+<button class="save" style="width:100%" onclick="confirmOrder()">Confirmar pedido</button>
+</section>
+
+<section id="orders" class="page">
+<div class="hero"><h1>Mis pedidos</h1><p>Consulta el estado de tus pedidos recientes.</p></div>
+<div id="orderList"></div>
+</section>
+
+
+<section id="admin" class="page">
+  <div class="shop-shell">
+    <div class="shop-topbar">
+      <div><div class="eyebrow">MI TIENDA</div><h1>Pedidos</h1><p>Revisa y completa tus pedidos primero.</p></div>
+      <div class="shop-pending" id="pendingCount">0 pendientes</div>
+    </div>
+    <nav class="shop-main-tabs">
+      <button class="shop-main-tab active" id="shopTabOrders" onclick="shopSection('orders')">Pedidos</button>
+      <button class="shop-main-tab" id="shopTabInventory" onclick="shopSection('inventory')">Inventario</button>
+      <button class="shop-main-tab" id="shopTabSales" onclick="shopSection('sales')">Ventas</button>
+      <button class="shop-main-tab" id="shopTabCatalog" onclick="shopSection('catalog')">Catálogo</button>
+    </nav>
+
+    <section id="shopSectionOrders" class="shop-main-section active">
+      <div class="shop-section-head"><div><h2>Pedidos pendientes</h2><span>Acéptalos y finalízalos.</span></div></div>
+      <div id="shopOrders"></div>
+    </section>
+
+    <section id="shopSectionInventory" class="shop-main-section">
+      <div class="inventory-choice-grid">
+        <button class="inventory-choice" onclick="inventorySection('view')"><b>Ver inventario</b><span>Consulta productos, precios y cantidades.</span></button>
+        <button class="inventory-choice" onclick="inventorySection('create')"><b>Crear inventario</b><span>Agrega un producto disponible en tu tienda.</span></button>
+      </div>
+      <div id="inventoryView" class="inventory-subsection">
+        <div class="inventory-manager">
+          <div class="inventory-search-head">
+            <h2>Buscar en mi inventario</h2>
+            <p>Busca un modelo para consultar o cambiar su precio y cantidad.</p>
+          </div>
+
+          <div class="inventory-search-box">
+            <span>⌕</span>
+            <input id="inventorySearch" type="search" placeholder="A15, iPhone 13, Redmi Note 12..." autocomplete="off" oninput="renderInventorySearch()" onkeydown="if(event.key==='Enter'){event.preventDefault();renderInventorySearch();this.blur();}">
+          </div>
+
+          <div id="inventoryResults" class="inventory-results">
+            <div class="inventory-empty-state">
+              <b>Busca un modelo</b>
+              <span>Tu inventario aparecerá aquí.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="inventoryCreate" class="inventory-subsection">
+        <div class="shop-action">
+          <h2>Crear inventario</h2><p>Busca el modelo, elige el repuesto y define precio y cantidad.</p>
+          <div id="storePicker" class="product-picker shop-create-flow">
+  <div class="picker-step">
+    <div class="picker-label"><span>1. Busca el modelo</span></div>
+    <div class="picker-search"><span>⌕</span><input id="spSearch" type="search" placeholder="Ej. A15, iPhone 13, Redmi Note 12..." autocomplete="off"></div>
+    <div class="picker-results" id="spModels"></div>
+  </div>
+
+  <button type="button" class="shop-select-row disabled" id="partPickerBtn" style="display:none" onclick="togglePartPicker()">
+    <span><b>2. Elegir repuesto</b><small id="partPickerValue">Primero selecciona un modelo</small></span>
+    <strong id="partPickerArrow">⌄</strong>
+  </button>
+  <div id="spChoiceStep" class="shop-dropdown-panel">
+    <div class="picker-grid" id="spChoices"></div>
+  </div>
+
+  <div id="spVariantStep" class="shop-variant-box" style="display:none"></div>
+  <div class="picker-selected product-summary is-disabled" id="spSelected" style="display:none"></div>
+
+  <div class="picker-step is-disabled" id="spDataStep" style="display:none">
+    <div class="picker-label"><span>4. Precio y cantidad</span></div>
+    <div class="form">
+      <div class="money-field">
+        <span class="money-symbol">$</span>
+        <input id="price" inputmode="numeric" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
+      </div>
+      <input id="qty" inputmode="numeric" class="field" type="number" min="0" placeholder="Cantidad">
+      <button class="save" id="spSave" type="button">Agregar al inventario</button><div id="spSaveStatus" class="tiny" style="margin-top:8px;min-height:20px"></div>
+    </div>
+  </div>
+</div></div>
+          <select id="prod" class="field" style="display:none"></select>
+        </div>
+      </div>
+    </section>
+
+    <section id="shopSectionSales" class="shop-main-section">

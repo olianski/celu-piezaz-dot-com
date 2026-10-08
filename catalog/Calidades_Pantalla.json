@@ -1,0 +1,15 @@
+{
+  "applies_only_to": "Pantalla",
+  "android": [
+    "Incell",
+    "OLED",
+    "Original"
+  ],
+  "iphone": [
+    "Incell",
+    "JK",
+    "GX",
+    "Original"
+  ],
+  "source": "Celu Piezaz master catalog models in Tienda v13"
+}
