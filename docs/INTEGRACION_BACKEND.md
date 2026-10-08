@@ -2,19 +2,19 @@
 
 La aplicación visual aprobada permanece intacta.
 
-## Estado
-- Base PostgreSQL/Supabase creada.
-- Autenticación y perfiles preparados.
-- Inventario y catálogo tienen tablas y permisos.
-- Pedidos tienen una función transaccional para descontar stock.
-- Este adaptador concentra las llamadas que conectaremos al frontend.
+## Estado actual
+- Supabase/PostgreSQL: esquema real preparado.
+- Registro público: siempre crea técnico; una tienda requiere autorización.
+- Tiendas: pendiente → aprobada → suspendida.
+- Inventario: una tienda aprobada publica solo productos maestros.
+- Catálogo: 109 modelos con alias de búsqueda.
+- Búsqueda: multi-palabra, tildes y alias.
+- Pedidos: creación transaccional con bloqueo de stock.
+- Tienda: pendiente → aceptado → entregado.
+- Rechazo/cancelación: devuelve el stock reservado.
+- RLS: aislamiento entre tiendas y usuarios.
 
-## Falta para conexión real
-Se necesita un proyecto Supabase real con su URL y clave pública. No se inventan credenciales ni se guardan secretos en GitHub.
+## Conexión real pendiente
+Solo falta un proyecto Supabase real con URL y clave pública. No se inventan credenciales ni se guardan secretos en GitHub.
 
-## Orden de integración
-1. Autenticación.
-2. Catálogo y búsqueda.
-3. Inventario de tienda.
-4. Pedido del técnico.
-5. Historial/estado.
+El frontend podrá usar `app/backend-adapter.js` sin cambiar la interfaz aprobada.
