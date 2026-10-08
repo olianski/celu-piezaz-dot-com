@@ -1245,6 +1245,9 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 </div></nav>
 <div id="toast" class="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./backend-config.js"></script>
+<script src="./backend-adapter.js"></script>
 <script>
 /* Celu Piezaz Dot Com — MVP funcional local.
    Persistencia: localStorage. Backend real se conecta en la siguiente fase. */
@@ -1915,5 +1918,16 @@ if(savedRole==="technician"||savedRole==="shop"||savedRole==="admin"){
 }else{
   showRoleGate();
 }
+
+// Backend real: conexión preparada con Supabase.
+(function initRealBackend(){
+  try{
+    if(window.supabase && window.CELU_SUPABASE_CONFIG){
+      const client=window.supabase.createClient(window.CELU_SUPABASE_CONFIG.url,window.CELU_SUPABASE_CONFIG.anonKey);
+      window.CeluPiezazBackend.configure(client);
+      window.CeluPiezazBackendReady=true;
+    }
+  }catch(e){ console.warn("Backend Supabase no disponible",e); }
+})();
 </script>
 </body></html>
