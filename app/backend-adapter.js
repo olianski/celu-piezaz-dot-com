@@ -6,7 +6,6 @@ window.CeluPiezazBackend = (() => {
   function ready(){ return !!client; }
   function requireClient(){ if(!client) throw new Error('Backend no configurado'); return client; }
   async function signIn(email,password){ return requireClient().auth.signInWithPassword({email,password}); }
-  async function signUp(email,password,name,phone){ return requireClient().auth.signUp({email,password,options:{data:{name:name||null,phone:phone||null,role:'technician'}}}); }
   async function profile(){ return requireClient().rpc('get_my_profile'); }
   async function signOut(){ return requireClient().auth.signOut(); }
   async function session(){ if(!client) return {data:{session:null},error:null}; return client.auth.getSession(); }
@@ -19,6 +18,12 @@ window.CeluPiezazBackend = (() => {
   async function updateOrderStatus(orderId,nextStatus){ return requireClient().rpc('update_order_status',{p_order_id:orderId,p_next_status:nextStatus}); }
   async function listMyOrders(){ return requireClient().from('orders').select('id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops(id,name,address)').order('created_at',{ascending:false}); }
   // Funciones del panel administrativo: las políticas RLS de Supabase restringen estas operaciones a admins.
+  async function adminCreateAccount(payload){
+    const r=await requireClient().functions.invoke('admin-create-account',{body:payload});
+    if(r.error) throw r.error;
+    if(r.data?.error) throw new Error(r.data.error);
+    return r;
+  }
   async function adminOverview(){
     const c=requireClient();
     const [users,shops,pendingShops,products,models,openOrders,openRequests,deliveredOrders]=await Promise.all([
@@ -121,5 +126,5 @@ window.CeluPiezazBackend = (() => {
     if(!['open','notified','closed'].includes(status))throw new Error('Estado de solicitud no válido');
     return requireClient().from('demand_requests').update({status}).eq('id',id).select().single();
   }
-  return {configure,ready,signIn,signUp,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders ,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
+  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders ,adminCreateAccount,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
 })();
