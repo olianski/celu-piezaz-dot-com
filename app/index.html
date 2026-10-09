@@ -1879,19 +1879,21 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     document.getElementById("spModels").hidden=false;document.getElementById("spModels").innerHTML='<div class="picker-empty">Cargando productos…</div>';
     try{
       await loadProductsForModel(model);
-      if(btn){btn.style.display="flex";btn.classList.remove("disabled");}
+      if(btn){btn.style.display="flex";btn.classList.remove("disabled");btn.classList.add("open");}
       if(val)val.textContent=model;
-      if(step)step.classList.add("active");
-      const types=[...new Set(state.catalog.filter(p=>p.active&&p.model===model).map(p=>p.type))];
-      choices.innerHTML=types.map(t=>'<button type="button" onclick="chooseStoreTypeV38('+inlineArg(model)+','+inlineArg(t)+')">'+esc(t)+'</button>').join("");
+      const types=[...new Set(state.catalog.filter(p=>p.active&&normalize(p.model)===normalize(model)).map(p=>p.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+      if(step)step.classList.add("open");
+      choices.innerHTML=types.length?types.map(t=>'<button type="button" onclick="chooseStoreTypeV38('+inlineArg(model)+','+inlineArg(t)+')">'+esc(t)+'</button>').join(""):'<div class="picker-empty">Este modelo no tiene repuestos activos disponibles. Contacta al administrador.</div>';
       document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button></div>';
     }catch(e){document.getElementById("spModels").innerHTML='<div class="picker-empty">No se pudo consultar el catálogo. Intenta de nuevo.</div>';}
   };
 
   window.togglePartPicker=function(){
-    const p=document.getElementById("spChoiceStep"), a=document.getElementById("partPickerArrow");
-    if(p)p.classList.toggle("active");
-    if(a)a.textContent=p&&p.classList.contains("active")?"⌃":"⌄";
+    const p=document.getElementById("spChoiceStep"), b=document.getElementById("partPickerBtn"), a=document.getElementById("partPickerArrow");
+    if(!p)return;
+    const open=p.classList.toggle("open");
+    if(b)b.classList.toggle("open",open);
+    if(a)a.textContent=open?"⌃":"⌄";
   };
 
   window.chooseStoreTypeV38=function(model,type){
