@@ -93,7 +93,7 @@ window.CeluPiezazBackend = (() => {
     return requireClient().from('part_types').select('id,name,active').order('name');
   }
   async function adminCreateType(name){
-    const clean=String(name||'').trim().replace(/\\s+/g,' ');
+    const clean=String(name||'').trim().replace(/\s+/g,' ');
     if(!clean||clean.length>80)throw new Error('El nombre del tipo debe tener entre 1 y 80 caracteres.');
     const r=await requireClient().from('part_types').insert({name:clean,active:true}).select().single();
     if(r.error?.code==='23505')return {...r,error:{...r.error,message:'Ese tipo de repuesto ya existe.'}};
@@ -115,7 +115,7 @@ window.CeluPiezazBackend = (() => {
     return requireClient().from('part_variants').select('id,part_type_id,name,active,part_types!part_variants_part_type_id_fkey(name)').order('name');
   }
   async function adminCreateVariant(typeId,name){
-    const clean=String(name||'').trim().replace(/\\s+/g,' ');
+    const clean=String(name||'').trim().replace(/\s+/g,' ');
     if(!typeId)throw new Error('Selecciona el tipo de repuesto.');
     if(!clean||clean.length>80)throw new Error('La variante debe tener entre 1 y 80 caracteres.');
     const r=await requireClient().from('part_variants').insert({part_type_id:typeId,name:clean,active:true}).select().single();
