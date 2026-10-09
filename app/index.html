@@ -2486,7 +2486,7 @@ async function bootAuthenticated(){
   }else if(role==="shop"){
     await loadMasterModels();
     await loadCurrentShop();
-    openPage("admin");renderAdminV38();
+    openPage("admin");
   }else throw new Error("El tipo de cuenta no está autorizado.");
 }
 async function doLogout(){
