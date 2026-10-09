@@ -24,9 +24,9 @@ assert.strictEqual(typeContext.isScreenDisplayType("Flex"), false, "Flex debe qu
 assert.strictEqual(typeContext.isScreenDisplayType("Batería"), false, "Batería debe quedar fuera del MVP.");
 const variantContext = { normalize: s => (s || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") };
 const variantStart = script.indexOf("function isVisibleVariant(name)");
-const variantEnd = script.indexOf("\\n}", variantStart);
+const variantEnd = script.indexOf("\n}", variantStart);
 assert(variantStart >= 0 && variantEnd > variantStart, "No se encontró el filtro de variantes.");
-require("vm").runInNewContext(script.slice(variantStart, variantEnd + 2) + "\\nthis.isVisibleVariant = isVisibleVariant;", variantContext);
+require("vm").runInNewContext(script.slice(variantStart, variantEnd + 2) + "\nthis.isVisibleVariant = isVisibleVariant;", variantContext);
 assert.strictEqual(variantContext.isVisibleVariant("Compatible"), false, "Compatible debe ocultarse.");
 assert.strictEqual(variantContext.isVisibleVariant("AMOLED"), true, "AMOLED debe mantenerse.");
 assert.strictEqual(variantContext.isVisibleVariant("OLED"), true, "OLED debe mantenerse.");
