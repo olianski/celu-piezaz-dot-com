@@ -1652,51 +1652,71 @@ async function renderMarket(){
   }
 }
 function setFilter(x){filter=x;renderMarket();}
-function requestDemand(){
-  let q=(document.getElementById("q").value||"").trim()||"repuesto no especificado";
-  if(!state.demand.some(d=>normalize(d.query)===normalize(q)&&d.status==="open"))
-    state.demand.push({id:Date.now(),query:q,status:"open",date:new Date().toLocaleString("es-CO")});
-  save(); toast("Solicitud guardada. Te avisaremos cuando aparezca."); renderAdmin();
+async function requestDemand(){
+  const product=state.catalog.find(p=>normalize(p.model)===normalize(techSelectedModel)&&normalize(p.type)===normalize(techSelectedPart)&&(!techSelectedVariant||normalize(p.variant)===normalize(techSelectedVariant)));
+  if(!product){toast("Selecciona primero el modelo y el repuesto.");return;}
+  try{
+    const r=await CeluPiezazBackend.createDemandRequest(product.id);
+    if(r.error)throw r.error;
+    toast("Solicitud registrada correctamente.");
+  }catch(e){toast(e.message||"No se pudo registrar la solicitud.");}
 }
 function openProduct(productId){
-  selectedProduct=productId; openPage("product");
-  let p=catalogProduct(productId);
-  let offers=activeInventory().filter(i=>String(i.productId)===String(productId)).map(i=>({...i,s:shop(i.shopId)})).sort((a,b)=>a.price-b.price);
-  document.getElementById("productDetail").innerHTML=`
-  <div class="panel"><div class="tiny">${p.type}</div><h1 style="font-size:26px;margin:4px 0">${p.model}</h1><div class="sub">${p.variant}</div></div>
-  <div class="section"><h2>Tiendas disponibles</h2><small>${offers.length} opción(es)</small></div>
-  ${offers.length?offers.map(x=>`<div class="card"><div class="cardtop"><div><div class="title">${x.s.name}</div><div class="sub">${p.type} · ${p.variant}</div></div><span class="badge ${x.qty===1?"one":""}">${x.qty===1?"Última unidad":"Disponible"}</span></div>
-  <div class="meta"><div><div class="price">${money(x.price)}</div><div class="shop">${x.qty} unidad(es)</div></div><button class="buy" onclick="startCheckout('${x.shopId}')">Pedir</button></div></div>`).join("")
-  :`<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>`}`;
+  selectedProduct=productId;openPage("product");
+  const p=catalogProduct(productId);
+  const offers=activeInventory().filter(i=>String(i.productId)===String(productId)).map(i=>({...i,s:i.s||shop(i.shopId)})).sort((a,b)=>a.price-b.price);
+  if(!p){document.getElementById("productDetail").innerHTML='<div class="card empty">Producto no disponible.</div>';return;}
+  document.getElementById("productDetail").innerHTML=
+    '<div class="panel"><div class="tiny">'+p.type+'</div><h1 style="font-size:26px;margin:4px 0">'+p.model+'</h1><div class="sub">'+p.variant+'</div></div>'+
+    '<div class="section"><h2>Tiendas disponibles</h2><small>'+offers.length+' opción(es)</small></div>'+
+    (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+(x.s?.name||"Tienda")+'</div><div class="sub">'+p.type+' · '+p.variant+'</div></div>'+
+      '<span class="badge '+(x.qty===1?'one':'')+'">'+(x.qty===1?'Última unidad':'Disponible')+'</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+x.qty+' unidad(es)</div></div>'+
+      '<button class="buy" onclick="startCheckout(\''+x.shopId+'\',\''+x.productId+'\')">Pedir</button></div></div>').join(''):
+      '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
 }
-function startCheckout(shopId, productId){
+function startCheckout(shopId,productId){
   selectedShop=shopId;
-  if(productId) selectedProduct=productId;
-  let p=catalogProduct(selectedProduct), i=inventoryFor(shopId,selectedProduct);
-  document.getElementById("checkoutCard").innerHTML=`<div class="card"><div class="title">${p.type} ${p.model}</div><div class="sub">${p.variant} · ${shop(shopId).name}</div><div class="price" style="margin-top:12px">${money(i.price)}</div><div class="tiny" style="margin-top:6px">${i.qty} disponible(s)</div></div>`;
+  if(productId)selectedProduct=productId;
+  const p=catalogProduct(selectedProduct),inv=inventoryFor(shopId,selectedProduct);
+  if(!p||!inv){toast("La disponibilidad cambió. Vuelve a buscar el repuesto.");openPage("market");return;}
+  selectedInventoryId=inv.id;
+  const sh=inv.s||shop(shopId);
+  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+p.type+' '+p.model+'</div><div class="sub">'+p.variant+' · '+(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+inv.qty+' disponible(s)</div></div>';
   openPage("checkout");
 }
-function confirmOrder(){
-  let i=inventoryFor(selectedShop,selectedProduct), p=catalogProduct(selectedProduct);
-  if(!i||i.qty<1){toast("Ese repuesto se agotó.");openPage("market");return;}
-  let delivery=document.getElementById("delivery").value;
-  let address=document.getElementById("address").value.trim();
+async function confirmOrder(){
+  const inv=state.inventory.find(x=>String(x.id)===String(selectedInventoryId));
+  const delivery=document.getElementById("delivery").value;
+  const address=document.getElementById("address").value.trim();
+  if(!inv||inv.qty<1){toast("Ese repuesto se agotó.");openPage("market");return;}
   if(delivery!=="pickup"&&!address){toast("Agrega la dirección del taller.");return;}
-  let fee=delivery==="far"?shop(selectedShop).outsideFee:0;
-  i.qty-=1;
-  state.orders.unshift({id:state.nextOrder++,shopId:selectedShop,productId:selectedProduct,qty:1,total:i.price+fee,status:"pending",
-    address:address||"Recoger en tienda",deliveryType:delivery,deliveryFee:fee,date:"Ahora"});
-  save(); toast("Pedido enviado a la tienda."); renderMarket(); renderAdmin(); renderOrders(); openPage("orders");
+  const deliveryType=delivery==="far"?"outside_zone":delivery;
+  const btn=document.querySelector('#checkout .save[onclick="confirmOrder()"]');
+  if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
+  try{
+    const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId,quantity:1}]);
+    if(r.error)throw r.error;
+    toast("Pedido enviado a la tienda.");
+    offersLoadedForModel="";
+    await renderOrders();
+    openPage("orders");
+  }catch(e){toast(e.message||"No se pudo crear el pedido.");}
+  finally{if(btn){btn.disabled=false;btn.textContent="Confirmar pedido";}}
 }
-function renderOrders(){
-  let el=document.getElementById("orderList");
-  el.innerHTML=state.orders.length?state.orders.map(o=>{
-    let p=catalogProduct(o.productId), s=shop(o.shopId);
-    return `<div class="card"><div class="cardtop"><div><div class="title">${p.type} ${p.model}</div><div class="sub">${p.variant} · ${s.name}</div></div>
-    <span class="badge ${o.status==="delivered"?"":"one"}">${statusLabel(o.status)}</span></div>
-    <div class="meta"><div><div class="price">${money(o.total)}</div><div class="shop">Pedido #${o.id} · ${o.date}</div></div></div>
-    <div class="tiny" style="margin-top:9px">Entrega: ${o.address}</div></div>`;
-  }).join(""):`<div class="card empty"><b>Aún no tienes pedidos.</b></div>`;
+async function renderOrders(){
+  const el=document.getElementById("orderList");
+  el.innerHTML='<div class="card empty">Cargando tus pedidos…</div>';
+  try{
+    const orders=await loadVisibleOrders();
+    el.innerHTML=orders.length?orders.map(o=>{
+      const p=orderProduct(o),sh=orderShop(o),line=orderPrimaryItem(o);
+      return '<div class="card"><div class="cardtop"><div><div class="title">'+(p.type||"Repuesto")+' '+p.model+'</div><div class="sub">'+(p.variant||"")+' · '+(sh.name||"Tienda")+'</div></div>'+
+      '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+statusLabel(o.status)+'</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+new Date(o.created_at).toLocaleString("es-CO")+'</div></div></div>'+
+      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</div></div>';
+    }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
+  }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+String(e.message||"")+'</div></div>';}
 }
 function renderAdmin(){
   let own=state.inventory.filter(i=>i.shopId==="shop1");
