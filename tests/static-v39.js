@@ -8,6 +8,8 @@ assert(script, "No se encontró el bloque JavaScript principal.");
 
 assert(script.includes('function isScreenDisplayType(name)'), "Falta el filtro común de pantallas/displays.");
 assert(script.includes('type==="pantalla"||type==="display"'), "Solo Pantalla y Display deben estar visibles en el MVP.");
+assert(script.includes('function isVisibleVariant(name)'), "Falta el filtro global para ocultar Compatible.");
+assert(script.includes('normalize(String(name||"").trim())!=="compatible"'), "Compatible debe quedar oculto sin borrar registros.");
 
 const screenTypeStart = script.indexOf("function isScreenDisplayType(name)");
 assert(screenTypeStart >= 0, "No se encontró la función de filtro.");
@@ -20,6 +22,14 @@ assert.strictEqual(typeContext.isScreenDisplayType("Pantalla"), true, "Pantalla 
 assert.strictEqual(typeContext.isScreenDisplayType("Display"), true, "Display debe tratarse como pantalla.");
 assert.strictEqual(typeContext.isScreenDisplayType("Flex"), false, "Flex debe quedar fuera del MVP.");
 assert.strictEqual(typeContext.isScreenDisplayType("Batería"), false, "Batería debe quedar fuera del MVP.");
+const variantContext = { normalize: s => (s || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") };
+const variantStart = script.indexOf("function isVisibleVariant(name)");
+const variantEnd = script.indexOf("\n}", variantStart);
+assert(variantStart >= 0 && variantEnd > variantStart, "No se encontró el filtro de variantes.");
+require("vm").runInNewContext(script.slice(variantStart, variantEnd + 2) + "\nthis.isVisibleVariant = isVisibleVariant;", variantContext);
+assert.strictEqual(variantContext.isVisibleVariant("Compatible"), false, "Compatible debe ocultarse.");
+assert.strictEqual(variantContext.isVisibleVariant("AMOLED"), true, "AMOLED debe mantenerse.");
+assert.strictEqual(variantContext.isVisibleVariant("OLED"), true, "OLED debe mantenerse.");
 assert(script.includes("A.types.filter(x=>x.active&&isScreenDisplayType(x.name))"), "El formulario admin no debe ofrecer Flex ni otros repuestos.");
 assert(script.includes("(r||[]).filter(p=>isScreenDisplayType(obj(p.part_types).name))"), "La búsqueda administrativa debe filtrar por tipo de pantalla/display.");
 assert(script.includes("const tabs=[['products','Pantallas / displays'],['models','Modelos']]"), "El catálogo inicial solo debe mostrar pantallas y modelos.");
