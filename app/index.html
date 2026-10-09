@@ -1413,6 +1413,26 @@ let currentShop=null;
 let offersLoadedForModel="";
 let state={mode:null,shops:[],catalog:[],inventory:[],orders:[],demand:[],nextOrder:1};
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+function unwrapDbRelation(v){return Array.isArray(v)?(v[0]||{}):(v||{});}
+function modelDisplayName(m){return String(m.brand||"")+" "+String(m.model||"");}
+function mapDbProduct(r){
+  if(!r)return null;
+  const m=unwrapDbRelation(r.phone_models),t=unwrapDbRelation(r.part_types),v=unwrapDbRelation(r.part_variants);
+  return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",active:r.active!==false,displayName:r.display_name||""};
+}
+async function loadMasterModels(){
+  const r=await CeluPiezazBackend.listPhoneModels();if(r.error)throw r.error;
+  masterModels=(r.data||[]).filter(m=>m.active).map(m=>({...m,label:modelDisplayName(m).trim()}));
+  return masterModels;
+}
+async function loadProductsForModel(label){
+  const m=masterModels.find(x=>normalize(x.label)===normalize(label));
+  if(!m)throw new Error("Modelo no encontrado.");
+  const r=await CeluPiezazBackend.listProductsByModel(m.id);if(r.error)throw r.error;
+  const rows=(r.data||[]).map(mapDbProduct).filter(Boolean);
+  state.catalog=state.catalog.filter(p=>p.phoneModelId!==m.id).concat(rows);
+  return rows;
+}
 function catalogProduct(id){return state.catalog.find(x=>x.id===id);}
 function shop(id){return state.shops.find(x=>x.id===id);}
 function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId===shopId&&String(x.productId)===String(productId));}
