@@ -1101,6 +1101,8 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 body.role-admin .bottom{display:none!important}
 body.role-technician #navAdmin{display:none!important}
 body.role-shop #navMarket{display:none!important}
+.shop-approval-banner{margin:12px 0;padding:13px 15px;background:#fff6ed;border:1px solid #fed7aa;border-radius:14px;color:#9a3412;font-size:13px;line-height:1.45;font-weight:650}
+body.role-technician #techBanner{display:none!important}
 body.role-admin #techBanner{display:none!important}
 #acConsole{max-width:1020px;margin:0 auto;padding:8px 0 36px}
 .ac-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:4px 0 22px}
@@ -2022,8 +2024,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       return;
     }
     if (heading) heading.textContent = "MI TIENDA";
-    if (title) title.textContent = "Pedidos";
-    if (subtitle) subtitle.textContent = "Revisa y completa tus pedidos primero.";
+    if (title) title.textContent = currentShop?.name||"Mi tienda";
+    if (subtitle) subtitle.textContent = currentShop?.status==="approved"?"Gestiona tus pedidos y tu inventario real.":"Tu tienda debe ser aprobada antes de publicar inventario.";
     if (pending) pending.style.display = "";
     ["Orders","Inventory","Sales","Catalog"].forEach(s => {
       const tab = document.getElementById("shopTab"+s);
@@ -2031,6 +2033,15 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     });
     const catalogTab = document.getElementById("shopTabCatalog");
     if (catalogTab) catalogTab.textContent = "Catálogo";
+    let approval=document.getElementById("shopApprovalNotice");
+    if(!approval){
+      approval=document.createElement("div");approval.id="shopApprovalNotice";approval.className="shop-approval-banner";
+      const nav=document.querySelector("#admin .shop-main-tabs");if(nav)nav.parentNode.insertBefore(approval,nav);
+    }
+    const approved=!!currentShop&&currentShop.status==="approved"&&currentShop.active;
+    approval.style.display=approved||!currentShop?"none":"block";
+    approval.textContent= currentShop?.status==="suspended"?"Tu tienda está suspendida. Contacta al administrador.":"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
+    document.querySelectorAll("#admin .inventory-choice").forEach(b=>{b.disabled=!approved;b.style.opacity=approved?"1":".45";});
     renderShopOrdersV38();
     document.getElementById("shopSectionOrders").classList.add("active");
     document.getElementById("shopSectionInventory").classList.remove("active");
