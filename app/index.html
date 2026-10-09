@@ -1786,7 +1786,7 @@ function adminTab(t){
 }
 function openPage(id){
   const shopOrdersPage=id==="orders"&&state.role==="shop";
-  if(shopOrdersPage)id="admin";
+  if(shopOrdersPage)id='admin';
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   document.getElementById("navMarket").classList.toggle("active",id==="market");
