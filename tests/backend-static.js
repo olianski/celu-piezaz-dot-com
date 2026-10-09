@@ -71,6 +71,12 @@ for(const f of files){
       [s.includes('p.part_variant_id = public.part_variants.id'),'variante histórica visible para participantes']
     );
   }
+  if(f.includes('013_restrict_technician_inventory_to_approved_shops')){
+    checks.push(
+      [s.includes("public.current_user_role() = 'technician'"),'inventario visible a técnicos con rol correcto'],
+      [s.includes("s.status = 'approved'") && s.includes('s.active = true'),'inventario de tiendas aprobadas y activas únicamente']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
