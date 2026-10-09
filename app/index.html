@@ -1881,21 +1881,25 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   }
 
   function renderStoreModels(){
-    const search=document.getElementById("spSearch"), box=document.getElementById("spModels"); if(!search||!box)return;
+    const search=document.getElementById("spSearch"),box=document.getElementById("spModels");if(!search||!box)return;
     const q=norm(search.value);
-    const models=[...new Set(state.catalog.filter(p=>p.active).map(p=>p.model))].sort((a,b)=>a.localeCompare(b));
+    const models=masterModels.map(m=>m.label).sort((a,b)=>a.localeCompare(b,"es"));
     const found=models.filter(m=>!q||norm(m).includes(q)).slice(0,8);
     box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38(\''+esc(m).replace(/'/g,"\\'")+'\')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
   }
 
-  window.chooseStoreModelV38=function(model){
-    const btn=document.getElementById("partPickerBtn"), val=document.getElementById("partPickerValue"), choices=document.getElementById("spChoices"), step=document.getElementById("spChoiceStep");
-    if(btn){btn.style.display="flex";btn.classList.remove("disabled");}
-    if(val)val.textContent=model;
-    if(step)step.classList.add("active");
-    const types=[...new Set(state.catalog.filter(p=>p.active&&p.model===model).map(p=>p.type))];
-    choices.innerHTML=types.map(t=>'<button type="button" onclick="chooseStoreTypeV38(\''+esc(model).replace(/'/g,"\\'")+'\',\''+esc(t).replace(/'/g,"\\'")+'\')">'+esc(t)+'</button>').join("");
-    document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button></div>';
+  window.chooseStoreModelV38=async function(model){
+    const btn=document.getElementById("partPickerBtn"),val=document.getElementById("partPickerValue"),choices=document.getElementById("spChoices"),step=document.getElementById("spChoiceStep");
+    document.getElementById("spModels").innerHTML='<div class="picker-empty">Cargando productos…</div>';
+    try{
+      await loadProductsForModel(model);
+      if(btn){btn.style.display="flex";btn.classList.remove("disabled");}
+      if(val)val.textContent=model;
+      if(step)step.classList.add("active");
+      const types=[...new Set(state.catalog.filter(p=>p.active&&p.model===model).map(p=>p.type))];
+      choices.innerHTML=types.map(t=>'<button type="button" onclick="chooseStoreTypeV38(\''+esc(model).replace(/'/g,"\\'")+'\',\''+esc(t).replace(/'/g,"\\'")+'\')">'+esc(t)+'</button>').join("");
+      document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button></div>';
+    }catch(e){document.getElementById("spModels").innerHTML='<div class="picker-empty">No se pudo consultar el catálogo. Intenta de nuevo.</div>';}
   };
 
   window.togglePartPicker=function(){
