@@ -1304,19 +1304,26 @@ body.role-shop #admin.active{display:block!important}
 <div id="productDetail"></div>
 </section>
 
-<section id="checkout" class="page">
+<section id="checkout" class="page checkout-page">
 <div class="adminhead"><button class="back" onclick="openPage('product')">← Repuesto</button><div></div></div>
-<div class="panel"><h2 style="margin:0 0 5px">Confirmar pedido</h2><div class="tiny">Revisa los datos antes de enviarlo.</div></div>
-<div id="checkoutCard"></div>
-<div class="panel"><h3>Entrega</h3>
+<div class="checkout-intro"><span class="checkout-step">ÚLTIMO PASO</span><h2>Confirma tu pedido</h2><p>Verifica el repuesto y cómo quieres recibirlo.</p></div>
+<div id="checkoutCard" class="checkout-product"></div>
+<div class="panel checkout-delivery"><h3>¿Cómo lo recibes?</h3>
+<label class="checkout-field-label" for="delivery">Método de entrega</label>
 <select id="delivery" class="field" onchange="deliveryChanged()">
 <option value="local">Domicilio local — gratis</option>
 <option value="far">Domicilio fuera de zona — $5.000</option>
 <option value="pickup">Recoger en tienda — gratis</option>
 </select>
-<input id="address" class="field" style="margin-top:9px" placeholder="Dirección o referencia del taller">
+<div id="checkoutAddressWrap" class="checkout-address-wrap">
+<label class="checkout-field-label" for="address">Dirección de entrega</label>
+<input id="address" class="field" placeholder="Calle, barrio o referencia del taller" autocomplete="street-address">
+<p class="checkout-hint">Incluye barrio y una referencia para facilitar la entrega.</p>
 </div>
-<button class="save" style="width:100%" onclick="confirmOrder()">Confirmar pedido</button>
+<div class="checkout-fee-row"><span id="checkoutDeliveryLabel">Domicilio local</span><strong id="checkoutDeliveryFee">Gratis</strong></div>
+</div>
+<button id="confirmOrderButton" class="save checkout-submit" style="width:100%" onclick="confirmOrder()">Confirmar pedido</button>
+<p class="checkout-footnote">El pedido se enviará a la tienda seleccionada. La disponibilidad se valida al confirmar.</p>
 </section>
 
 <section id="orders" class="page">
@@ -1722,15 +1729,19 @@ async function confirmOrder(){
   const inv=state.inventory.find(x=>String(x.id)===String(selectedInventoryId));
   const delivery=document.getElementById("delivery").value;
   const address=document.getElementById("address").value.trim();
-  if(!inv||inv.qty<1){toast("Ese repuesto se agotó.");openPage("market");return;}
-  if(delivery!=="pickup"&&!address){toast("Agrega la dirección del taller.");return;}
+  if(!inv||Number(inv.qty)<1){toast("Ese repuesto se agotó. Busca otra opción.");openPage("market");return;}
+  if(delivery!=="pickup"&&!address){toast("Agrega la dirección de entrega.");document.getElementById("address").focus();return;}
+  if(delivery!=="pickup"&&address.length<6){toast("Escribe una dirección o referencia más completa.");document.getElementById("address").focus();return;}
   const deliveryType=delivery==="far"?"outside_zone":delivery;
-  const btn=document.querySelector('#checkout .save[onclick="confirmOrder()"]');
+  const btn=document.getElementById("confirmOrderButton");
   if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
   try{
     const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId,quantity:1}]);
     if(r.error)throw r.error;
     toast("Pedido enviado a la tienda.");
+    document.getElementById("address").value="";
+    document.getElementById("delivery").value="local";
+    deliveryChanged();
     offersLoadedForModel="";
     await renderOrders();
     openPage("orders");
