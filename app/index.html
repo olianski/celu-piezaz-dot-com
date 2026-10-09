@@ -1433,6 +1433,37 @@ async function loadProductsForModel(label){
   state.catalog=state.catalog.filter(p=>p.phoneModelId!==m.id).concat(rows);
   return rows;
 }
+async function loadLiveOffersForModel(label){
+  const products=state.catalog.filter(p=>normalize(p.model)===normalize(label)&&p.active);
+  if(!products.length){state.inventory=[];state.shops=[];offersLoadedForModel=label;return [];}
+  const r=await CeluPiezazBackend.getInventoryByProducts(products.map(p=>p.id));if(r.error)throw r.error;
+  const rows=(r.data||[]).map(x=>{
+    const p=mapDbProduct(x.products)||catalogProduct(x.product_id), sh=unwrapDbRelation(x.shops);
+    if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
+    return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p,s:sh};
+  });
+  state.inventory=rows;
+  state.shops=[...new Map(rows.filter(x=>x.s&&x.s.id).map(x=>[x.s.id,x.s])).values()];
+  offersLoadedForModel=label;
+  return rows;
+}
+async function loadCurrentShop(){
+  const r=await CeluPiezazBackend.getMyShop();if(r.error)throw r.error;
+  currentShop=r.data||null;state.shops=currentShop?[currentShop]:[];
+  if(currentShop){
+    const q=await CeluPiezazBackend.listShopInventory(currentShop.id);if(q.error)throw q.error;
+    state.inventory=(q.data||[]).map(x=>{
+      const p=mapDbProduct(x.products);if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
+      return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,updatedAt:x.updated_at};
+    });
+  }else state.inventory=[];
+  return currentShop;
+}
+async function loadVisibleOrders(){const r=await CeluPiezazBackend.listMyOrders();if(r.error)throw r.error;return r.data||[];}
+function orderPrimaryItem(order){return unwrapDbRelation(order.order_items);}
+function orderProduct(order){const line=orderPrimaryItem(order);return mapDbProduct(line.products)||{model:unwrapDbRelation(line.products).display_name||"Repuesto",type:"",variant:""};}
+function orderShop(order){return unwrapDbRelation(order.shops);}
+function orderTechnician(order){return unwrapDbRelation(order.users);}
 function catalogProduct(id){return state.catalog.find(x=>x.id===id);}
 function shop(id){return state.shops.find(x=>x.id===id);}
 function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId===shopId&&String(x.productId)===String(productId));}
