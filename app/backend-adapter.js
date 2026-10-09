@@ -81,33 +81,57 @@ window.CeluPiezazBackend = (() => {
     const c=requireClient();
     const r=await c.from('phone_models').update({active}).eq('id',id).select().single();
     if(r.error) return r;
-    if(!active){const p=await c.from('products').update({active:false}).eq('phone_model_id',id);if(p.error)return p;}
+    if(!active){
+      const p=await c.from('products').update({active:false}).eq('phone_model_id',id).select('id');
+      if(p.error)return p;
+      const ids=(p.data||[]).map(x=>x.id);
+      if(ids.length){const inv=await c.from('inventory').update({active:false}).in('product_id',ids);if(inv.error)return inv;}
+    }
     return r;
   }
   async function adminListTypes(){
     return requireClient().from('part_types').select('id,name,active').order('name');
   }
   async function adminCreateType(name){
-    return requireClient().from('part_types').insert({name:String(name||'').trim(),active:true}).select().single();
+    const clean=String(name||'').trim().replace(/\\s+/g,' ');
+    if(!clean||clean.length>80)throw new Error('El nombre del tipo debe tener entre 1 y 80 caracteres.');
+    const r=await requireClient().from('part_types').insert({name:clean,active:true}).select().single();
+    if(r.error?.code==='23505')return {...r,error:{...r.error,message:'Ese tipo de repuesto ya existe.'}};
+    return r;
   }
   async function adminSetTypeActive(id,active){
     const c=requireClient();
     const r=await c.from('part_types').update({active}).eq('id',id).select().single();
     if(r.error)return r;
-    if(!active){const p=await c.from('products').update({active:false}).eq('part_type_id',id);if(p.error)return p;}
+    if(!active){
+      const p=await c.from('products').update({active:false}).eq('part_type_id',id).select('id');
+      if(p.error)return p;
+      const ids=(p.data||[]).map(x=>x.id);
+      if(ids.length){const inv=await c.from('inventory').update({active:false}).in('product_id',ids);if(inv.error)return inv;}
+    }
     return r;
   }
   async function adminListVariants(){
     return requireClient().from('part_variants').select('id,part_type_id,name,active,part_types!part_variants_part_type_id_fkey(name)').order('name');
   }
   async function adminCreateVariant(typeId,name){
-    return requireClient().from('part_variants').insert({part_type_id:typeId,name:String(name||'').trim(),active:true}).select().single();
+    const clean=String(name||'').trim().replace(/\\s+/g,' ');
+    if(!typeId)throw new Error('Selecciona el tipo de repuesto.');
+    if(!clean||clean.length>80)throw new Error('La variante debe tener entre 1 y 80 caracteres.');
+    const r=await requireClient().from('part_variants').insert({part_type_id:typeId,name:clean,active:true}).select().single();
+    if(r.error?.code==='23505')return {...r,error:{...r.error,message:'Esa variante ya existe para el tipo seleccionado.'}};
+    return r;
   }
   async function adminSetVariantActive(id,active){
     const c=requireClient();
     const r=await c.from('part_variants').update({active}).eq('id',id).select().single();
     if(r.error)return r;
-    if(!active){const p=await c.from('products').update({active:false}).eq('part_variant_id',id);if(p.error)return p;}
+    if(!active){
+      const p=await c.from('products').update({active:false}).eq('part_variant_id',id).select('id');
+      if(p.error)return p;
+      const ids=(p.data||[]).map(x=>x.id);
+      if(ids.length){const inv=await c.from('inventory').update({active:false}).in('product_id',ids);if(inv.error)return inv;}
+    }
     return r;
   }
   async function adminListProducts(search,active){
@@ -119,12 +143,16 @@ window.CeluPiezazBackend = (() => {
   }
   async function adminCreateProduct(fields){
     const c=requireClient();
+    if(!fields?.phone_model_id||!fields?.part_type_id)throw new Error('Selecciona un modelo y un tipo de repuesto.');
+    if(!String(fields.display_name||'').trim()||!String(fields.normalized_search||'').trim())throw new Error('El nombre del producto está incompleto.');
     let q=c.from('products').select('id',{count:'exact',head:true}).eq('phone_model_id',fields.phone_model_id).eq('part_type_id',fields.part_type_id);
     q=fields.part_variant_id?q.eq('part_variant_id',fields.part_variant_id):q.is('part_variant_id',null);
     const check=await q;
     if(check.error)throw check.error;
     if((check.count||0)>0)throw new Error('Ese producto ya existe en el catálogo.');
-    return c.from('products').insert(fields).select().single();
+    const r=await c.from('products').insert(fields).select().single();
+    if(r.error?.code==='23505')return {...r,error:{...r.error,message:'Ese producto ya existe en el catálogo.'}};
+    return r;
   }
   async function adminSetProductActive(id,active){
     const c=requireClient();
