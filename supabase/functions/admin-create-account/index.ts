@@ -19,8 +19,10 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return respond({ error: "Método no permitido." }, 405);
 
   const authHeader = req.headers.get("Authorization") || "";
-  const token = authHeader.replace(/^Bearer\s+/i, "");
-  if (!token || token === authHeader) return respond({ error: "Debes iniciar sesión como administrador." }, 401);
+  const tokenFromSession = authHeader.replace(/^Bearer\s+/i, "");
+  if (!tokenFromSession || tokenFromSession === authHeader) {
+    return respond({ error: "Debes iniciar sesión como administrador." }, 401);
+  }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -36,7 +38,7 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: callerData, error: callerError } = await callerClient.auth.getUser(token);
+  const { data: callerData, error: callerError } = await callerClient.auth.getUser(tokenFromSession);
   if (callerError || !callerData.user) return respond({ error: "Sesión inválida o vencida." }, 401);
 
   const { data: callerProfile, error: profileError } = await adminClient
@@ -64,40 +66,46 @@ Deno.serve(async (req: Request) => {
   if (role === "shop" && !shopName) return respond({ error: "El nombre de la tienda es obligatorio." }, 400);
   if (shopName.length > 160 || address.length > 240) return respond({ error: "Los datos de la tienda son demasiado largos." }, 400);
 
-  const token = crypto.randomUUID();
-  const { error: tokenError } = await adminClient.from("admin_account_provisioning").insert({
-    token, email, role, name, phone: phone || null,
-    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-  });
-  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta. " + tokenError.message }, 500);
-
-  const token = crypto.randomUUID();
+  const authorizationToken = crypto.randomUUID();
   const { error: tokenError } = await adminClient.from("account_authorization_tokens").insert({
-    token, email, role, full_name: name, phone: phone || null,
+    token: authorizationToken,
+    email,
+    role,
+    full_name: name,
+    phone: phone || null,
     expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
   });
-  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta." }, 500);
-
-  const token = crypto.randomUUID();
-  const { error: tokenError } = await adminClient.from("account_authorization_tokens").insert({
-    token, email, role, full_name: name, phone: phone || null,
-    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-  });
-  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta." }, 500);
+  if (tokenError) {
+    return respond({ error: "No se pudo preparar la autorización de alta." }, 500);
+  }
 
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-    email, password, email_confirm: true,
-    user_metadata: { name, phone: phone || null, role, _account_token: token },
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      name,
+      phone: phone || null,
+      role,
+      _account_token: authorizationToken,
+    },
   });
+
   if (createError || !created.user) {
-    await adminClient.from("account_authorization_tokens").delete().eq("token", token);
+    await adminClient.from("account_authorization_tokens").delete().eq("token", authorizationToken);
     const message = createError?.message || "No se pudo crear la cuenta.";
     const duplicate = /already|registered|exists/i.test(message);
     return respond({ error: duplicate ? "Ese correo ya tiene una cuenta." : message }, duplicate ? 409 : 400);
   }
-  await adminClient.auth.admin.updateUserById(created.user.id, {
+
+  // Remove the one-time authorization token from metadata after the trigger validates it.
+  const { error: metadataError } = await adminClient.auth.admin.updateUserById(created.user.id, {
     user_metadata: { name, phone: phone || null, role },
   });
+  if (metadataError) {
+    await adminClient.auth.admin.deleteUser(created.user.id);
+    return respond({ error: "No se pudo finalizar la creación del perfil. Intenta de nuevo." }, 500);
+  }
 
   if (role === "shop") {
     const { error: shopError } = await adminClient.from("shops").insert({
@@ -111,7 +119,7 @@ Deno.serve(async (req: Request) => {
     });
     if (shopError) {
       await adminClient.auth.admin.deleteUser(created.user.id);
-      return respond({ error: "No se pudo crear la ficha de tienda. La cuenta fue revertida. " + shopError.message }, 500);
+      return respond({ error: "No se pudo crear la ficha de tienda. La cuenta fue revertida." }, 500);
     }
   }
 
