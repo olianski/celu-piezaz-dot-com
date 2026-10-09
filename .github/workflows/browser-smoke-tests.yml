@@ -1,0 +1,58 @@
+name: Browser smoke tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 14 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --save-dev @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Create public-site smoke test
+        run: |
+          mkdir -p tests/browser
+          cat > tests/browser/public-site.spec.cjs <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const siteUrl = 'https://olianski.github.io/celu-piezaz-dot-com/';
+
+          test('public site loads in Chromium', async ({ page }) => {
+            const response = await page.goto(siteUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            expect(response, 'The site should return an HTTP response').not.toBeNull();
+            expect(response.status(), 'The published site should respond successfully').toBeLessThan(400);
+            await expect(page.locator('body')).not.toBeEmpty();
+            await page.screenshot({ path: 'artifacts/public-site.png', fullPage: true });
+          });
+          EOF
+          mkdir -p artifacts
+
+      - name: Run browser test
+        run: npx playwright test tests/browser/public-site.spec.cjs --reporter=list
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-site-browser-screenshot
+          path: artifacts/public-site.png
+          if-no-files-found: ignore
+          retention-days: 7
