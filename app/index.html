@@ -1474,16 +1474,6 @@ function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId=
 function activeInventory(){return state.inventory.filter(x=>x.active&&x.qty>0);}
 function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function statusLabel(s){return ({pending:"Pendiente",accepted:"Aceptado",preparing:"Preparando",out_for_delivery:"En camino",delivered:"Entregado",rejected:"Rechazado",cancelled:"Cancelado"})[s]||s;}
-function setMode(mode){
-  state.mode=mode; save();
-  document.getElementById("modeShop").classList.toggle("active",mode==="shop");
-  document.getElementById("modeAdmin").classList.toggle("active",mode==="admin");
-  document.getElementById("modeTech").classList.toggle("active",mode==="technician");
-  document.getElementById("currentModeLabel").textContent=mode==="admin"?"Modo administrador":mode==="technician"?"Modo técnico":"Modo tienda";
-  if(mode==="technician") openPage("market"); else {openPage("admin");adminTab(mode==="admin"?"catalog":"inv");}
-}
-function renderChips(){}
-
 let techSelectedModel="";
 let techSelectedPart="";
 let techSelectedVariant="";
@@ -1722,69 +1712,7 @@ async function renderOrders(){
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+String(e.message||"")+'</div></div>';}
 }
-function renderAdmin(){
-  let own=state.inventory.filter(i=>i.shopId==="shop1");
-  document.getElementById("prod").innerHTML=state.catalog.filter(p=>p.active).map(p=>`<option value="${p.id}">${p.type} ${p.model} · ${p.variant}</option>`).join("");
-  document.getElementById("inv").innerHTML=own.length?own.map(i=>{let p=catalogProduct(i.productId);return `<div class="invrow"><div class="invtop"><div><b>${p.type} ${p.model}</b><div class="tiny">${p.variant}</div></div><div class="invprice">${money(i.price)}</div></div><div class="tiny" style="margin-top:7px">Stock: <b>${i.qty}</b> ${i.qty<=1?"· alerta de stock":""}</div><button class="remove" onclick="removeStock('${i.id}')">Quitar</button></div>`}).join(""):`<div class="tiny">No hay productos en inventario.</div>`;
-  document.getElementById("sp").textContent=own.filter(x=>x.qty>0).length;
-  document.getElementById("su").textContent=own.reduce((a,x)=>a+x.qty,0);
-  document.getElementById("sa").textContent=own.filter(x=>x.qty<=1).length;
-  renderShopOrders(); renderCatalog();
-}
-function saveStock(){
-  let id=+document.getElementById("prod").value, price=+document.getElementById("price").value, qty=+document.getElementById("qty").value;
-  if(!price||qty<0){toast("Completa precio y cantidad");return;}
-  let i=inventoryFor("shop1",id);
-  if(i){i.price=price;i.qty=qty;i.active=true;} else state.inventory.push({id:"i"+Date.now(),shopId:"shop1",productId:id,price,qty,active:true});
-  save(); toast("Inventario guardado"); renderAdmin(); renderMarket();
-}
-function removeStock(id){let i=state.inventory.find(x=>x.id===id);if(i){i.active=false;i.qty=0;}save();renderAdmin();renderMarket();toast("Producto retirado del inventario");}
-function renderShopOrders(){
-  let shopOrders=state.orders.filter(o=>o.shopId==="shop1");
-  document.getElementById("shopOrders").innerHTML=shopOrders.length?shopOrders.map(o=>{
-    let p=catalogProduct(o.productId);
-    let action="";
-    if(o.status==="pending") action=`<button class="buy" onclick="advanceOrder(${o.id},'accepted')">Aceptar</button><button class="remove" onclick="rejectOrder(${o.id})">Rechazar</button>`;
-    else if(o.status==="accepted") action=`<button class="buy" onclick="advanceOrder(${o.id},'preparing')">Preparar</button>`;
-    else if(o.status==="preparing") action=`<button class="buy" onclick="advanceOrder(${o.id},'out_for_delivery')">Enviar</button>`;
-    else if(o.status==="out_for_delivery") action=`<button class="buy" onclick="advanceOrder(${o.id},'delivered')">Marcar entregado</button>`;
-    else action=`<span class="tiny">Pedido finalizado</span>`;
-    return `<div class="card"><div class="cardtop"><div><div class="title">Pedido #${o.id}</div><div class="sub">${p.type} ${p.model} · ${p.variant}</div></div><span class="badge ${o.status==="delivered"?"":"one"}">${statusLabel(o.status)}</span></div>
-    <div class="tiny" style="margin-top:9px">${o.address} · ${money(o.total)}</div><div style="display:flex;gap:7px;margin-top:11px">${action}</div></div>`;
-  }).join(""):`<div class="card empty"><b>No hay pedidos.</b></div>`;
-}
-function advanceOrder(id,next){
-  let o=state.orders.find(x=>x.id===id); if(!o)return;
-  o.status=next; save(); renderAdmin(); renderOrders(); toast("Pedido actualizado: "+statusLabel(next));
-}
-function rejectOrder(id){
-  let o=state.orders.find(x=>x.id===id); if(!o)return;
-  let i=inventoryFor(o.shopId,o.productId); if(i)i.qty+=o.qty;
-  o.status="rejected"; save(); renderAdmin(); renderMarket(); renderOrders(); toast("Pedido rechazado y stock restaurado");
-}
-function renderCatalog(){
-  document.getElementById("catalogCount").textContent=state.catalog.length+" productos";
-  document.getElementById("catalogList").innerHTML=state.catalog.map(p=>`<div class="invrow"><b>${p.brand?p.brand+" · ":""}${p.model}</b><div class="tiny">${p.type} · ${p.variant}</div></div>`).join("");
-  document.getElementById("demandList").innerHTML=state.demand.length?state.demand.map(d=>`<div class="invrow"><b>${d.query}</b><div class="tiny">${d.status==="open"?"Solicitud pendiente de disponibilidad":"Atendida"}</div></div>`).join(""):`<div class="tiny">Todavía no hay solicitudes.</div>`;
-}
-function addCatalog(){
-  let model=document.getElementById("newModel").value.trim(),type=document.getElementById("newType").value.trim(),variant=document.getElementById("newVariant").value.trim();
-  if(!model||!type||!variant){toast("Completa los tres campos.");return;}
-  let exists=state.catalog.some(p=>normalize(`${p.model}|${p.type}|${p.variant}`)===normalize(`${model}|${type}|${variant}`));
-  if(exists){toast("Ese producto ya existe en el catálogo.");return;}
-  state.catalog.push({id:Date.now(),model,type,variant,active:true});
-  document.getElementById("newModel").value="";document.getElementById("newType").value="";document.getElementById("newVariant").value="";
-  save();renderAdmin();toast("Producto agregado al catálogo maestro");
-}
-function adminTab(t){
-  document.getElementById("adminInv").classList.toggle("hidden",t!=="inv");
-  document.getElementById("adminOrders").classList.toggle("hidden",t!=="orders");
-  document.getElementById("adminCatalog").classList.toggle("hidden",t!=="catalog");
-  document.getElementById("tabInv").classList.toggle("active",t==="inv");
-  document.getElementById("tabOrders").classList.toggle("active",t==="orders");
-  document.getElementById("tabCatalog").classList.toggle("active",t==="catalog");
-}
-function openPage(id){
+// Inventario, catálogo y pedidos se gestionan desde Supabase.\nfunction openPage(id){
   const shopOrdersPage=id==="orders"&&state.role==="shop";
   if(shopOrdersPage){const shopPage='admin';id=shopPage;}
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
@@ -2062,27 +1990,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
 const smartSearch=document.getElementById("q");
 if(smartSearch) smartSearch.addEventListener("input",()=>{techSelectedModel="";techSelectedPart="";techSelectedVariant="";renderMarket();});
-
-function enterRole(role){
-  state.role=role;
-  state.mode=role==="technician"?"technician":role;
-  save();
-  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
-  document.body.classList.add("role-active","role-"+role);
-  if(role==="technician"){openPage("market");renderMarket();renderOrders();}
-  else if(role==="shop"){openPage("admin");adminTab("inv");renderAdminV38();}
-  else if(role==="admin"){openPage("adminConsole");if(window.adminConsoleInit)window.adminConsoleInit();}
-}
-function showRoleGate(){
-  document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
-  document.getElementById("roleGate").style.display="flex";
-}
-function changeRole(){showRoleGate();}
-document.addEventListener("keydown",e=>{if(e.key==="Escape" && document.body.classList.contains("role-active")) showRoleGate();});
-
-
-
-if(typeof renderAdminV38==="function") renderAdminV38();
 
 async function submitAuth(e){
   e.preventDefault();
