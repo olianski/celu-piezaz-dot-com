@@ -58,6 +58,12 @@ assert(!html.includes("funciones locales de prueba"), "Quedó texto de funciones
 assert(html.includes('Empieza buscando un modelo'), "Debe mostrarse un estado vacío útil antes de buscar.");
 assert(html.includes('if(step)step.style.display="none"'), "El contador de disponibilidad debe ocultarse hasta seleccionar modelo.");
 assert(html.includes('Iniciar preparación')&&html.includes('Marcar en camino'), "Faltan pasos intermedios del flujo de pedido.");
+assert(html.includes("function escapeHtml(value)"), "Falta escapar texto dinámico del catálogo.");
+assert(html.includes("function inlineArg(value)"), "Falta codificar de forma segura los argumentos de los selectores.");
+assert(html.includes("chooseStoreModelV38('+inlineArg(m)+')"), "El selector de modelo de tienda debe escapar los argumentos.");
+assert(html.includes("chooseStoreVariantV38('+inlineArg(model)+','+inlineArg(type)+','+inlineArg(v)+')"), "El selector de variantes de tienda debe escapar los argumentos.");
+assert(!/body\\.role-(?:technician|admin|active) #techBanner/.test(html), "Quedaron reglas obsoletas del banner de prueba.");
+
 
 assert(!html.includes('id="signupTab"'), "El registro público sigue visible.");
 assert(!adapter.includes("auth.signUp"), "El adaptador todavía permite registro público.");
