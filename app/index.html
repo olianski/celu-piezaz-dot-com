@@ -1727,7 +1727,7 @@ function openPage(id){
   if(id==="orders")renderOrders();
   if(shopOrdersPage&&window.shopSection)window.shopSection("orders");
   else if(isShop&&id==="admin"&&window.shopSection)window.shopSection(activeShopSection);
-  document.getElementById("navMarket").classList.toggle("active",!isShop&&id==="market");
+  document.getElementById("navMarket").classList.toggle("active",!isShop&&["market","product","checkout"].includes(id));
   document.getElementById("navOrders").classList.toggle("active",isShop?(id==="admin"&&activeShopSection==="orders"):id==="orders");
   document.getElementById("navAdmin").classList.toggle("active",isShop?(id==="admin"&&activeShopSection!=="orders"):(id==="admin"||id==="adminConsole"));
   scrollTo(0,0);
@@ -1990,7 +1990,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         ?"Tu tienda está suspendida. Contacta al administrador."
         :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
     document.querySelectorAll("#admin .inventory-choice").forEach(b=>{b.disabled=!approved;b.style.opacity=approved?"1":".45";});
-    renderShopOrdersV38();
     document.getElementById("shopSectionOrders").classList.add("active");
     document.getElementById("shopSectionInventory").classList.remove("active");
     document.getElementById("shopSectionSales").classList.remove("active");
