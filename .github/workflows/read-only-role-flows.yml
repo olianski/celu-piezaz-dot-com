@@ -1,0 +1,95 @@
+name: Read-only role flows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/read-only-role-flows.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/read-only-role-flows.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-role-flows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_URL: https://olianski.github.io/celu-piezaz-dot-com/
+      TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+      TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+      TEST_SHOP_EMAIL: ${{ secrets.TEST_SHOP_EMAIL }}
+      TEST_SHOP_PASSWORD: ${{ secrets.TEST_SHOP_PASSWORD }}
+      TEST_TECHNICIAN_EMAIL: ${{ secrets.TEST_TECHNICIAN_EMAIL }}
+      TEST_TECHNICIAN_PASSWORD: ${{ secrets.TEST_TECHNICIAN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --save-dev @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Create read-only browser tests
+        run: |
+          mkdir -p tests/browser
+          cat > tests/browser/read-only-role-flows.spec.cjs <<'EOF'
+          const { test, expect } = require('@playwright/test');
+          const site = process.env.SITE_URL;
+
+          async function login(page, email, password, role, panel) {
+            test.skip(!email || !password, 'Faltan los secrets de acceso del rol ' + role);
+            await page.goto(site, { waitUntil: 'domcontentloaded', timeout: 60000 });
+            await page.locator('#authEmail').fill(email);
+            await page.locator('#authPassword').fill(password);
+            await page.getByRole('button', { name: 'Entrar' }).click();
+            await expect(page.locator('#authGate')).toBeHidden({ timeout: 30000 });
+            await expect(page.locator('body')).toHaveClass(new RegExp('\\brole-' + role + '\\b'), { timeout: 20000 });
+            await expect(page.locator(panel)).toBeVisible({ timeout: 20000 });
+          }
+
+          test('admin: resumen, tiendas y catálogo se pueden consultar', async ({ page }) => {
+            await login(page, process.env.TEST_ADMIN_EMAIL, process.env.TEST_ADMIN_PASSWORD, 'admin', '#adminConsole');
+            await expect(page.getByRole('heading', { name: 'Centro de control' })).toBeVisible();
+            await expect(page.locator('#acContent')).toBeVisible();
+            await page.locator('[data-ac-tab="shops"]').click();
+            await expect(page.locator('#acShopList')).toBeVisible({ timeout: 20000 });
+            await page.locator('[data-ac-tab="catalog"]').click();
+            await expect(page.locator('#acContent')).toContainText('Catálogo maestro', { timeout: 20000 });
+            await page.getByRole('button', { name: 'Modelos', exact: true }).click();
+            await expect(page.locator('#acModelList')).toBeVisible({ timeout: 20000 });
+            // Solo se navega y consulta; no se crean, editan ni desactivan registros.
+          });
+
+          test('tienda: pedidos, inventario y catálogo se pueden consultar', async ({ page }) => {
+            await login(page, process.env.TEST_SHOP_EMAIL, process.env.TEST_SHOP_PASSWORD, 'shop', '#admin');
+            await expect(page.locator('#shopOrders')).toBeVisible();
+            await page.locator('#shopTabInventory').click();
+            await expect(page.locator('#shopSectionInventory')).toBeVisible();
+            await page.getByRole('button', { name: /Ver inventario/ }).click();
+            await expect(page.locator('#inventorySearch')).toBeVisible();
+            await page.locator('#inventorySearch').fill('A15');
+            await expect(page.locator('#inventoryResults')).toBeVisible();
+            await page.locator('#shopTabCatalog').click();
+            await expect(page.locator('#shopSectionCatalog')).toBeVisible();
+            // No se guarda ni modifica inventario o pedidos.
+          });
+
+          test('técnico: búsqueda de modelo y disponibilidad responden', async ({ page }) => {
+            await login(page, process.env.TEST_TECHNICIAN_EMAIL, process.env.TEST_TECHNICIAN_PASSWORD, 'technician', '#market');
+            await expect(page.locator('#flowModelStep')).toBeVisible();
+            await page.locator('#q').fill('Samsung');
+            await expect(page.locator('#results')).toBeVisible();
+            await expect(page.locator('#flowModelSelected')).toBeVisible();
+            // No se confirma ningún pedido ni se crean solicitudes.
+          });
+          EOF
+      - name: Run read-only browser tests
+        run: npx playwright test tests/browser/read-only-role-flows.spec.cjs --reporter=list
