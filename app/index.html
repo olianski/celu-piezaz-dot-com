@@ -1866,8 +1866,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   function renderStoreModels(){
     const search=document.getElementById("spSearch"),box=document.getElementById("spModels");if(!search||!box)return;
     const q=norm(search.value);
+    if(!q){box.innerHTML="";return;}
     const models=masterModels.map(m=>m.label).sort((a,b)=>a.localeCompare(b,"es"));
-    const found=models.filter(m=>!q||norm(m).includes(q)).slice(0,8);
+    const found=models.filter(m=>norm(m).includes(q)).slice(0,8);
     box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38('+inlineArg(m)+')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
   }
 
