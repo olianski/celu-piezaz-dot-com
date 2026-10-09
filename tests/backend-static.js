@@ -59,6 +59,9 @@ for(const f of files){
       [s.includes('from anon, public'),'sin privilegios heredados para invitados']
     );
   }
+  if(f.includes('011_deduplicate_open_demand_requests')){
+    checks.push([s.includes('demand_requests_one_open_per_product_uidx'),'solicitudes abiertas sin duplicados']);
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
