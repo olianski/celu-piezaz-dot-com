@@ -10,7 +10,7 @@ window.CeluPiezazBackend = (() => {
   async function signOut(){ return requireClient().auth.signOut(); }
   async function session(){ if(!client) return {data:{session:null},error:null}; return client.auth.getSession(); }
   async function searchProducts(search){ return requireClient().rpc('search_products',{p_query:String(search||'').trim()}); }
-  async function getMyShop(){ const c=requireClient(); const u=await c.auth.getUser(); return c.from('shops').select('id,user_id,name,address,delivery_local_fee,delivery_outside_fee,active,status,approved_at').eq('user_id',u.data.user?.id).maybeSingle(); }
+  async function getMyShop(){ const c=requireClient(); const u=await c.auth.getUser(); return c.from('shops').select('id,user_id,name,address,delivery_local_fee,delivery_outside_fee,active,status').eq('user_id',u.data.user?.id).maybeSingle(); }
   async function getMyInventory(){ return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,updated_at,products(id,display_name,phone_models(brand,model),part_types(name),part_variants(name))').order('updated_at',{ascending:false}); }
   async function getInventoryByProduct(productId){ return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,shops(id,name,address,delivery_local_fee,delivery_outside_fee,status)').eq('product_id',productId).eq('active',true).gt('quantity',0).eq('shops.status','approved'); }
   async function saveInventoryItem(productId,price,quantity){ return requireClient().rpc('save_inventory_item',{p_product_id:productId,p_price:Number(price),p_quantity:Number(quantity)}); }
@@ -32,7 +32,7 @@ window.CeluPiezazBackend = (() => {
   async function createDemandRequest(productId){
     const c=requireClient(); const u=await c.auth.getUser();
     if(u.error) return {data:null,error:u.error};
-    return c.from('demand_requests').upsert({technician_id:u.data.user.id,product_id:productId,status:'open'},{onConflict:'technician_id,product_id'}).select().single();
+    return c.from('demand_requests').insert({technician_id:u.data.user.id,product_id:productId,status:'open'}).select().single();
   }
   async function adminCreateAccount(payload){
     const r=await requireClient().functions.invoke('admin-create-account',{body:payload});
