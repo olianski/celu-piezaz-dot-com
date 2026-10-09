@@ -47,6 +47,10 @@ assert(html.includes('Esta cuenta no tiene una tienda vinculada.'), "El perfil d
 assert(html.includes('adminConsoleNav(\'shops\')'), "Falta la navegación de tiendas.");
 assert(html.includes('adminConsoleNav(\'catalog\')'), "Falta la navegación del catálogo.");
 assert(adapter.includes("adminSetShopStatus"), "Falta la gestión de estados de tiendas.");
+assert(adapter.includes("Ya tienes una solicitud abierta para este repuesto."), "Las solicitudes repetidas deben mostrar un mensaje claro.");
+assert(adapter.includes("from('inventory').update({active:false}).in('product_id',ids)"), "Al desactivar entradas del catálogo se debe ocultar también su inventario.");
+assert(adapter.includes("Ese tipo de repuesto ya existe."), "El alta de tipos debe informar duplicados con claridad.");
+assert(adapter.includes("Esa variante ya existe para el tipo seleccionado."), "El alta de variantes debe informar duplicados con claridad.");
 assert(adapter.includes("adminCreateProduct"), "Falta la creación de productos maestros.");
 assert(adapter.includes("adminSetUserRole"), "Falta la gestión de roles.");
 assert(adapter.includes("Solo puedes asignar roles de técnico o tienda."), "No se deben asignar nuevos administradores.");
