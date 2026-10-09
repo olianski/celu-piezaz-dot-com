@@ -1911,7 +1911,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         const p=orderProduct(o),u=orderTechnician(o),line=orderPrimaryItem(o);
         let action="";
         if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
-        else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
+        else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'preparing\')">Iniciar preparación</button>';
+        else if(o.status==="preparing")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'out_for_delivery\')">Marcar en camino</button>';
+        else if(o.status==="out_for_delivery")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
         else action='<span class="tiny">Pedido '+statusLabel(o.status).toLowerCase()+'</span>';
         return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
           '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Cantidad</span><b>'+Number(line.quantity||1)+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
@@ -2081,7 +2083,7 @@ async function submitAuth(e){
     const activeOrders=A.orders.filter(o=>['pending','accepted','preparing','out_for_delivery'].includes(o.status));
     const recent=activeOrders.slice(0,4).map(o=>{
       const sh=obj(o.shops),u=obj(o.users);
-      const acts=o.status==='pending'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+o.id+'\',\'rejected\')">Rechazar</button>':o.status==='accepted'?'<button class="ac-btn primary" onclick="adminConsoleOrder(\''+o.id+'\',\'delivered\')">Marcar entregado</button>':'';
+      const acts=o.status==='pending'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+o.id+'\',\'rejected\')">Rechazar</button>':o.status==='accepted'?'<button class="ac-btn primary" onclick="adminConsoleOrder(\''+o.id+'\',\'preparing\')">Iniciar preparación</button>':o.status==='preparing'?'<button class="ac-btn primary" onclick="adminConsoleOrder(\''+o.id+'\',\'out_for_delivery\')">Marcar en camino</button>':o.status==='out_for_delivery'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'delivered\')">Marcar entregado</button>':'';
       return item('Pedido · '+esc(sh.name||'Tienda')+' · '+cash(o.total),esc(u.name||'Técnico')+' · '+date(o.created_at),badge(o.status),acts);
     }).join('');
     const pending=A.shops.filter(x=>x.status==='pending').slice(0,4).map(x=>{
@@ -2315,7 +2317,9 @@ async function submitAuth(e){
       const u=obj(x.users),sh=obj(x.shops);
       let actions='';
       if(x.status==='pending')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+x.id+'\',\'rejected\')">Rechazar y devolver stock</button>';
-      else if(x.status==='accepted')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'delivered\')">Marcar entregado</button>';
+      else if(x.status==='accepted')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'preparing\')">Iniciar preparación</button>';
+      else if(x.status==='preparing')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'out_for_delivery\')">Marcar en camino</button>';
+      else if(x.status==='out_for_delivery')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'delivered\')">Marcar entregado</button>';
       return item('Pedido · '+cash(x.total),esc(sh.name||'Tienda')+' · '+esc(u.name||'Técnico')+' · '+esc(date(x.created_at)),badge(x.status),
         '<span class="ac-muted">Entrega: '+esc(x.delivery_type==='pickup'?'Recoger en tienda':x.delivery_type==='outside_zone'?'Fuera de zona':'Local')+' · '+cash(x.delivery_fee)+'</span>'+(x.delivery_address?'<span class="ac-muted">Dirección: '+esc(x.delivery_address)+'</span>':''),actions);
     }).join(''):empty('No hay pedidos','Los pedidos aparecerán aquí cuando se registren.');
