@@ -1916,12 +1916,13 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   async function saveCreateInventory(){
     const prod=document.getElementById("prod").value;
     const priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,"");
-    const qty=Number(document.getElementById("qty").value),price=Number(priceRaw);
+    const qtyRaw=document.getElementById("qty").value.trim();
+    const qty=Number(qtyRaw),price=Number(priceRaw);
     if(!currentShop){toast("No encontramos la tienda de esta cuenta.");return;}
     if(currentShop.status!=="approved"||!currentShop.active){toast("Tu tienda debe ser aprobada por el administrador antes de publicar inventario.");return;}
     if(!prod){toast("Primero selecciona el producto.");return;}
     if(!price||price<0){toast("Indica un precio válido.");return;}
-    if(!Number.isInteger(qty)||qty<0){toast("Indica una cantidad válida.");return;}
+    if(qtyRaw===""||!Number.isInteger(qty)||qty<0){toast("Indica una cantidad válida.");return;}
     const btn=document.getElementById("spSave"),st=document.getElementById("spSaveStatus");
     if(btn){btn.disabled=true;btn.textContent="Guardando…";}
     try{
