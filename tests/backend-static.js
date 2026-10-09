@@ -24,6 +24,25 @@ for(const f of files){
   if(f.includes('003_auth_profile')){
     checks.push([s.includes('on_auth_user_created'),'trigger auth']);
   }
+  if(f.includes('007_audit_integrity_roles_catalog')){
+    checks.push(
+      [s.includes('phone_models_catalog_key_uidx'),'unicidad normalizada de modelos'],
+      [s.includes('products_unique_catalog_key_uidx'),'unicidad de productos por modelo/tipo/variante'],
+      [s.includes('users_single_admin_uidx'),'solo una cuenta admin'],
+      [s.includes('prevent_shop_self_approval'),'protección contra autoaprobación de tiendas'],
+      [s.includes('where id = p_product_id and active = true'),'inventario solo de productos activos'],
+      [s.includes('status = \'approved\''),'validación de tienda aprobada en pedidos']
+    );
+  }
+  if(f.includes('008_protect_business_data_and_order_flow')){
+    checks.push(
+      [s.includes('for select to authenticated'),'lectura del catálogo requiere sesión'],
+      [s.includes('public.guard_shop_lifecycle'),'ciclo de vida de tienda protegido'],
+      [s.includes('revoke insert, update, delete on public.orders, public.order_items'),'mutaciones de pedidos solo por RPC'],
+      [s.includes("p_next_status='preparing'") && s.includes("p_next_status='out_for_delivery'"),'estados intermedios de pedidos'],
+      [s.includes('grant execute on function public.place_order'),'RPC de pedido autorizado']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
