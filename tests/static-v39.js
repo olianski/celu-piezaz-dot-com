@@ -54,6 +54,8 @@ assert(adapter.includes("Esa variante ya existe para el tipo seleccionado."), "E
 assert(adapter.includes("adminCreateProduct"), "Falta la creación de productos maestros.");
 assert(adapter.includes("adminSetUserRole"), "Falta la gestión de roles.");
 assert(adapter.includes("Solo puedes asignar roles de técnico o tienda."), "No se deben asignar nuevos administradores.");
+assert(adapter.includes('Esta cuenta no tiene ficha comercial.'), "No se deben convertir técnicos en tiendas sin crear ficha comercial.");
+assert(adapter.includes('Esta cuenta tiene una ficha de tienda vinculada.'), "No se deben convertir tiendas en técnicos y dejar fichas huérfanas.");
 assert(adapter.includes("eq('shops.active',true)"), "La búsqueda no debe mostrar inventario de tiendas inactivas.");
 assert(adapter.includes("code==='23505'"), "El alta de modelos debe detectar duplicados.");
 assert(adapter.includes("Ese modelo ya existe en el catálogo"), "Falta el mensaje claro para modelos repetidos.");
