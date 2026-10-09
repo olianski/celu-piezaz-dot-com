@@ -1371,7 +1371,7 @@ body.role-shop #admin.active{display:block!important}
     </section>
 </main>
 
-<nav class="bottom"><div class="bottomin">
+<nav class="bottom" id="bottomNav"><div class="bottomin">
 <button class="navbtn active" id="navMarket" onclick="openPage('market')">🔎 Buscar</button>
 <button class="navbtn" id="navOrders" onclick="openPage('orders')">📋 Pedidos</button>
 <button class="navbtn" id="navAdmin" onclick="openShopHome()">📦 Mi tienda</button>
@@ -1681,6 +1681,8 @@ async function renderOrders(){
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
   const isShop=state.role==="shop";
+  const bottomNav=document.getElementById("bottomNav");
+  if(bottomNav) bottomNav.style.display=(isShop||state.role==="admin")?"none":"";
   const shopOrdersPage=isShop&&id==="orders";
   if(shopOrdersPage)id="admin";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
@@ -1915,6 +1917,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const subtitle = document.querySelector("#admin .shop-topbar p");
     const pending = document.getElementById("pendingCount");
     if (isAdmin) {
+      const bottomNav = document.getElementById("bottomNav");
+      if (bottomNav) bottomNav.style.display = "none";
       if (heading) heading.textContent = "ADMINISTRACIÓN";
       if (title) title.textContent = "Panel de administración";
       if (subtitle) subtitle.textContent = "Gestiona el catálogo maestro de repuestos.";
