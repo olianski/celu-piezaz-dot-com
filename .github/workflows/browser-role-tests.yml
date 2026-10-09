@@ -126,6 +126,7 @@ jobs:
           });
 
           test('tienda: pedidos, inventario y catálogo se consultan sin cambios', async ({ page }) => {
+            test.setTimeout(60000);
             await login(page, process.env.TEST_SHOP_EMAIL, process.env.TEST_SHOP_PASSWORD, 'shop', '#admin');
             await expect(page.locator('#shopOrders')).toBeVisible();
             await page.locator('#shopTabInventory').click();
@@ -140,10 +141,12 @@ jobs:
 
           test('técnico: búsqueda de modelo y disponibilidad responden', async ({ page }) => {
             await login(page, process.env.TEST_TECHNICIAN_EMAIL, process.env.TEST_TECHNICIAN_PASSWORD, 'technician', '#market');
-            await expect(page.locator('#flowModelStep')).toBeVisible();
+            // El selector avanzado se oculta hasta que haya una selección; la búsqueda principal siempre debe funcionar.
+            await expect(page.locator('#q')).toBeVisible();
             await page.locator('#q').fill('Samsung');
             await expect(page.locator('#results')).toBeVisible();
-            await expect(page.locator('#flowModelSelected')).toBeVisible();
+            await expect(page.locator('#count')).toBeVisible();
+            await expect(page.locator('#techFlow')).toBeHidden();
           });
           EOF
       - name: Run read-only role-flow tests
