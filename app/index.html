@@ -2448,6 +2448,7 @@ async function submitAuth(e){
       '<div class="ac-two"><label>Correo de acceso<input id="acNewEmail" class="ac-input" type="email" required autocomplete="off" placeholder="persona@correo.com"></label>'+
       '<label>Teléfono<input id="acNewPhone" class="ac-input" maxlength="40" autocomplete="off" placeholder="Número de contacto"></label></div>'+
       '<label>Contraseña inicial<input id="acNewPassword" class="ac-input" type="password" required minlength="10" autocomplete="new-password" placeholder="Mínimo 10 caracteres"></label>'+
+      '<div id="acNewTechnicianFields"><div class="ac-two"><label>Dirección de entrega del técnico<input id="acNewTechAddress" class="ac-input" maxlength="240" placeholder="Barrio, calle y referencia"></label><label>Tarifa de domicilio ($)<input id="acNewDeliveryFee" class="ac-input" type="number" min="0" max="1000000" step="500" value="0" placeholder="Ej. 4000"></label></div><p class="ac-footer-note">La dirección y tarifa se usarán automáticamente en sus pedidos a domicilio. Puedes definir el valor según la zona que conozcas.</p></div>'+
       '<div id="acNewShopFields" style="display:none"><div class="ac-two"><label>Nombre comercial de la tienda<input id="acNewShopName" class="ac-input" maxlength="160" placeholder="Nombre del negocio"></label><label>Dirección<input id="acNewShopAddress" class="ac-input" maxlength="240" placeholder="Dirección del local"></label></div>'+
       '<p class="ac-footer-note">Las tiendas nuevas quedarán pendientes de aprobación y no estarán activas hasta que las revises.</p></div>'+
       '<button class="ac-btn primary" id="acCreateAccountSubmit" type="submit">Crear perfil</button></form></div>'+
@@ -2457,6 +2458,9 @@ async function submitAuth(e){
     const isShop=$('acNewRole').value==='shop';
     $('acNewShopFields').style.display=isShop?'block':'none';
     $('acNewShopName').required=isShop;
+    $('acNewTechnicianFields').style.display=isShop?'none':'block';
+    $('acNewTechAddress').required=!isShop;
+    $('acNewDeliveryFee').required=!isShop;
   }
   async function createAccount(e){
     e.preventDefault();
@@ -2464,8 +2468,11 @@ async function submitAuth(e){
     const role=$('acNewRole').value;
     const payload={role,name:$('acNewName').value.trim(),email:$('acNewEmail').value.trim(),phone:$('acNewPhone').value.trim(),password:$('acNewPassword').value};
     if(role==='shop'){payload.shopName=$('acNewShopName').value.trim();payload.address=$('acNewShopAddress').value.trim();}
+    else {payload.address=$('acNewTechAddress').value.trim();payload.deliveryFee=Number($('acNewDeliveryFee').value||0);}
     if(payload.password.length<10){notice('La contraseña inicial debe tener al menos 10 caracteres.',true);return;}
     if(role==='shop'&&!payload.shopName){notice('Indica el nombre comercial de la tienda.',true);return;}
+    if(role==='technician'&&payload.address.length<6){notice('Indica la dirección completa del técnico.',true);return;}
+    if(role==='technician'&&(!Number.isFinite(payload.deliveryFee)||payload.deliveryFee<0)){notice('La tarifa de domicilio debe ser cero o un valor positivo.',true);return;}
     btn.disabled=true;btn.textContent='Creando perfil…';notice('');
     try{
       const r=await checked(CeluPiezazBackend.adminCreateAccount(payload));
