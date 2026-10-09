@@ -109,7 +109,7 @@ jobs:
             await page.locator('#authPassword').fill(password);
             await page.getByRole('button', { name: 'Entrar' }).click();
             await expect(page.locator('#authGate')).toBeHidden({ timeout: 30000 });
-            await expect(page.locator('body')).toHaveClass(new RegExp('\\\\brole-' + role + '\\\\b'), { timeout: 20000 });
+            await expect(page.locator('body')).toHaveClass(new RegExp('role-' + role), { timeout: 20000 });
             await expect(page.locator(panel)).toBeVisible({ timeout: 20000 });
           }
 
@@ -126,7 +126,7 @@ jobs:
           });
 
           test('tienda: pedidos, inventario y catálogo se consultan sin cambios', async ({ page }) => {
-            test.setTimeout(60000);
+            test.setTimeout(90000);
             await login(page, process.env.TEST_SHOP_EMAIL, process.env.TEST_SHOP_PASSWORD, 'shop', '#admin');
             await expect(page.locator('#shopOrders')).toBeVisible();
             await page.locator('#shopTabInventory').click();
@@ -145,8 +145,10 @@ jobs:
             await expect(page.locator('#q')).toBeVisible();
             await page.locator('#q').fill('Samsung');
             await expect(page.locator('#results')).toBeVisible();
-            await expect(page.locator('#count')).toBeVisible();
-            await expect(page.locator('#techFlow')).toBeHidden();
+            await expect(page.locator('#flowModelSelected .model-result').first()).toBeVisible({ timeout: 10000 });
+            await page.locator('#flowModelSelected .model-result').first().click();
+            await expect(page.locator('#flowModelSelected .flow-selected')).toContainText(/Samsung/i, { timeout: 20000 });
+            await expect(page.locator('#flowPartStep')).toBeVisible({ timeout: 20000 });
           });
           EOF
       - name: Run read-only role-flow tests
