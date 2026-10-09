@@ -125,15 +125,20 @@ window.CeluPiezazBackend = (() => {
     return c.from('products').insert(fields).select().single();
   }
   async function adminSetProductActive(id,active){
-    return requireClient().from('products').update({active}).eq('id',id).select().single();
+    const c=requireClient();
+    const result=await c.from('products').update({active}).eq('id',id).select().single();
+    if(result.error||active)return result;
+    const inventory=await c.from('inventory').update({active:false}).eq('product_id',id);
+    if(inventory.error)return inventory;
+    return result;
   }
   async function adminListUsers(){
     return requireClient().from('users').select('id,role,name,phone,created_at').order('created_at',{ascending:false}).limit(500);
   }
   async function adminSetUserRole(id,role){
-    if(!['technician','shop','admin'].includes(role))throw new Error('Rol no válido');
+    if(!['technician','shop'].includes(role))throw new Error('Solo puedes asignar roles de técnico o tienda.');
     const u=await requireClient().auth.getUser();
-    if(u.data?.user?.id===id&&role!=='admin')throw new Error('No puedes quitarte tu propio rol de administrador.');
+    if(u.data?.user?.id===id)throw new Error('No puedes cambiar tu propio rol de administrador.');
     return requireClient().from('users').update({role}).eq('id',id).select().single();
   }
   async function adminListOrders(){
