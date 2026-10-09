@@ -1902,12 +1902,17 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   window.chooseStoreTypeV38=function(model,type){
     const products=(window.__storeCreateProducts||[]).filter(p=>p.active&&normalize(p.model)===normalize(model)&&p.type===type);
     const variants=[...new Set(products.map(p=>p.variant).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
-    const vs=document.getElementById("spVariantStep"), ch=document.getElementById("spChoices"), step=document.getElementById("spChoiceStep"), btn=document.getElementById("partPickerBtn"), arrow=document.getElementById("partPickerArrow");
+    const vs=document.getElementById("spVariantStep"), step=document.getElementById("spChoiceStep"), btn=document.getElementById("partPickerBtn"), arrow=document.getElementById("partPickerArrow"), prod=document.getElementById("prod"), selected=document.getElementById("spSelected"), data=document.getElementById("spDataStep");
     if(step)step.classList.remove("open");
     if(btn)btn.classList.remove("open");
     if(arrow)arrow.textContent="⌄";
-    if(ch)ch.innerHTML="";
+    const value=document.getElementById("partPickerValue");if(value)value.textContent=model+" · "+type;
+    if(prod){prod.innerHTML="";prod.value="";}
+    if(selected){selected.style.display="none";selected.classList.add("is-disabled");selected.innerHTML="";}
+    if(data){data.style.display="none";data.classList.add("is-disabled");}
+    ["price","qty"].forEach(id=>{const input=document.getElementById(id);if(input)input.value="";});
     if(!vs)return;
+    vs.style.display="none";vs.innerHTML="";
     if(variants.length===1)return chooseStoreVariantV38(model,type,variants[0]);
     vs.style.display="block";
     vs.innerHTML=variants.length?'<div class="picker-label"><span>3. Elige la variante</span></div><div class="picker-grid">'+variants.map(v=>'<button type="button" onclick="chooseStoreVariantV38('+inlineArg(model)+','+inlineArg(type)+','+inlineArg(v)+')">'+esc(v)+'</button>').join("")+'</div>':'<div class="picker-empty">No hay variantes activas para este repuesto.</div>';
@@ -2071,7 +2076,7 @@ document.addEventListener("keydown",function(event){
   const actions={
     q:()=>{if(typeof renderMarket==="function")renderMarket();},
     inventorySearch:()=>{if(typeof renderInventorySearch==="function")renderInventorySearch();},
-    spSearch:()=>{if(typeof renderStoreModels==="function")renderStoreModels();},
+    spSearch:()=>{if(typeof renderStoreModels==="function")renderStoreModels();const first=document.querySelector("#spModels .picker-option");if(first)first.click();},
     acShopSearch:()=>{if(typeof adminConsoleFilterShops==="function")adminConsoleFilterShops();},
     acProductSearch:()=>{if(typeof adminConsoleFindProducts==="function")adminConsoleFindProducts();},
     acModelSearch:()=>{if(typeof adminConsoleFilterModels==="function")adminConsoleFilterModels();},
