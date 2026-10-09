@@ -6,6 +6,13 @@ const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1] || "";
 
 assert(script, "No se encontró el bloque JavaScript principal.");
 
+assert(script.includes('function isScreenDisplayType(name)'), "Falta el filtro común de pantallas/displays.");
+assert(script.includes('type==="pantalla"||type==="display"'), "Solo Pantalla y Display deben estar visibles en el MVP.");
+assert(script.includes("A.types.filter(x=>x.active&&isScreenDisplayType(x.name))"), "El formulario admin no debe ofrecer Flex ni otros repuestos.");
+assert(script.includes("(r||[]).filter(p=>isScreenDisplayType(obj(p.part_types).name))"), "La búsqueda administrativa debe filtrar por tipo de pantalla/display.");
+assert(script.includes("const tabs=[['products','Pantallas / displays'],['models','Modelos']]"), "El catálogo inicial solo debe mostrar pantallas y modelos.");
+
+
 const htmlMarkup = html.replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<style\b[\s\S]*?<\/style>/gi, "");
 const ids = [...htmlMarkup.matchAll(/\bid=["']([^"']+)["']/g)].map(m => m[1]);
 const counts = ids.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{});
