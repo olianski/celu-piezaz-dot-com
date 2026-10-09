@@ -2530,6 +2530,16 @@ async function bootAuthenticated(){
 }
 async function doLogout(){
   try{await CeluPiezazBackend.signOut();}catch(e){}
+  // Cada sesión nueva de técnico debe comenzar con el buscador limpio.
+  techSelectedModel="";techSelectedPart="";techSelectedVariant="";
+  offersLoadedForModel="";selectedProduct=null;selectedInventoryId=null;
+  const search=document.getElementById("q");if(search)search.value="";
+  const more=document.getElementById("flowMore");if(more){more.dataset.open="0";more.textContent="Ver más";}
+  state.inventory=[];state.shops=[];
+  const count=document.getElementById("count");if(count)count.textContent="";
+  const results=document.getElementById("results");if(results)results.innerHTML='<div class="card empty"><b>Empieza buscando un modelo</b><div class="tiny" style="margin-top:6px">Por ejemplo: Galaxy A15, iPhone 13 o Redmi Note 12.</div></div>';
+  const model=document.getElementById("flowModelSelected");if(model)model.innerHTML="";
+  ["flowPartStep","flowVariantStep"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("is-disabled");});
   state.role=null;save();
   document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
   document.getElementById("authGate").style.display="flex";
