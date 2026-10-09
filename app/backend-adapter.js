@@ -16,8 +16,24 @@ window.CeluPiezazBackend = (() => {
   async function saveInventoryItem(productId,price,quantity){ return requireClient().rpc('save_inventory_item',{p_product_id:productId,p_price:Number(price),p_quantity:Number(quantity)}); }
   async function placeOrder(shopId,deliveryType,deliveryAddress,items){ return requireClient().rpc('place_order',{p_shop_id:shopId,p_delivery_type:deliveryType,p_delivery_address:deliveryAddress||null,p_items:items}); }
   async function updateOrderStatus(orderId,nextStatus){ return requireClient().rpc('update_order_status',{p_order_id:orderId,p_next_status:nextStatus}); }
-  async function listMyOrders(){ return requireClient().from('orders').select('id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops(id,name,address)').order('created_at',{ascending:false}); }
+  async function listMyOrders(){ return requireClient().from('orders').select('id,technician_id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops!orders_shop_id_fkey(id,name,address,status),users!orders_technician_id_fkey(name,phone),order_items!order_items_order_id_fkey(id,inventory_id,product_id,quantity,unit_price,products!order_items_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)))').order('created_at',{ascending:false}).limit(300); }
   // Funciones del panel administrativo: las políticas RLS de Supabase restringen estas operaciones a admins.
+  async function listPhoneModels(){ return requireClient().from('phone_models').select('id,brand,model,normalized_name,active').eq('active',true).order('brand').order('model').limit(500); }
+  async function listProductsByModel(modelId){
+    return requireClient().from('products').select('id,phone_model_id,part_type_id,part_variant_id,display_name,normalized_search,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)').eq('phone_model_id',modelId).eq('active',true).order('display_name').limit(200);
+  }
+  async function getInventoryByProducts(productIds){
+    if(!productIds||!productIds.length)return {data:[],error:null};
+    return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,shops!inventory_shop_id_fkey(id,name,address,status,delivery_local_fee,delivery_outside_fee),products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').in('product_id',productIds).eq('active',true).gt('quantity',0).eq('shops.status','approved').order('price');
+  }
+  async function listShopInventory(shopId){
+    return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,updated_at,products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').eq('shop_id',shopId).order('updated_at',{ascending:false});
+  }
+  async function createDemandRequest(productId){
+    const c=requireClient(); const u=await c.auth.getUser();
+    if(u.error) return {data:null,error:u.error};
+    return c.from('demand_requests').upsert({technician_id:u.data.user.id,product_id:productId,status:'open'},{onConflict:'technician_id,product_id'}).select().single();
+  }
   async function adminCreateAccount(payload){
     const r=await requireClient().functions.invoke('admin-create-account',{body:payload});
     if(r.error) throw r.error;
@@ -126,5 +142,5 @@ window.CeluPiezazBackend = (() => {
     if(!['open','notified','closed'].includes(status))throw new Error('Estado de solicitud no válido');
     return requireClient().from('demand_requests').update({status}).eq('id',id).select().single();
   }
-  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders ,adminCreateAccount,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
+  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,updateOrderStatus,listMyOrders,listPhoneModels,listProductsByModel,getInventoryByProducts,listShopInventory,createDemandRequest,adminCreateAccount,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
 })();
