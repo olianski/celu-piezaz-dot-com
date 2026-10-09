@@ -68,8 +68,12 @@ window.CeluPiezazBackend = (() => {
     return requireClient().from('phone_models').select('id,brand,model,normalized_name,active').order('brand').order('model').limit(500);
   }
   async function adminCreateModel(brand,model){
-    const normalized_name=(String(brand||'')+' '+String(model||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
-    return requireClient().from('phone_models').insert({brand:String(brand||'').trim(),model:String(model||'').trim(),normalized_name,active:true}).select().single();
+    const cleanBrand=String(brand||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ');
+    const cleanModel=String(model||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ');
+    const normalized_name=(cleanBrand+' '+cleanModel).toLowerCase().trim();
+    const r=await requireClient().from('phone_models').insert({brand:cleanBrand,model:cleanModel,normalized_name,active:true}).select().single();
+    if(r.error?.code==='23505') return {...r,error:{...r.error,message:'Ese modelo ya existe en el catálogo. No se creó un duplicado.'}};
+    return r;
   }
   async function adminSetModelActive(id,active){
     const c=requireClient();
