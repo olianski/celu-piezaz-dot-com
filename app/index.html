@@ -1455,6 +1455,9 @@ function shop(id){return state.shops.find(x=>x.id===id);}
 function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId===shopId&&String(x.productId)===String(productId));}
 function activeInventory(){return state.inventory.filter(x=>x.active&&x.qty>0);}
 function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function inlineArg(value){return escapeHtml(JSON.stringify(String(value??"")).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026"));}
+
 function statusLabel(s){return ({pending:"Pendiente",accepted:"Aceptado",preparing:"Preparando",out_for_delivery:"En camino",delivered:"Entregado",rejected:"Rechazado",cancelled:"Cancelado"})[s]||s;}
 let techSelectedModel="";
 let techSelectedPart="";
@@ -1478,7 +1481,6 @@ function renderTechFlow(){
   const variantsEl=document.getElementById("flowVariantOptions");
   const variantTitle=document.getElementById("flowVariantTitle");
 
-  // Antes de seleccionar modelo: solo búsqueda.
   if(!techSelectedModel){
     if(!q){
       modelEl.innerHTML="";
@@ -1488,59 +1490,41 @@ function renderTechFlow(){
     }
     const found=techModels().filter(m=>normalize(m).includes(q)).slice(0,8);
     modelEl.innerHTML=found.length
-      ? `<div class="flow-suggestion-label">Modelos encontrados</div>`+
-        found.map(m=>`<button class="model-result" onclick="selectTechModel('${String(m).replace(/'/g,"\\'")}')"><b>${m}</b><small>Seleccionar modelo</small></button>`).join("")
-      : `<div class="flow-empty">No encontramos ese modelo.</div>`;
+      ? '<div class="flow-suggestion-label">Modelos encontrados</div>'+
+        found.map(m=>'<button class="model-result" onclick="selectTechModel('+inlineArg(m)+')"><b>'+escapeHtml(m)+'</b><small>Seleccionar modelo</small></button>').join("")
+      : '<div class="flow-empty">No encontramos ese modelo.</div>';
     partStep.classList.add("is-disabled");
     variantStep.classList.add("is-disabled");
     return;
   }
 
-  // Modelo elegido: mostrarlo como selección compacta.
-  modelEl.innerHTML=`<div class="flow-selected"><b>${techSelectedModel}</b><button onclick="resetTechFlow()">Cambiar</button></div>`;
-
-  // Una vez elegido el repuesto, ocultamos la lista y mostramos solo la selección.
+  modelEl.innerHTML='<div class="flow-selected"><b>'+escapeHtml(techSelectedModel)+'</b><button onclick="resetTechFlow()">Cambiar</button></div>';
   if(!techSelectedPart){
     partStep.classList.remove("is-disabled");
-    partsEl.innerHTML=techPartsForSelection().map(p=>`
-      <button class="part-option" onclick="selectTechPart('${String(p).replace(/'/g,"\\'")}')">
-        <span>${p}</span><span class="part-arrow">›</span>
-      </button>`).join("");
+    partsEl.innerHTML=techPartsForSelection().map(p=>
+      '<button class="part-option" onclick="selectTechPart('+inlineArg(p)+')"><span>'+escapeHtml(p)+'</span><span class="part-arrow">›</span></button>'
+    ).join("");
     variantStep.classList.add("is-disabled");
     return;
   }
 
   partStep.classList.remove("is-disabled");
-  partsEl.innerHTML=`<div class="selection-summary">
-    <span>Repuesto</span>
-    <strong>${techSelectedPart}</strong>
-    <button onclick="changeTechPart()">Cambiar</button>
-  </div>`;
-
+  partsEl.innerHTML='<div class="selection-summary"><span>Repuesto</span><strong>'+escapeHtml(techSelectedPart)+'</strong><button onclick="changeTechPart()">Cambiar</button></div>';
   const variants=techVariantsForSelection();
-
-  // Si no hay variantes o solo hay una, no mostramos un segundo listado.
   if(variants.length<=1){
     techSelectedVariant=variants[0]||"";
     variantStep.classList.add("is-disabled");
     return;
   }
-
-  // Si hay variantes, el listado ocupa el lugar del anterior.
   if(!techSelectedVariant){
     variantStep.classList.remove("is-disabled");
     variantTitle.textContent="¿Qué tipo necesitas?";
-    variantsEl.innerHTML=variants.map(v=>`
-      <button class="part-option" onclick="selectTechVariant('${String(v).replace(/'/g,"\\'")}')">
-        <span>${v}</span><span class="part-arrow">›</span>
-      </button>`).join("");
+    variantsEl.innerHTML=variants.map(v=>
+      '<button class="part-option" onclick="selectTechVariant('+inlineArg(v)+')"><span>'+escapeHtml(v)+'</span><span class="part-arrow">›</span></button>'
+    ).join("");
   }else{
     variantStep.classList.remove("is-disabled");
-    variantsEl.innerHTML=`<div class="selection-summary">
-      <span>Tipo</span>
-      <strong>${techSelectedVariant}</strong>
-      <button onclick="changeTechVariant()">Cambiar</button>
-    </div>`;
+    variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant)+'</strong><button onclick="changeTechVariant()">Cambiar</button></div>';
   }
 }
 function changeTechPart(){
@@ -1621,11 +1605,11 @@ async function renderMarket(){
   results.className="results-grid";
   if(rows.length){
     results.innerHTML='<div class="section" style="margin-top:4px"><div><h2>Tiendas que lo tienen</h2><small>'+rows.length+' opciones · ordenadas por precio</small></div></div>'+
-      rows.map((x,idx)=>'<article class="card" onclick="openProduct(\''+x.productId+'\')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
-      '<div class="cardtop"><div><div class="title">'+(x.s?.name||'Tienda')+'</div><div class="sub">'+x.p.type+' · '+x.p.variant+'</div></div>'+
+      rows.map((x,idx)=>'<article class="card" onclick="openProduct('+inlineArg(x.productId)+')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
+      '<div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||'Tienda')+'</div><div class="sub">'+escapeHtml(x.p.type)+' · '+escapeHtml(x.p.variant)+'</div></div>'+
       '<span class="badge '+(x.qty<=1?'one':'')+'">'+(x.qty<=1?'Última unidad':'Disponible')+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+x.qty+' unidad(es)</div></div>'+
-      '<button class="buy" onclick="event.stopPropagation();startCheckout(\''+x.shopId+'\',\''+x.productId+'\')">Pedir</button></div></article>').join('');
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<button class="buy" onclick="event.stopPropagation();startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></article>').join('');
   }else{
     results.innerHTML='<div class="card empty"><b>No encontramos ese repuesto disponible.</b><div class="tiny" style="margin-top:6px">Puedes solicitar que te avisemos cuando una tienda lo publique.</div><button class="save" style="margin-top:12px;width:100%" onclick="requestDemand()">Avisarme cuando aparezca</button></div>';
   }
@@ -1641,17 +1625,18 @@ async function requestDemand(){
   }catch(e){toast(e.message||"No se pudo registrar la solicitud.");}
 }
 function openProduct(productId){
-  selectedProduct=productId;openPage("product");
+  selectedProduct=productId;
+  openPage("product");
   const p=catalogProduct(productId);
   const offers=activeInventory().filter(i=>String(i.productId)===String(productId)).map(i=>({...i,s:i.s||shop(i.shopId)})).sort((a,b)=>a.price-b.price);
   if(!p){document.getElementById("productDetail").innerHTML='<div class="card empty">Producto no disponible.</div>';return;}
   document.getElementById("productDetail").innerHTML=
-    '<div class="panel"><div class="tiny">'+p.type+'</div><h1 style="font-size:26px;margin:4px 0">'+p.model+'</h1><div class="sub">'+p.variant+'</div></div>'+
+    '<div class="panel"><div class="tiny">'+escapeHtml(p.type)+'</div><h1 style="font-size:26px;margin:4px 0">'+escapeHtml(p.model)+'</h1><div class="sub">'+escapeHtml(p.variant)+'</div></div>'+
     '<div class="section"><h2>Tiendas disponibles</h2><small>'+offers.length+' opción(es)</small></div>'+
-    (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+(x.s?.name||"Tienda")+'</div><div class="sub">'+p.type+' · '+p.variant+'</div></div>'+
+    (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||"Tienda")+'</div><div class="sub">'+escapeHtml(p.type)+' · '+escapeHtml(p.variant)+'</div></div>'+
       '<span class="badge '+(x.qty===1?'one':'')+'">'+(x.qty===1?'Última unidad':'Disponible')+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+x.qty+' unidad(es)</div></div>'+
-      '<button class="buy" onclick="startCheckout(\''+x.shopId+'\',\''+x.productId+'\')">Pedir</button></div></div>').join(''):
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<button class="buy" onclick="startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></div>').join(''):
       '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
 }
 function startCheckout(shopId,productId){
@@ -1661,7 +1646,7 @@ function startCheckout(shopId,productId){
   if(!p||!inv){toast("La disponibilidad cambió. Vuelve a buscar el repuesto.");openPage("market");return;}
   selectedInventoryId=inv.id;
   const sh=inv.s||shop(shopId);
-  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+p.type+' '+p.model+'</div><div class="sub">'+p.variant+' · '+(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+inv.qty+' disponible(s)</div></div>';
+  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+Number(inv.qty)+' disponible(s)</div></div>';
   openPage("checkout");
 }
 async function confirmOrder(){
@@ -1690,12 +1675,12 @@ async function renderOrders(){
     const orders=await loadVisibleOrders();
     el.innerHTML=orders.length?orders.map(o=>{
       const p=orderProduct(o),sh=orderShop(o),line=orderPrimaryItem(o);
-      return '<div class="card"><div class="cardtop"><div><div class="title">'+(p.type||"Repuesto")+' '+p.model+'</div><div class="sub">'+(p.variant||"")+' · '+(sh.name||"Tienda")+'</div></div>'+
-      '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+statusLabel(o.status)+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+new Date(o.created_at).toLocaleString("es-CO")+'</div></div></div>'+
-      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</div></div>';
+      return '<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml((p.type||"Repuesto")+' '+p.model)+'</div><div class="sub">'+escapeHtml((p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
+      '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
+      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+escapeHtml(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</div></div>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
-  }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+String(e.message||"")+'</div></div>';}
+  }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
 }
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
