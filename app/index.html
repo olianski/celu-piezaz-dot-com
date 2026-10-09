@@ -1462,9 +1462,14 @@ let activeShopSection="orders";
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 function unwrapDbRelation(v){return Array.isArray(v)?(v[0]||{}):(v||{});}
 function modelDisplayName(m){return String(m.brand||"")+" "+String(m.model||"");}
+function isScreenDisplayType(name){
+  const type=normalize(String(name||"").trim());
+  return type==="pantalla"||type==="display";
+}
 function mapDbProduct(r){
   if(!r)return null;
   const m=unwrapDbRelation(r.phone_models),t=unwrapDbRelation(r.part_types),v=unwrapDbRelation(r.part_variants);
+  if(!isScreenDisplayType(t.name))return null;
   return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",active:r.active!==false,displayName:r.display_name||""};
 }
 async function loadMasterModels(){
@@ -2238,8 +2243,9 @@ async function submitAuth(e){
   }
   async function renderCatalog(){
     await ensureCatalogRefs();
-    const tabs=[['products','Productos'],['models','Modelos'],['types','Tipos de repuesto'],['variants','Variantes']];
-    $('acContent').innerHTML=heading('Catálogo maestro','La lista oficial que las tiendas usan para publicar inventario.')+
+    const tabs=[['products','Pantallas / displays'],['models','Modelos']];
+    if(!['products','models'].includes(A.catalogMode))A.catalogMode='products';
+    $('acContent').innerHTML=heading('Catálogo de pantallas','Solo se publican pantallas y displays. Los demás repuestos se conservan para futuras etapas.')+
       '<div class="ac-subtabs">'+tabs.map(t=>'<button class="ac-subtab '+(A.catalogMode===t[0]?'active':'')+'" onclick="adminConsoleCatalogMode(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div><div id="acCatalogBody"></div>';
     if(A.catalogMode==='products')renderProducts();
     else if(A.catalogMode==='models')renderModels();
@@ -2249,8 +2255,10 @@ async function submitAuth(e){
   async function catalogMode(mode){A.catalogMode=mode;await renderCatalog();}
   async function renderProducts(){
     const modelOptions=A.models.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+esc(x.brand+' '+x.model)+'</option>').join('');
-    const typeOptions=A.types.filter(x=>x.active).map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
-    const variantOptions=A.variants.filter(x=>x.active).map(x=>'<option value="'+x.id+'" data-type="'+x.part_type_id+'">'+esc(obj(x.part_types).name||x.name)+' · '+esc(x.name)+'</option>').join('');
+    const screenTypes=A.types.filter(x=>x.active&&isScreenDisplayType(x.name));
+    const screenTypeIds=new Set(screenTypes.map(x=>x.id));
+    const typeOptions=screenTypes.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
+    const variantOptions=A.variants.filter(x=>x.active&&screenTypeIds.has(x.part_type_id)).map(x=>'<option value="'+x.id+'" data-type="'+x.part_type_id+'">'+esc(obj(x.part_types).name||x.name)+' · '+esc(x.name)+'</option>').join('');
     $('acCatalogBody').innerHTML=
       '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Crear producto maestro</h3><p>Selecciona modelo, tipo y variante. No se crean nombres libres para las tiendas.</p></div></div>'+
       '<form class="ac-form" onsubmit="adminConsoleCreateProduct(event)"><div class="ac-two"><label>Modelo<select required id="acProductModel" class="ac-select"><option value="">Seleccionar modelo</option>'+modelOptions+'</select></label><label>Tipo de repuesto<select required id="acProductType" class="ac-select"><option value="">Seleccionar tipo</option>'+typeOptions+'</select></label></div>'+
@@ -2272,7 +2280,7 @@ async function submitAuth(e){
     if(search.length<2){notice('Escribe al menos 2 caracteres para buscar productos.',true);return;}
     notice('');
     $('acProductList').innerHTML=empty('Buscando productos','Consultando catálogo maestro...');
-    const r=await checked(CeluPiezazBackend.adminListProducts(search,$('acProductActive').value));A.products=r||[];
+    const r=await checked(CeluPiezazBackend.adminListProducts(search,$('acProductActive').value));A.products=(r||[]).filter(p=>isScreenDisplayType(obj(p.part_types).name));
     $('acProductList').innerHTML=A.products.length?A.products.map(p=>{
       const m=obj(p.phone_models),t=obj(p.part_types),v=obj(p.part_variants);
       const status=p.active?'active':'inactive';
@@ -2284,7 +2292,7 @@ async function submitAuth(e){
     e.preventDefault();
     const mid=$('acProductModel').value,tid=$('acProductType').value,vid=$('acProductVariant').value||null;
     const m=A.models.find(x=>x.id===mid),t=A.types.find(x=>x.id===tid),v=A.variants.find(x=>x.id===vid);
-    if(!m||!t){notice('Selecciona un modelo y un tipo de repuesto válidos.',true);return;}
+    if(!m||!t||!isScreenDisplayType(t.name)){notice('Solo puedes crear productos de tipo Pantalla o Display.',true);return;}
     if(v&&v.part_type_id!==tid){notice('La variante elegida no corresponde al tipo de repuesto.',true);return;}
     const display_name=[m.brand,m.model,t.name,v&&v.name].filter(Boolean).join(' · ');
     const normalized_search=norm(display_name);
@@ -2432,7 +2440,7 @@ async function submitAuth(e){
   }
   function filterRequests(){
     const status=$('acRequestStatus')&&$('acRequestStatus').value||'all';
-    const rows=A.requests.filter(x=>status==='all'||x.status===status);
+    const rows=A.requests.filter(x=>isScreenDisplayType(obj(obj(x.products).part_types).name)&&(status==='all'||x.status===status));
     $('acRequestList').innerHTML=rows.length?rows.map(x=>{
       const u=obj(x.users),p=obj(x.products),m=obj(p.phone_models),t=obj(p.part_types),v=obj(p.part_variants);
       const next=x.status==='open'?'notified':x.status==='notified'?'closed':'open';
