@@ -1404,11 +1404,10 @@ body.role-shop #admin.active{display:block!important}
 <script src="./backend-config.js"></script>
 <script src="./backend-adapter.js"></script>
 <script>
-/* Celu Piezaz Dot Com — MVP funcional local.
-   Persistencia: localStorage. Backend real se conecta en la siguiente fase. */
-
-// Se purga el almacenamiento local de la versión de demostración.
+/* Celu Piezaz Dot Com — aplicación conectada al backend real. */
+// Limpiar residuos locales de las versiones de prueba; los datos válidos viven en Supabase.
 localStorage.removeItem("celu_piezaz_tecnico_v11");
+localStorage.removeItem("celu_piezaz_real_v1");
 const KEY="celu_piezaz_real_v1";
 const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n||0));
 let selectedProduct=null, selectedShop=null, selectedInventoryId=null, filter="Todos";
@@ -1732,7 +1731,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
 
 
-/* Tienda — UX v38 aprobado + funciones locales de prueba */
+/* Tienda — interfaz operativa conectada al backend */
 (function(){
   const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
