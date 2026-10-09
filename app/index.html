@@ -1094,7 +1094,6 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 .auth-form input:focus{border-color:#8eafff;box-shadow:0 0 0 3px #eaf2ff}
 .auth-submit{width:100%;min-height:62px;border:0;border-radius:17px;background:#0b63f6;color:white;font-size:20px;font-weight:850;margin-top:4px}
 @media(max-width:560px){.auth-gate{padding:20px}.auth-card{width:100%;padding:28px 24px;border-radius:27px}.auth-card .logo{font-size:21px;margin-bottom:28px!important}.auth-card h1{font-size:30px}.auth-card p{font-size:15px}.auth-card .auth-subnote{font-size:14px!important;margin:28px 0 22px!important}.auth-form{gap:17px}.auth-form input{padding:16px;font-size:16px}.auth-submit{min-height:60px;font-size:19px}}
-.auth-form{display:grid;gap:10px}.auth-form label{font-size:12px;font-weight:700;color:#475467}.auth-form input{width:100%;padding:12px;border:1px solid #dfe4ea;border-radius:11px;outline:0;margin-top:5px}.auth-submit{border:0;background:#0b63f6;color:#fff;border-radius:11px;padding:13px;font-weight:850;margin-top:3px}
 .auth-msg{font-size:12px;color:#667085;min-height:17px;margin-top:8px}.auth-msg.error{color:#b42318}
 
 /* Consola de administración — interfaz operativa independiente */
@@ -1396,7 +1395,7 @@ body.role-shop #admin.active{display:block!important}
 <nav class="bottom"><div class="bottomin">
 <button class="navbtn active" id="navMarket" onclick="openPage('market')">🔎 Buscar</button>
 <button class="navbtn" id="navOrders" onclick="openPage('orders')">📋 Pedidos</button>
-<button class="navbtn" id="navAdmin" onclick="openPage('admin')">📦 Mi tienda</button>
+<button class="navbtn" id="navAdmin" onclick="openShopHome()">📦 Mi tienda</button>
 </div></nav>
 <div id="toast" class="toast"></div>
 
@@ -1415,6 +1414,7 @@ let masterModels=[];
 let currentShop=null;
 let offersLoadedForModel="";
 let state={mode:null,shops:[],catalog:[],inventory:[],orders:[],demand:[],nextOrder:1};
+let activeShopSection="orders";
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 function unwrapDbRelation(v){return Array.isArray(v)?(v[0]||{}):(v||{});}
 function modelDisplayName(m){return String(m.brand||"")+" "+String(m.model||"");}
@@ -1601,13 +1601,16 @@ function resetTechFlow(){
 async function renderMarket(){
   renderTechFlow();
   const results=document.getElementById("results");
+  const step=document.getElementById("step");
   if(!techSelectedModel){
     state.inventory=[];state.shops=[];
-    document.getElementById("count").textContent="0 opciones";
+    document.getElementById("count").textContent="";
+    if(step)step.style.display="none";
     results.className="results-grid";
     results.innerHTML='<div class="card empty"><b>Empieza buscando un modelo</b><div class="tiny" style="margin-top:6px">Por ejemplo: Galaxy A15, iPhone 13 o Redmi Note 12.</div></div>';
     return;
   }
+  if(step)step.style.display="";
   if(!state.catalog.some(p=>normalize(p.model)===normalize(techSelectedModel))){
     results.innerHTML='<div class="card empty">Cargando productos del modelo…</div>';return;
   }
@@ -1713,17 +1716,25 @@ async function renderOrders(){
 }
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
-  const shopOrdersPage=id==="orders"&&state.role==="shop";
-  if(shopOrdersPage){const shopPage='admin';id=shopPage;}
+  const isShop=state.role==="shop";
+  const shopOrdersPage=isShop&&id==="orders";
+  if(shopOrdersPage)id="admin";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.getElementById("navMarket").classList.toggle("active",id==="market");
-  document.getElementById("navOrders").classList.toggle("active",id==="orders"||shopOrdersPage);
-  document.getElementById("navAdmin").classList.toggle("active",id==="admin"||id==="adminConsole");
+  const page=document.getElementById(id);
+  if(!page)return;
+  page.classList.add("active");
   if(id==="admin")renderAdmin();
   if(id==="orders")renderOrders();
   if(shopOrdersPage&&window.shopSection)window.shopSection("orders");
+  else if(isShop&&id==="admin"&&window.shopSection)window.shopSection(activeShopSection);
+  document.getElementById("navMarket").classList.toggle("active",!isShop&&id==="market");
+  document.getElementById("navOrders").classList.toggle("active",isShop?(id==="admin"&&activeShopSection==="orders"):id==="orders");
+  document.getElementById("navAdmin").classList.toggle("active",isShop?(id==="admin"&&activeShopSection!=="orders"):(id==="admin"||id==="adminConsole"));
   scrollTo(0,0);
+}
+function openShopHome(){
+  activeShopSection="inventory";
+  openPage("admin");
 }
 function deliveryChanged(){}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display="none",2200);}
@@ -1738,16 +1749,21 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   const shopTabs=["orders","inventory","sales","catalog"];
 
   window.shopSection=function(section){
+    activeShopSection=shopTabs.includes(section)?section:"orders";
     shopTabs.forEach(x=>{
       const el=document.getElementById("shopSection"+x.charAt(0).toUpperCase()+x.slice(1));
-      if(el)el.classList.toggle("active",x===section);
+      if(el)el.classList.toggle("active",x===activeShopSection);
       const tab=document.getElementById("shopTab"+x.charAt(0).toUpperCase()+x.slice(1));
-      if(tab)tab.classList.toggle("active",x===section);
+      if(tab)tab.classList.toggle("active",x===activeShopSection);
     });
-    if(section==="orders") renderShopOrdersV38();
-    if(section==="inventory") inventorySection("home");
-    if(section==="sales") renderShopSales();
-    if(section==="catalog") renderShopCatalog();
+    if(state.role==="shop"){
+      document.getElementById("navOrders").classList.toggle("active",activeShopSection==="orders");
+      document.getElementById("navAdmin").classList.toggle("active",activeShopSection!=="orders");
+    }
+    if(activeShopSection==="orders") renderShopOrdersV38();
+    if(activeShopSection==="inventory") inventorySection("home");
+    if(activeShopSection==="sales") renderShopSales();
+    if(activeShopSection==="catalog") renderShopCatalog();
   };
 
   window.inventorySection=function(view){
@@ -1927,8 +1943,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   function renderAdminV38(){
     const isAdmin = state.role === "admin";
-    const banner = document.getElementById("techBanner");
-    if (banner) banner.style.display = isAdmin ? "none" : "";
     const heading = document.querySelector("#admin .shop-topbar .eyebrow");
     const title = document.querySelector("#admin .shop-topbar h1");
     const subtitle = document.querySelector("#admin .shop-topbar p");
@@ -1967,8 +1981,12 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       const nav=document.querySelector("#admin .shop-main-tabs");if(nav)nav.parentNode.insertBefore(approval,nav);
     }
     const approved=!!currentShop&&currentShop.status==="approved"&&currentShop.active;
-    approval.style.display=approved||!currentShop?"none":"block";
-    approval.textContent= currentShop?.status==="suspended"?"Tu tienda está suspendida. Contacta al administrador.":"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
+    approval.style.display=approved?"none":"block";
+    approval.textContent=!currentShop
+      ?"Esta cuenta no tiene una tienda vinculada. Contacta al administrador."
+      :currentShop.status==="suspended"
+        ?"Tu tienda está suspendida. Contacta al administrador."
+        :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
     document.querySelectorAll("#admin .inventory-choice").forEach(b=>{b.disabled=!approved;b.style.opacity=approved?"1":".45";});
     renderShopOrdersV38();
     document.getElementById("shopSectionOrders").classList.add("active");
@@ -2277,15 +2295,12 @@ async function submitAuth(e){
     const q=norm($('acUserSearch')&&$('acUserSearch').value);
     const rows=A.users.filter(x=>!q||norm([x.name,x.phone,x.role].join(' ')).includes(q));
     $('acUserList').innerHTML=rows.length?rows.map(x=>{
-      const self=x.id===A.uid;
-      const edit='<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop','admin'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar</button></div>';
+      const self=x.id===A.uid, protectedAdmin=x.role==='admin';
+      const edit=protectedAdmin
+        ?'<span class="ac-badge ok">Administrador protegido</span>'
+        :'<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar</button></div>';
       return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · '+esc(date(x.created_at)),badge(x.role),'',edit);
     }).join(''):empty('Sin usuarios','No coincide ninguna cuenta.');
-  }
-  async function userRole(id){
-    const role=$('acRole-'+id).value;
-    if(!confirm('¿Cambiar el rol de esta cuenta a "'+labelStatus(role)+'"?'))return;
-    await checked(CeluPiezazBackend.adminSetUserRole(id,role));notice('Rol del usuario actualizado.');await renderUsers();
   }
   async function renderOrders(){
     A.orders=await checked(CeluPiezazBackend.adminListOrders())||[];
