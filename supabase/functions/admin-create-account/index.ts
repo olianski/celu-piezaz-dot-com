@@ -64,18 +64,40 @@ Deno.serve(async (req: Request) => {
   if (role === "shop" && !shopName) return respond({ error: "El nombre de la tienda es obligatorio." }, 400);
   if (shopName.length > 160 || address.length > 240) return respond({ error: "Los datos de la tienda son demasiado largos." }, 400);
 
+  const token = crypto.randomUUID();
+  const { error: tokenError } = await adminClient.from("admin_account_provisioning").insert({
+    token, email, role, name, phone: phone || null,
+    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+  });
+  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta. " + tokenError.message }, 500);
+
+  const token = crypto.randomUUID();
+  const { error: tokenError } = await adminClient.from("account_authorization_tokens").insert({
+    token, email, role, full_name: name, phone: phone || null,
+    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+  });
+  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta." }, 500);
+
+  const token = crypto.randomUUID();
+  const { error: tokenError } = await adminClient.from("account_authorization_tokens").insert({
+    token, email, role, full_name: name, phone: phone || null,
+    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+  });
+  if (tokenError) return respond({ error: "No se pudo preparar la autorización de alta." }, 500);
+
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { name, phone: phone || null, role },
-    app_metadata: { provisioned_by_admin: "true" },
+    email, password, email_confirm: true,
+    user_metadata: { name, phone: phone || null, role, _account_token: token },
   });
   if (createError || !created.user) {
+    await adminClient.from("account_authorization_tokens").delete().eq("token", token);
     const message = createError?.message || "No se pudo crear la cuenta.";
     const duplicate = /already|registered|exists/i.test(message);
     return respond({ error: duplicate ? "Ese correo ya tiene una cuenta." : message }, duplicate ? 409 : 400);
   }
+  await adminClient.auth.admin.updateUserById(created.user.id, {
+    user_metadata: { name, phone: phone || null, role },
+  });
 
   if (role === "shop") {
     const { error: shopError } = await adminClient.from("shops").insert({
