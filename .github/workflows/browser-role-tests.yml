@@ -129,23 +129,23 @@ jobs:
             test.setTimeout(60000);
             await login(page, process.env.TEST_SHOP_EMAIL, process.env.TEST_SHOP_PASSWORD, 'shop', '#admin');
             console.log('SHOP_STEP orders');
-    await expect(page.locator('#shopOrders')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('#shopOrders')).toBeVisible({ timeout: 10000 });
             console.log('SHOP_STEP click-inventory-tab');
-    await page.locator('#shopTabInventory').click({ timeout: 10000 });
+            await page.locator('#shopTabInventory').click({ timeout: 10000 });
             console.log('SHOP_STEP inventory-section');
-    await expect(page.locator('#shopSectionInventory')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('#shopSectionInventory')).toBeVisible({ timeout: 10000 });
             console.log('SHOP_STEP click-view-inventory');
-    await page.getByRole('button', { name: /Ver inventario/ }).click({ timeout: 10000 });
+            await page.getByRole('button', { name: /Ver inventario/ }).click({ timeout: 10000 });
             console.log('SHOP_STEP inventory-search');
-    await expect(page.locator('#inventorySearch')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('#inventorySearch')).toBeVisible({ timeout: 10000 });
             console.log('SHOP_STEP search-A15');
-    await page.locator('#inventorySearch').fill('A15', { timeout: 10000 });
+            await page.locator('#inventorySearch').fill('A15', { timeout: 10000 });
             console.log('SHOP_STEP inventory-results');
-    await expect(page.locator('#inventoryResults')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('#inventoryResults')).toBeVisible({ timeout: 10000 });
             console.log('SHOP_STEP click-catalog-tab');
-    await page.locator('#shopTabCatalog').click({ timeout: 10000 });
+            await page.locator('#shopTabCatalog').click({ timeout: 10000 });
             console.log('SHOP_STEP catalog-section');
-    await expect(page.locator('#shopSectionCatalog')).toBeVisible({ timeout: 10000 });
+            await expect(page.locator('#shopSectionCatalog')).toBeVisible({ timeout: 10000 });
           });
 
           test('técnico: búsqueda de modelo y disponibilidad responden', async ({ page }) => {
