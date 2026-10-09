@@ -1925,18 +1925,27 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     document.getElementById("price").focus();
   };
 
-  function saveCreateInventory(){
-    const prod=document.getElementById("prod").value, priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,""), qty=Number(document.getElementById("qty").value);
-    const price=Number(priceRaw);
+  async function saveCreateInventory(){
+    const prod=document.getElementById("prod").value;
+    const priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,"");
+    const qty=Number(document.getElementById("qty").value),price=Number(priceRaw);
+    if(!currentShop){toast("No encontramos la tienda de esta cuenta.");return;}
+    if(currentShop.status!=="approved"||!currentShop.active){toast("Tu tienda debe ser aprobada por el administrador antes de publicar inventario.");return;}
     if(!prod){toast("Primero selecciona el producto.");return;}
-    if(!price||price<0){toast("Indica un precio.");return;}
+    if(!price||price<0){toast("Indica un precio válido.");return;}
     if(!Number.isInteger(qty)||qty<0){toast("Indica una cantidad válida.");return;}
-    const existing=state.inventory.find(i=>i.shopId==="shop1"&&String(i.productId)===String(prod));
-    if(existing){existing.price=price;existing.qty=qty;existing.active=true;}else state.inventory.push({id:"i"+Date.now(),shopId:"shop1",productId:Number(prod),price,qty,active:true});
-    save();renderAdminV38();renderMarket();
-    const st=document.getElementById("spSaveStatus");st.textContent="✓ Producto guardado correctamente";
-    toast(existing?"Producto actualizado ✓":"Producto agregado ✓");
-    setTimeout(()=>resetCreateInventory(),500);
+    const btn=document.getElementById("spSave"),st=document.getElementById("spSaveStatus");
+    if(btn){btn.disabled=true;btn.textContent="Guardando…";}
+    try{
+      const r=await CeluPiezazBackend.saveInventoryItem(prod,price,qty);
+      if(r.error)throw r.error;
+      await loadCurrentShop();
+      if(st)st.textContent="✓ Inventario guardado correctamente";
+      renderInventorySearch();
+      toast("Producto publicado en tu tienda.");
+      resetCreateInventory();
+    }catch(e){if(st)st.textContent="";toast(e.message||"No se pudo guardar el inventario.");}
+    finally{if(btn){btn.disabled=false;btn.textContent="Agregar al inventario";}}
   }
 
   function renderShopOrdersV38(){
