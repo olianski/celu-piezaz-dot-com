@@ -62,6 +62,15 @@ for(const f of files){
   if(f.includes('011_deduplicate_open_demand_requests')){
     checks.push([s.includes('demand_requests_one_open_per_product_uidx'),'solicitudes abiertas sin duplicados']);
   }
+  if(f.includes('012_preserve_order_history_for_participants')){
+    checks.push(
+      [s.includes('where o.technician_id = public.users.id and s.user_id = auth.uid()'),'datos de contacto solo en pedidos propios de la tienda'],
+      [s.includes('oi.product_id = public.products.id'),'producto de pedido histórico visible para participantes'],
+      [s.includes('p.phone_model_id = public.phone_models.id'),'modelo histórico visible para participantes'],
+      [s.includes('p.part_type_id = public.part_types.id'),'tipo de repuesto histórico visible para participantes'],
+      [s.includes('p.part_variant_id = public.part_variants.id'),'variante histórica visible para participantes']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
