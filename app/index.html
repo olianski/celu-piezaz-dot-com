@@ -1805,8 +1805,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
      c.classList.toggle("active",sub==="create");
      if(choices)choices.style.display=sub==="home"?"grid":"none";
      if(sub==="view"){
-       document.getElementById("inventorySearch").value="";
-       document.getElementById("inventoryResults").innerHTML='<div class="inventory-empty-state"><b>Busca un modelo</b><span>Tu inventario aparecerá aquí.</span></div>';
+       const search=document.getElementById("inventorySearch");
+       if(search)search.value="";
+       if(typeof window.renderInventorySearch==="function")window.renderInventorySearch();
      }
      if(sub==="create") resetCreateInventory();
    };
@@ -1815,11 +1816,19 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   function productFor(id){return state.catalog.find(p=>String(p.id)===String(id));}
 
   window.renderInventorySearch=function(){
-    const q=norm(document.getElementById("inventorySearch").value);
+    const input=document.getElementById("inventorySearch");
+    const q=norm(input?.value||"");
     const results=document.getElementById("inventoryResults");
-    if(!q){results.innerHTML='<div class="inventory-empty-state"><b>Busca un modelo</b><span>Tu inventario aparecerá aquí.</span></div>';return;}
-    const rows=ownInventory().map(i=>({...i,p:productFor(i.productId)})).filter(x=>x.p && norm([x.p.model,x.p.brand,x.p.type,x.p.variant].join(" ")).includes(q));
-    results.innerHTML=rows.length?rows.map(x=>inventoryCard(x)).join(""):'<div class="inventory-empty-state"><b>No encontramos ese producto</b><span>Prueba con otro modelo o repuesto.</span></div>';
+    if(!results)return;
+    const inventory=ownInventory().map(i=>({...i,p:productFor(i.productId)})).filter(x=>x.p);
+    const rows=q?inventory.filter(x=>norm([x.p.model,x.p.brand,x.p.type,x.p.variant,x.p.displayName].join(" ")).includes(q)):inventory;
+    if(!rows.length){
+      const title=q?"No encontramos ese producto":"Tu inventario está vacío";
+      const desc=q?"Prueba con otro modelo o repuesto.":"Cuando publiques un repuesto, aparecerá aquí automáticamente.";
+      results.innerHTML='<div class="inventory-empty-state"><b>'+esc(title)+'</b><span>'+esc(desc)+'</span></div>';
+      return;
+    }
+    results.innerHTML=rows.map(x=>inventoryCard(x)).join("");
   };
 
   function inventoryCard(x){
