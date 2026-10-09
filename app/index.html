@@ -1547,7 +1547,6 @@ function renderTechFlow(){
   if(variants.length<=1){
     techSelectedVariant=variants[0]||"";
     variantStep.classList.add("is-disabled");
-    renderMarket();
     return;
   }
 
@@ -1606,57 +1605,50 @@ function resetTechFlow(){
   renderMarket();
   document.getElementById("q").focus();
 }
-function renderMarket(){
+async function renderMarket(){
   renderTechFlow();
-  const q=normalize(document.getElementById("q").value.trim());
-  let rows=activeInventory().map(i=>({...i,p:catalogProduct(i.productId),s:shop(i.shopId)}))
-    .filter(x=>x.p)
-    .filter(x=>{
-      if(!techSelectedModel) return false;
-      return normalize(x.p.model)===normalize(techSelectedModel);
-    })
-    .filter(x=>!techSelectedPart || normalize(x.p.type)===normalize(techSelectedPart))
-    .filter(x=>!techSelectedVariant || normalize(x.p.variant)===normalize(techSelectedVariant));
-
-  rows.sort((a,b)=>a.price-b.price);
-  document.getElementById("count").textContent=rows.length+" opciones";
-
   const results=document.getElementById("results");
   if(!techSelectedModel){
+    state.inventory=[];state.shops=[];
+    document.getElementById("count").textContent="0 opciones";
     results.className="results-grid";
-    results.innerHTML=`<div class="card empty"><b>Empieza buscando un modelo</b><div class="tiny" style="margin-top:6px">Por ejemplo: A15, iPhone 13 o Redmi Note 12.</div></div>`;
+    results.innerHTML='<div class="card empty"><b>Empieza buscando un modelo</b><div class="tiny" style="margin-top:6px">Por ejemplo: Galaxy A15, iPhone 13 o Redmi Note 12.</div></div>';
     return;
   }
+  if(!state.catalog.some(p=>normalize(p.model)===normalize(techSelectedModel))){
+    results.innerHTML='<div class="card empty">Cargando productos del modelo…</div>';return;
+  }
+  if(offersLoadedForModel!==techSelectedModel){
+    results.innerHTML='<div class="card empty">Consultando disponibilidad real…</div>';
+    try{await loadLiveOffersForModel(techSelectedModel);}
+    catch(e){results.innerHTML='<div class="card empty"><b>No se pudo consultar la disponibilidad.</b><div class="tiny">Intenta de nuevo en unos segundos.</div></div>';return;}
+  }
+  let rows=activeInventory().map(i=>({...i,p:catalogProduct(i.productId),s:i.s||shop(i.shopId)}))
+    .filter(x=>x.p&&normalize(x.p.model)===normalize(techSelectedModel))
+    .filter(x=>!techSelectedPart||normalize(x.p.type)===normalize(techSelectedPart))
+    .filter(x=>!techSelectedVariant||normalize(x.p.variant)===normalize(techSelectedVariant));
+  rows.sort((a,b)=>a.price-b.price);
+  document.getElementById("count").textContent=rows.length+" opciones";
   if(!techSelectedPart){
     results.className="results-grid";
-    results.innerHTML=`<div class="card empty"><b>Ahora elige el repuesto que necesitas</b><div class="tiny" style="margin-top:6px">Así evitamos mostrarte cientos de productos que no necesitas.</div></div>`;
+    results.innerHTML='<div class="card empty"><b>Ahora elige el repuesto que necesitas</b><div class="tiny" style="margin-top:6px">Te mostraremos solo las tiendas que tienen disponibilidad.</div></div>';
     return;
   }
-  if(!techSelectedVariant && techVariantsForSelection().length>1){
+  if(!techSelectedVariant&&techVariantsForSelection().filter(Boolean).length>1){
     results.className="results-grid";
-    results.innerHTML=`<div class="card empty"><b>Elige el tipo de repuesto</b><div class="tiny" style="margin-top:6px">Después te mostraremos únicamente las tiendas que lo tienen.</div></div>`;
+    results.innerHTML='<div class="card empty"><b>Elige el tipo de repuesto</b><div class="tiny" style="margin-top:6px">Después te mostraremos las tiendas que lo tienen.</div></div>';
     return;
   }
-
   results.className="results-grid";
   if(rows.length){
-    const product=rows[0].p;
-    results.innerHTML=`<div class="section" style="margin-top:4px"><div><h2>Tiendas que lo tienen</h2><small>${rows.length} opciones · ordenadas por precio</small></div></div>`+
-      rows.map((x,idx)=>`    <article class="card" onclick="openProduct(${x.productId})" style="${idx===0?'border:2px solid #c7dcff;':''}">
-      <div class="cardtop">
-        <div>
-          <div class="title">${x.s.name}</div>
-          <div class="sub">${product.type} · ${product.variant}</div>
-        </div>
-        <span class="badge ${x.qty<=1?"one":""}">${x.qty<=1?"Última unidad":"Disponible"}</span>
-      </div>
-      <div class="meta">
-        <div><div class="price">${money(x.price)}</div><div class="shop">${x.qty} unidad(es)</div></div>
-        <button class="buy" onclick="event.stopPropagation();startCheckout('${x.shopId}',${x.productId})">Pedir</button>
-      </div>
-    </article>`).join("");
+    results.innerHTML='<div class="section" style="margin-top:4px"><div><h2>Tiendas que lo tienen</h2><small>'+rows.length+' opciones · ordenadas por precio</small></div></div>'+
+      rows.map((x,idx)=>'<article class="card" onclick="openProduct(\''+x.productId+'\')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
+      '<div class="cardtop"><div><div class="title">'+(x.s?.name||'Tienda')+'</div><div class="sub">'+x.p.type+' · '+x.p.variant+'</div></div>'+
+      '<span class="badge '+(x.qty<=1?'one':'')+'">'+(x.qty<=1?'Última unidad':'Disponible')+'</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+x.qty+' unidad(es)</div></div>'+
+      '<button class="buy" onclick="event.stopPropagation();startCheckout(\''+x.shopId+'\',\''+x.productId+'\')">Pedir</button></div></article>').join('');
   }else{
-    results.innerHTML=`<div class="card empty"><b>No encontramos ese repuesto disponible.</b><div class="tiny" style="margin-top:6px">Puedes solicitar que te avisemos cuando aparezca.</div><button class="save" style="margin-top:12px;width:100%" onclick="requestDemand()">Avisarme cuando aparezca</button></div>`;
+    results.innerHTML='<div class="card empty"><b>No encontramos ese repuesto disponible.</b><div class="tiny" style="margin-top:6px">Puedes solicitar que te avisemos cuando una tienda lo publique.</div><button class="save" style="margin-top:12px;width:100%" onclick="requestDemand()">Avisarme cuando aparezca</button></div>';
   }
 }
 function setFilter(x){filter=x;renderMarket();}
