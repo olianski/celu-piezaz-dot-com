@@ -9,10 +9,13 @@ assert(script, "No se encontró el bloque JavaScript principal.");
 assert(script.includes('function isScreenDisplayType(name)'), "Falta el filtro común de pantallas/displays.");
 assert(script.includes('type==="pantalla"||type==="display"'), "Solo Pantalla y Display deben estar visibles en el MVP.");
 
-const screenTypeFn = script.match(/function isScreenDisplayType\\(name\\)\\s*\\{[\\s\\S]*?\\n\\}/)?.[0];
-assert(screenTypeFn, "No se pudo extraer el filtro de tipos para probarlo.");
+const screenTypeStart = script.indexOf("function isScreenDisplayType(name)");
+assert(screenTypeStart >= 0, "No se encontró la función de filtro.");
+const screenTypeEnd = script.indexOf("\\n}", screenTypeStart);
+assert(screenTypeEnd > screenTypeStart, "No se pudo extraer el filtro de tipos para probarlo.");
+const screenTypeFn = script.slice(screenTypeStart, screenTypeEnd + 2);
 const typeContext = { normalize: s => (s || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") };
-require("vm").runInNewContext(screenTypeFn, typeContext);
+require("vm").runInNewContext(screenTypeFn + "\\nthis.isScreenDisplayType = isScreenDisplayType;", typeContext);
 assert.strictEqual(typeContext.isScreenDisplayType("Pantalla"), true, "Pantalla debe habilitarse.");
 assert.strictEqual(typeContext.isScreenDisplayType("Display"), true, "Display debe tratarse como pantalla.");
 assert.strictEqual(typeContext.isScreenDisplayType("Flex"), false, "Flex debe quedar fuera del MVP.");
