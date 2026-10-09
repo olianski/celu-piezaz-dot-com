@@ -1746,6 +1746,8 @@ function startCheckout(shopId,productId){
   selectedInventoryId=inv.id;
   const sh=inv.s||shop(shopId);
   document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+Number(inv.qty)+' disponible(s)</div></div>';
+  const delivery=document.getElementById("delivery");if(delivery)delivery.value="local";
+  deliveryChanged();
   openPage("checkout");
 }
 async function confirmOrder(){
@@ -1802,6 +1804,9 @@ async function showAlternativeShops(orderId,productId,originalShopId){
       return {...x,p,shop:sh};
     }).filter(x=>x.p&&x.shop&&x.shop.id);
     if(!offers.length){target.innerHTML='<div class="tiny" style="padding:12px 0">No encontramos otra tienda con unidades disponibles. Inténtalo más tarde.</div>';return;}
+    offers.forEach(x=>{if(x.p&&!state.catalog.some(p=>String(p.id)===String(x.p.id)))state.catalog.push(x.p);});
+    state.inventory=offers.map(x=>({id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p:x.p,s:x.shop}));
+    state.shops=[...new Map(offers.map(x=>[x.shop.id,x.shop])).values()];
     target.innerHTML='<div style="display:grid;gap:9px;margin-top:12px">'+offers.map(x=>{
       const fee=x.delivery_type==="pickup"?0:Number(x.shop.delivery_local_fee||0);
       return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+')">Solicitar a esta tienda</button></div>';
@@ -1842,9 +1847,11 @@ function deliveryChanged(){
  const d=document.getElementById("delivery"),a=document.getElementById("address");
  const w=document.getElementById("checkoutAddressWrap"),f=document.getElementById("checkoutDeliveryFee"),l=document.getElementById("checkoutDeliveryLabel");
  const pickup=d&&d.value==="pickup",far=d&&d.value==="far";
+ const sh=state.shops.find(x=>String(x.id)===String(selectedShop))||{};
+ const fee=pickup?0:far?Number(sh.delivery_outside_fee??5000):Number(sh.delivery_local_fee??0);
  if(a){a.required=!pickup;a.placeholder=pickup?"No se requiere dirección":"Calle, barrio o referencia del taller";}
  if(w)w.classList.toggle("is-hidden",!!pickup);
- if(f)f.textContent=far?"$ 5.000":"Gratis";
+ if(f)f.textContent=fee>0?money(fee):"Gratis";
  if(l)l.textContent=pickup?"Recogida en tienda":far?"Domicilio fuera de zona":"Domicilio local";
 }
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display="none",2200);}
