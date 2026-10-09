@@ -167,9 +167,15 @@ window.CeluPiezazBackend = (() => {
   }
   async function adminSetUserRole(id,role){
     if(!['technician','shop'].includes(role))throw new Error('Solo puedes asignar roles de técnico o tienda.');
-    const u=await requireClient().auth.getUser();
+    const c=requireClient();
+    const u=await c.auth.getUser();
     if(u.data?.user?.id===id)throw new Error('No puedes cambiar tu propio rol de administrador.');
-    return requireClient().from('users').update({role}).eq('id',id).select().single();
+    const linkedShop=await c.from('shops').select('id',{count:'exact',head:true}).eq('user_id',id);
+    if(linkedShop.error)throw linkedShop.error;
+    const hasShop=Number(linkedShop.count||0)>0;
+    if(role==='shop'&&!hasShop)throw new Error('Esta cuenta no tiene ficha comercial. Crea el perfil de tienda desde «Crear perfil».');
+    if(role==='technician'&&hasShop)throw new Error('Esta cuenta tiene una ficha de tienda vinculada. No se puede convertir a técnico desde aquí.');
+    return c.from('users').update({role}).eq('id',id).select().single();
   }
   async function adminListOrders(){
     return requireClient().from('orders').select('id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,shops!orders_shop_id_fkey(name),users!orders_technician_id_fkey(name,phone)').order('created_at',{ascending:false}).limit(300);
