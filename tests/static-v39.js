@@ -62,7 +62,7 @@ assert(html.includes("function escapeHtml(value)"), "Falta escapar texto dinámi
 assert(html.includes("function inlineArg(value)"), "Falta codificar de forma segura los argumentos de los selectores.");
 assert(html.includes("chooseStoreModelV38('+inlineArg(m)+')"), "El selector de modelo de tienda debe escapar los argumentos.");
 assert(html.includes("chooseStoreVariantV38('+inlineArg(model)+','+inlineArg(type)+','+inlineArg(v)+')"), "El selector de variantes de tienda debe escapar los argumentos.");
-assert(!/body\\.role-(?:technician|admin|active) #techBanner/.test(html), "Quedaron reglas obsoletas del banner de prueba.");
+assert(!/body\.role-(?:technician|admin|active) #techBanner/.test(html), "Quedaron reglas obsoletas del banner de prueba.");
 
 
 assert(!html.includes('id="signupTab"'), "El registro público sigue visible.");
