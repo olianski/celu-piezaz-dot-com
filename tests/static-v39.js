@@ -35,6 +35,9 @@ const adapter = fs.readFileSync(adapterPath, "utf8");
 new vm.Script(adapter, { filename: adapterPath });
 assert(html.includes('id="adminConsole"'), "Falta la consola independiente de administración.");
 assert(html.includes('openPage("adminConsole")'), "El login de administrador no abre la nueva consola.");
+assert(html.includes('body.role-technician #techBanner{display:none!important}'), "El banner de modo técnico debe ocultarse.");
+assert(html.includes('body.role-technician #navAdmin{display:none!important}'), "El técnico no debe ver la navegación Mi tienda.");
+
 assert(html.includes('adminConsoleNav(\'shops\')'), "Falta la navegación de tiendas.");
 assert(html.includes('adminConsoleNav(\'catalog\')'), "Falta la navegación del catálogo.");
 assert(adapter.includes("adminSetShopStatus"), "Falta la gestión de estados de tiendas.");
