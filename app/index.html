@@ -2494,9 +2494,35 @@ async function submitAuth(e){
       const self=x.id===A.uid, protectedAdmin=x.role==='admin';
       const edit=protectedAdmin
         ?'<span class="ac-badge ok">Administrador protegido</span>'
-        :'<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar</button></div>';
+        :'<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\\''+x.id+'\\')">Guardar rol</button><button class="ac-btn" onclick="adminConsoleEditUser(\\''+x.id+'\\')">Editar datos</button><div id="acUserEdit-'+x.id+'" style="width:100%;grid-column:1/-1"></div></div>';
       return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · '+esc(date(x.created_at)),badge(x.role),'',edit);
     }).join(''):empty('Sin usuarios','No coincide ninguna cuenta.');
+  }
+  async function editUser(id){
+    const box=$('acUserEdit-'+id);if(!box)return;
+    if(box.dataset.open==='1'){box.innerHTML='';box.dataset.open='0';return;}
+    box.dataset.open='1';box.innerHTML='<div class="ac-panel" style="margin-top:12px"><span class="ac-muted">Cargando datos del perfil…</span></div>';
+    try{
+      const result=await checked(window.CeluSupabaseClient.functions.invoke('admin-update-profile',{body:{action:'get',userId:id}}));
+      const p=result.profile||{},shop=result.shop||{},isTech=p.role==='technician';
+      box.innerHTML='<div class="ac-panel" style="margin-top:12px"><div class="ac-panel-head"><div><h3>Editar '+(isTech?'técnico':'tienda')+'</h3><p>Los cambios se guardan en el perfil existente.</p></div></div><form class="ac-form" onsubmit="adminConsoleSaveUser(event,\\''+id+'\\',\\''+p.role+'\\')">'+
+        '<label class="ac-label">Nombre del responsable<input class="ac-input" name="name" required maxlength="120" value="'+esc(p.name||'')+'"></label>'+
+        '<label class="ac-label">Teléfono<input class="ac-input" name="phone" maxlength="40" value="'+esc(p.phone||'')+'"></label>'+
+        (isTech?'<label class="ac-label">Dirección de domicilio<input class="ac-input" name="address" required minlength="6" maxlength="240" value="'+esc(p.address||'')+'"></label><label class="ac-label">Tarifa de domicilio (COP)<input class="ac-input" name="deliveryFee" required type="number" min="0" max="1000000" step="100" value="'+Number(p.delivery_fee||0)+'"></label>':
+        '<label class="ac-label">Nombre comercial<input class="ac-input" name="shopName" required maxlength="160" value="'+esc(shop.name||'')+'"></label><label class="ac-label">Dirección de la tienda<input class="ac-input" name="address" maxlength="240" value="'+esc(shop.address||'')+'"></label>')+
+        '<div class="ac-actions"><button class="ac-btn primary" type="submit">Guardar cambios</button><button class="ac-btn" type="button" onclick="adminConsoleEditUser(\\''+id+'\\')">Cerrar</button></div></form></div>';
+    }catch(e){box.innerHTML='<div class="ac-panel"><span class="ac-muted">'+esc(errorText(e))+'</span></div>';box.dataset.open='0';}
+  }
+  async function saveUser(e,id,role){
+    e.preventDefault();const form=e.currentTarget,fd=new FormData(form),button=form.querySelector('button[type="submit"]');
+    const payload={action:'update',userId:id,name:String(fd.get('name')||'').trim(),phone:String(fd.get('phone')||'').trim(),address:String(fd.get('address')||'').trim()};
+    if(role==='technician')payload.deliveryFee=Number(fd.get('deliveryFee'));
+    else payload.shopName=String(fd.get('shopName')||'').trim();
+    button.disabled=true;button.textContent='Guardando…';
+    try{
+      await checked(window.CeluSupabaseClient.functions.invoke('admin-update-profile',{body:payload}));
+      notice('Datos del perfil actualizados.');await renderUsers();
+    }catch(err){notice(errorText(err),true);button.disabled=false;button.textContent='Guardar cambios';}
   }
   async function renderOrders(){
     A.orders=await checked(CeluPiezazBackend.adminListOrders())||[];
@@ -2583,6 +2609,8 @@ async function submitAuth(e){
   window.adminConsoleCreateAccount=e=>createAccount(e).catch(e2=>notice(errorText(e2),true));
   window.adminConsoleFilterUsers=filterUsers;
   window.adminConsoleUserRole=id=>userRole(id).catch(e=>notice(errorText(e),true));
+  window.adminConsoleEditUser=id=>editUser(id).catch(e=>notice(errorText(e),true));
+  window.adminConsoleSaveUser=(e,id,role)=>saveUser(e,id,role);
   window.adminConsoleFilterOrders=filterOrders;
   window.adminConsoleOrder=(id,next)=>orderAction(id,next).catch(e=>notice(errorText(e),true));
   window.adminConsoleFilterRequests=filterRequests;
