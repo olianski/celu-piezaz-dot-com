@@ -1684,6 +1684,8 @@ function openPage(id){
   const shopOrdersPage=isShop&&id==="orders";
   if(shopOrdersPage)id="admin";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  const bottomNav=document.querySelector(".bottom");
+  if(bottomNav)bottomNav.style.display=isShop?"none":"";
   const page=document.getElementById(id);
   if(!page)return;
   page.classList.add("active");
@@ -1710,7 +1712,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 (function(){
   const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const shopTabs=["orders","inventory","sales","catalog"];
+  const shopTabs=["orders","inventory","sales"];
 
   window.shopSection=function(section){
     activeShopSection=shopTabs.includes(section)?section:"orders";
@@ -1727,7 +1729,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if(activeShopSection==="orders") renderShopOrdersV38();
     if(activeShopSection==="inventory") inventorySection("home");
     if(activeShopSection==="sales") renderShopSales();
-    if(activeShopSection==="catalog") renderShopCatalog();
   };
 
   window.inventorySection=function(view){
@@ -1935,12 +1936,12 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if (title) title.textContent = currentShop?.name||"Mi tienda";
     if (subtitle) subtitle.textContent = currentShop?.status==="approved"?"Gestiona tus pedidos y tu inventario real.":"Tu tienda debe ser aprobada antes de publicar inventario.";
     if (pending) pending.style.display = "";
-    ["Orders","Inventory","Sales","Catalog"].forEach(s => {
+    ["Orders","Inventory","Sales"].forEach(s => {
       const tab = document.getElementById("shopTab"+s);
       if (tab) tab.style.display = "";
     });
     const catalogTab = document.getElementById("shopTabCatalog");
-    if (catalogTab) catalogTab.textContent = "Catálogo";
+    if (catalogTab) catalogTab.style.display = "none";
     let approval=document.getElementById("shopApprovalNotice");
     if(!approval){
       approval=document.createElement("div");approval.id="shopApprovalNotice";approval.className="shop-approval-banner";
