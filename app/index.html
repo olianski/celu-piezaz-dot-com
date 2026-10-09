@@ -1276,7 +1276,9 @@ body.role-shop #admin.active{display:block!important}
 }
 </style>
 
-</head>
+<style id="delivery-choice-polish">
+.delivery-choice-list{display:grid;gap:10px}.delivery-choice{width:100%;display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;text-align:left;transition:border-color .15s,background .15s;box-shadow:0 2px 8px #10182806}.delivery-choice.active{border-color:#8fb5ff;background:#f4f8ff;box-shadow:0 0 0 2px #0b63f610}.delivery-choice-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:12px;background:#eef4ff;color:var(--blue);font-size:24px;font-weight:800}.delivery-choice-copy{display:grid;gap:4px;flex:1}.delivery-choice-copy strong{font-size:14px;color:var(--ink)}.delivery-choice-copy small{font-size:12px;line-height:1.4;color:var(--muted)}.delivery-choice-check{width:23px;height:23px;display:grid;place-items:center;border:1.5px solid #d0d5dd;border-radius:50%;color:transparent;font-size:13px}.delivery-choice.active .delivery-choice-check{background:var(--blue);border-color:var(--blue);color:#fff}.saved-address-card{display:flex;gap:12px;align-items:center;padding:13px;border:1px solid #e3eaf5;border-radius:13px;background:#f8faff}.saved-address-pin{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:#eaf2ff;color:var(--blue);font-size:22px}.saved-address-card small{display:block;font-size:10px;letter-spacing:.08em;font-weight:800;color:var(--muted);margin-bottom:4px}.saved-address-card strong{font-size:13px;line-height:1.4}.checkout-delivery .checkout-fee-row{margin-top:14px}
+</style></head>
 
 <body>
 <div id="authGate" class="auth-gate">
@@ -1333,17 +1335,10 @@ body.role-shop #admin.active{display:block!important}
 <div id="checkoutCard" class="checkout-product"></div>
 <div class="panel checkout-delivery"><h3>¿Cómo lo recibes?</h3>
 <label class="checkout-field-label" for="delivery">Método de entrega</label>
-<select id="delivery" class="field" onchange="deliveryChanged()">
-<option value="local">Domicilio local — gratis</option>
-<option value="far">Domicilio fuera de zona — $5.000</option>
-<option value="pickup">Recoger en tienda — gratis</option>
-</select>
-<div id="checkoutAddressWrap" class="checkout-address-wrap">
-<label class="checkout-field-label" for="address">Dirección de entrega</label>
-<input id="address" class="field" placeholder="Calle, barrio o referencia del taller" autocomplete="street-address">
-<p class="checkout-hint">Incluye barrio y una referencia para facilitar la entrega.</p>
-</div>
-<div class="checkout-fee-row"><span id="checkoutDeliveryLabel">Domicilio local</span><strong id="checkoutDeliveryFee">Gratis</strong></div>
+<div class="delivery-choice-list" role="group" aria-label="Método de entrega"><button type="button" class="delivery-choice active" data-delivery="local" onclick="setDeliveryChoice('local')"><span class="delivery-choice-icon">⌂</span><span class="delivery-choice-copy"><strong>Pedir a domicilio</strong><small id="deliveryAddressSummary">Dirección guardada en tu perfil</small></span><span class="delivery-choice-check">✓</span></button><button type="button" class="delivery-choice" data-delivery="pickup" onclick="setDeliveryChoice('pickup')"><span class="delivery-choice-icon">↗</span><span class="delivery-choice-copy"><strong>Recoger en tienda</strong><small>Pasas directamente por el repuesto</small></span><span class="delivery-choice-check">✓</span></button></div>
+<input id="delivery" type="hidden" value="local">
+<div id="checkoutAddressWrap" class="checkout-address-wrap"><div class="saved-address-card"><span class="saved-address-pin">⌖</span><div><small>ENTREGAR EN</small><strong id="address">Dirección del técnico</strong></div></div><p class="checkout-hint">Usaremos la dirección y la tarifa configuradas en tu perfil. Para modificarlas, contacta al administrador.</p></div>
+<div class="checkout-fee-row"><span id="checkoutDeliveryLabel">Domicilio</span><strong id="checkoutDeliveryFee">$0</strong></div>
 </div>
 <button id="confirmOrderButton" class="save checkout-submit" style="width:100%" onclick="confirmOrder()">Confirmar pedido</button>
 <p class="checkout-footnote">El pedido se enviará a la tienda seleccionada. La disponibilidad se valida al confirmar.</p>
@@ -1488,6 +1483,7 @@ let masterModels=[];
 let currentShop=null;
 let offersLoadedForModel="";
 let state={mode:null,shops:[],catalog:[],inventory:[],orders:[],demand:[],nextOrder:1};
+let technicianProfile=null;
 let activeShopSection="orders";
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 function unwrapDbRelation(v){return Array.isArray(v)?(v[0]||{}):(v||{});}
@@ -1754,10 +1750,9 @@ function startCheckout(shopId,productId,priorOrderId=null){
 async function confirmOrder(){
   const inv=state.inventory.find(x=>String(x.id)===String(selectedInventoryId));
   const delivery=document.getElementById("delivery").value;
-  const address=document.getElementById("address").value.trim();
+  const address=technicianProfile?.address||"";
   if(!inv||Number(inv.qty)<1){toast("Ese repuesto se agotó. Busca otra opción.");openPage("market");return;}
-  if(delivery!=="pickup"&&!address){toast("Agrega la dirección de entrega.");document.getElementById("address").focus();return;}
-  if(delivery!=="pickup"&&address.length<6){toast("Escribe una dirección o referencia más completa.");document.getElementById("address").focus();return;}
+  if(delivery!=="pickup"&&!address.trim()){toast("Tu perfil no tiene dirección de entrega. Contacta al administrador.");return;}
   const deliveryType=delivery==="far"?"outside_zone":delivery;
   const btn=document.getElementById("confirmOrderButton");
   if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
@@ -1850,16 +1845,19 @@ function openShopHome(){
   activeShopSection="inventory";
   openPage("admin");
 }
+function setDeliveryChoice(value){const d=document.getElementById("delivery");if(d)d.value=value;deliveryChanged();}
 function deliveryChanged(){
- const d=document.getElementById("delivery"),a=document.getElementById("address");
- const w=document.getElementById("checkoutAddressWrap"),f=document.getElementById("checkoutDeliveryFee"),l=document.getElementById("checkoutDeliveryLabel");
- const pickup=d&&d.value==="pickup",far=d&&d.value==="far";
- const sh=state.shops.find(x=>String(x.id)===String(selectedShop))||{};
- const fee=pickup?0:far?Number(sh.delivery_outside_fee??5000):Number(sh.delivery_local_fee??0);
- if(a){a.required=!pickup;a.placeholder=pickup?"No se requiere dirección":"Calle, barrio o referencia del taller";}
+ const d=document.getElementById("delivery"),w=document.getElementById("checkoutAddressWrap"),f=document.getElementById("checkoutDeliveryFee"),l=document.getElementById("checkoutDeliveryLabel");
+ const pickup=d&&d.value==="pickup";
+ const fee=pickup?0:Number(technicianProfile?.delivery_fee||0);
+ document.querySelectorAll(".delivery-choice").forEach(b=>b.classList.toggle("active",b.dataset.delivery===(pickup?"pickup":"local")));
  if(w)w.classList.toggle("is-hidden",!!pickup);
  if(f)f.textContent=fee>0?money(fee):"Gratis";
- if(l)l.textContent=pickup?"Recogida en tienda":far?"Domicilio fuera de zona":"Domicilio local";
+ if(l)l.textContent=pickup?"Recoger en tienda":"Domicilio";
+ const address=document.getElementById("address");
+ if(address)address.textContent=technicianProfile?.address||"Dirección no configurada";
+ const summary=document.getElementById("deliveryAddressSummary");
+ if(summary)summary.textContent=technicianProfile?.address||"Dirección no configurada";
 }
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";clearTimeout(window.tt);window.tt=setTimeout(()=>e.style.display="none",2200);}
 
@@ -2588,6 +2586,7 @@ async function submitAuth(e){
 async function bootAuthenticated(){
   const p=await CeluPiezazBackend.profile();
   if(p.error||!p.data||!p.data.length)throw new Error("No se encontró el perfil del usuario.");
+  technicianProfile=p.data[0];
   const role=p.data[0].role;
   if(!["technician","shop","admin"].includes(role))throw new Error("El tipo de cuenta no está autorizado.");
   state.role=role;state.mode=role;state.shops=[];state.inventory=[];state.catalog=[];state.orders=[];offersLoadedForModel="";
