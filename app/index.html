@@ -1084,8 +1084,6 @@ body.role-admin .bottom{display:none!important}
 body.role-technician #navAdmin{display:none!important}
 body.role-shop #navMarket{display:none!important}
 .shop-approval-banner{margin:12px 0;padding:13px 15px;background:#fff6ed;border:1px solid #fed7aa;border-radius:14px;color:#9a3412;font-size:13px;line-height:1.45;font-weight:650}
-body.role-technician #techBanner{display:none!important}
-body.role-admin #techBanner{display:none!important}
 #acConsole{max-width:1020px;margin:0 auto;padding:8px 0 36px}
 .ac-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:4px 0 22px}
 .ac-eyebrow{display:block;color:#3157d5;font-size:11px;letter-spacing:1.5px;font-weight:900;margin-bottom:7px}
@@ -1181,8 +1179,6 @@ body.role-admin #techBanner{display:none!important}
 
 .auth-subnote{margin:14px 0 0!important;color:#667085!important;font-size:12px!important;line-height:1.45}
 /* Navegación y encabezados separados por tipo de cuenta */
-body.role-active #techBanner{display:none!important}
-body.role-technician #techBanner{display:none!important}
 body.role-technician #navAdmin{display:none!important}
 body.role-technician .bottomin{grid-template-columns:1fr 1fr}
 body.role-shop #navMarket{display:none!important}
@@ -1804,7 +1800,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const q=norm(search.value);
     const models=masterModels.map(m=>m.label).sort((a,b)=>a.localeCompare(b,"es"));
     const found=models.filter(m=>!q||norm(m).includes(q)).slice(0,8);
-    box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38(\''+esc(m).replace(/'/g,"\\'")+'\')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
+    box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38('+inlineArg(m)+')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
   }
 
   window.chooseStoreModelV38=async function(model){
@@ -1816,7 +1812,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       if(val)val.textContent=model;
       if(step)step.classList.add("active");
       const types=[...new Set(state.catalog.filter(p=>p.active&&p.model===model).map(p=>p.type))];
-      choices.innerHTML=types.map(t=>'<button type="button" onclick="chooseStoreTypeV38(\''+esc(model).replace(/'/g,"\\'")+'\',\''+esc(t).replace(/'/g,"\\'")+'\')">'+esc(t)+'</button>').join("");
+      choices.innerHTML=types.map(t=>'<button type="button" onclick="chooseStoreTypeV38('+inlineArg(model)+','+inlineArg(t)+')">'+esc(t)+'</button>').join("");
       document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button></div>';
     }catch(e){document.getElementById("spModels").innerHTML='<div class="picker-empty">No se pudo consultar el catálogo. Intenta de nuevo.</div>';}
   };
@@ -1830,9 +1826,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   window.chooseStoreTypeV38=function(model,type){
     const variants=[...new Set(state.catalog.filter(p=>p.active&&p.model===model&&p.type===type).map(p=>p.variant))];
     const vs=document.getElementById("spVariantStep"), ch=document.getElementById("spChoices");
-    ch.innerHTML=variants.length>1?variants.map(v=>'<button type="button" onclick="chooseStoreVariantV38(\''+esc(model).replace(/'/g,"\\'")+'\',\''+esc(type).replace(/'/g,"\\'")+'\',\''+esc(v).replace(/'/g,"\\'")+'\')">'+esc(v)+'</button>').join(""):'';
+    ch.innerHTML=variants.length>1?variants.map(v=>'<button type="button" onclick="chooseStoreVariantV38('+inlineArg(model)+','+inlineArg(type)+','+inlineArg(v)+')">'+esc(v)+'</button>').join(""):"";
     if(variants.length===1) return chooseStoreVariantV38(model,type,variants[0]);
-    vs.style.display="block";vs.innerHTML='<div class="picker-label"><span>3. Elige la variante</span></div><div class="picker-grid">'+variants.map(v=>'<button type="button" onclick="chooseStoreVariantV38(\''+esc(model).replace(/'/g,"\\'")+'\',\''+esc(type).replace(/'/g,"\\'")+'\',\''+esc(v).replace(/'/g,"\\'")+'\')">'+esc(v)+'</button>').join("")+'</div>';
+    vs.style.display="block";vs.innerHTML='<div class="picker-label"><span>3. Elige la variante</span></div><div class="picker-grid">'+variants.map(v=>'<button type="button" onclick="chooseStoreVariantV38('+inlineArg(model)+','+inlineArg(type)+','+inlineArg(v)+')">'+esc(v)+'</button>').join("")+'</div>';
   };
 
   window.chooseStoreVariantV38=function(model,type,variant){
