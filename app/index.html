@@ -1852,6 +1852,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   function resetCreateInventory(){
     const ids=["spSearch","price","qty"];
     ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
+    const prodSelect=document.getElementById("prod");if(prodSelect){prodSelect.innerHTML="";prodSelect.value="";}
     const m=document.getElementById("spModels"), ch=document.getElementById("spChoices"), vs=document.getElementById("spVariantStep"), sel=document.getElementById("spSelected"), ds=document.getElementById("spDataStep"), btn=document.getElementById("partPickerBtn");
     if(m){m.innerHTML="";m.hidden=true;}
     if(ch)ch.innerHTML="";
@@ -1872,6 +1873,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const found=models.filter(m=>norm(m).includes(q)).slice(0,8);
     box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38('+inlineArg(m)+')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
   }
+  window.renderStoreModels=renderStoreModels;
   window.chooseStoreModelV38=async function(model){
     const btn=document.getElementById("partPickerBtn"),val=document.getElementById("partPickerValue"),choices=document.getElementById("spChoices"),step=document.getElementById("spChoiceStep");
     document.getElementById("spModels").hidden=false;document.getElementById("spModels").innerHTML='<div class="picker-empty">Cargando productos…</div>';
@@ -1902,7 +1904,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   window.chooseStoreVariantV38=function(model,type,variant){
     const p=state.catalog.find(x=>x.active&&x.model===model&&x.type===type&&x.variant===variant); if(!p)return;
-    document.getElementById("prod").value=String(p.id);
+    const prodSelect=document.getElementById("prod");
+    prodSelect.innerHTML='<option value="'+esc(p.id)+'">'+esc(p.displayName||[type,model,variant].filter(Boolean).join(" · "))+'</option>';
+    prodSelect.value=String(p.id);
     const sel=document.getElementById("spSelected"); sel.style.display="flex";sel.classList.remove("is-disabled");
     sel.innerHTML='<div><strong>'+esc(type)+' · '+esc(model)+'</strong><small>'+esc(variant)+'</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button>';
     const ds=document.getElementById("spDataStep");ds.style.display="block";ds.classList.remove("is-disabled");
@@ -2036,6 +2040,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   window.renderAdmin=renderAdminV38;
   const saveBtn=document.getElementById("spSave"); if(saveBtn)saveBtn.onclick=saveCreateInventory;
   const search=document.getElementById("spSearch"); if(search)search.addEventListener("input",renderStoreModels);
+  const priceInput=document.getElementById("price"),qtyInput=document.getElementById("qty");
+  if(priceInput)priceInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(qtyInput)qtyInput.focus();}});
+  if(qtyInput)qtyInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(saveBtn)saveBtn.click();}});
   window.renderStoreProductPicker=function(){resetCreateInventory();};
   window.renderAdmin=renderAdminV38;
   renderAdminV38();
