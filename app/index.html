@@ -579,7 +579,7 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 
 
 /* v4 — crear inventario limpio */
-#inventoryCreate .picker-results:empty{display:none}
+#inventoryCreate .picker-results:empty{display:none} #inventoryCreate #spModels[hidden]{display:none!important}
 #inventoryCreate .picker-results{margin-top:8px}
 #inventoryCreate .picker-new-request{display:none}
 #inventoryCreate .picker-step:first-child{padding-bottom:0}
@@ -1402,7 +1402,7 @@ body.role-shop #admin.active{display:block!important}
   <div class="picker-step">
     <div class="picker-label"><span>1. Busca el modelo</span></div>
     <div class="picker-search"><span>⌕</span><input id="spSearch" type="search" placeholder="Ej. A15, iPhone 13, Redmi Note 12..." autocomplete="off"></div>
-    <div class="picker-results" id="spModels"></div>
+    <div class="picker-results" id="spModels" hidden></div>
   </div>
 
   <button type="button" class="shop-select-row disabled" id="partPickerBtn" style="display:none" onclick="togglePartPicker()">
@@ -1853,7 +1853,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const ids=["spSearch","price","qty"];
     ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     const m=document.getElementById("spModels"), ch=document.getElementById("spChoices"), vs=document.getElementById("spVariantStep"), sel=document.getElementById("spSelected"), ds=document.getElementById("spDataStep"), btn=document.getElementById("partPickerBtn");
-    if(m)m.innerHTML="";
+    if(m){m.innerHTML="";m.hidden=true;}
     if(ch)ch.innerHTML="";
     if(vs){vs.style.display="none";vs.innerHTML="";}
     if(sel){sel.style.display="none";sel.classList.add("is-disabled");sel.innerHTML="";}
@@ -1866,15 +1866,15 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   function renderStoreModels(){
     const search=document.getElementById("spSearch"),box=document.getElementById("spModels");if(!search||!box)return;
     const q=norm(search.value);
-    if(!q){box.innerHTML="";return;}
+    if(!q){box.innerHTML="";box.hidden=true;return;}
+    box.hidden=false;
     const models=masterModels.map(m=>m.label).sort((a,b)=>a.localeCompare(b,"es"));
     const found=models.filter(m=>norm(m).includes(q)).slice(0,8);
     box.innerHTML=found.length?found.map(m=>'<button type="button" class="picker-option" onclick="chooseStoreModelV38('+inlineArg(m)+')"><strong>'+esc(m)+'</strong><small>Seleccionar modelo</small></button>').join(""):'<div class="picker-empty">No encontramos ese modelo.</div>';
   }
-
   window.chooseStoreModelV38=async function(model){
     const btn=document.getElementById("partPickerBtn"),val=document.getElementById("partPickerValue"),choices=document.getElementById("spChoices"),step=document.getElementById("spChoiceStep");
-    document.getElementById("spModels").innerHTML='<div class="picker-empty">Cargando productos…</div>';
+    document.getElementById("spModels").hidden=false;document.getElementById("spModels").innerHTML='<div class="picker-empty">Cargando productos…</div>';
     try{
       await loadProductsForModel(model);
       if(btn){btn.style.display="flex";btn.classList.remove("disabled");}
