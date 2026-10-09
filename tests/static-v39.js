@@ -43,10 +43,15 @@ assert(html.includes('adminConsoleNav(\'catalog\')'), "Falta la navegación del 
 assert(adapter.includes("adminSetShopStatus"), "Falta la gestión de estados de tiendas.");
 assert(adapter.includes("adminCreateProduct"), "Falta la creación de productos maestros.");
 assert(adapter.includes("adminSetUserRole"), "Falta la gestión de roles.");
+assert(adapter.includes("code==='23505'"), "El alta de modelos debe detectar duplicados.");
+assert(adapter.includes("Ese modelo ya existe en el catálogo"), "Falta el mensaje claro para modelos repetidos.");
+assert(html.includes('localStorage.removeItem("celu_piezaz_real_v1")'), "Debe limpiar residuos locales de prueba.");
+assert(!html.includes("funciones locales de prueba"), "Quedó texto de funciones de demostración.");
+
 assert(!html.includes('id="signupTab"'), "El registro público sigue visible.");
 assert(!adapter.includes("auth.signUp"), "El adaptador todavía permite registro público.");
 assert(html.includes("adminConsoleCreateAccount"), "Falta el formulario de alta administrativa.");
 assert(adapter.includes("functions.invoke('admin-create-account'"), "El alta no usa la función segura del servidor.");
 
 
-console.log("PASS: HTML/IDs, sintaxis JS, consola admin, registro privado y funciones Supabase");
+console.log("PASS: HTML/IDs, sintaxis JS, consola admin, registro privado, deduplicación y limpieza de demo");
