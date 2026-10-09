@@ -1712,7 +1712,8 @@ async function renderOrders(){
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+String(e.message||"")+'</div></div>';}
 }
-// Inventario, catálogo y pedidos se gestionan desde Supabase.\nfunction openPage(id){
+// Inventario, catálogo y pedidos se gestionan desde Supabase.
+function openPage(id){
   const shopOrdersPage=id==="orders"&&state.role==="shop";
   if(shopOrdersPage){const shopPage='admin';id=shopPage;}
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
