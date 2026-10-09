@@ -1099,6 +1099,8 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 
 /* Consola de administración — interfaz operativa independiente */
 body.role-admin .bottom{display:none!important}
+body.role-technician #navAdmin{display:none!important}
+body.role-shop #navMarket{display:none!important}
 body.role-admin #techBanner{display:none!important}
 #acConsole{max-width:1020px;margin:0 auto;padding:8px 0 36px}
 .ac-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:4px 0 22px}
@@ -1781,13 +1783,16 @@ function adminTab(t){
   document.getElementById("tabCatalog").classList.toggle("active",t==="catalog");
 }
 function openPage(id){
+  const shopOrdersPage=id==="orders"&&state.role==="shop";
+  if(shopOrdersPage)id="admin";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   document.getElementById("navMarket").classList.toggle("active",id==="market");
-  document.getElementById("navOrders").classList.toggle("active",id==="orders");
+  document.getElementById("navOrders").classList.toggle("active",id==="orders"||shopOrdersPage);
   document.getElementById("navAdmin").classList.toggle("active",id==="admin"||id==="adminConsole");
   if(id==="admin")renderAdmin();
   if(id==="orders")renderOrders();
+  if(shopOrdersPage&&window.shopSection)window.shopSection("orders");
   scrollTo(0,0);
 }
 function deliveryChanged(){}
@@ -2456,21 +2461,22 @@ async function submitAuth(e){
 
 async function bootAuthenticated(){
   const p=await CeluPiezazBackend.profile();
-  if(p.error||!p.data||!p.data.length) throw new Error("No se encontró el perfil del usuario.");
+  if(p.error||!p.data||!p.data.length)throw new Error("No se encontró el perfil del usuario.");
   const role=p.data[0].role;
-  state.role=role;state.mode=role==="technician"?"technician":role;save();
+  state.role=role;state.mode=role;state.shops=[];state.inventory=[];state.catalog=[];state.orders=[];offersLoadedForModel="";
   document.getElementById("authGate").style.display="none";
   document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
   document.body.classList.add("role-active","role-"+role);
   if(role==="technician"){
-    openPage("market");renderMarket();renderOrders();
-  } else if(role==="admin"){
+    await loadMasterModels();
+    openPage("market");await renderMarket();await renderOrders();
+  }else if(role==="admin"){
     openPage("adminConsole");if(window.adminConsoleInit)await window.adminConsoleInit();
-  } else if(role==="shop"){
-    openPage("admin");adminTab("inv");renderAdminV38();
-  } else {
-    throw new Error("El tipo de cuenta no está autorizado.");
-  }
+  }else if(role==="shop"){
+    await loadMasterModels();
+    await loadCurrentShop();
+    openPage("admin");renderAdminV38();
+  }else throw new Error("El tipo de cuenta no está autorizado.");
 }
 async function doLogout(){
   try{await CeluPiezazBackend.signOut();}catch(e){}
