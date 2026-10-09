@@ -1948,36 +1948,46 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     finally{if(btn){btn.disabled=false;btn.textContent="Agregar al inventario";}}
   }
 
-  function renderShopOrdersV38(){
-    const box=document.getElementById("shopOrders"), pending=state.orders.filter(o=>o.shopId==="shop1"&&o.status==="pending");
-    document.getElementById("pendingCount").textContent=pending.length+" pendientes";
-    box.innerHTML=state.orders.filter(o=>o.shopId==="shop1").map(o=>{
-      const p=productFor(o.productId); if(!p)return "";
-      let action="";
-      if(o.status==="pending") action='<button class="buy" onclick="advanceOrderV38('+o.id+',\'accepted\')">Aceptar</button><button class="shop-remove" onclick="rejectOrderV38('+o.id+')">Rechazar</button>';
-      else if(o.status==="accepted") action='<button class="buy" onclick="advanceOrderV38('+o.id+',\'delivered\')">Finalizar</button>';
-      else action='<span class="tiny">Pedido finalizado</span>';
-      return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido #'+o.id+'</b><div class="tiny">'+esc(p.type)+' · '+esc(p.model)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div><div class="shop-order-items"><div class="shop-order-item"><span>Cantidad</span><b>'+o.qty+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.deliveryType==="pickup"?"Recoger en tienda":"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
-    }).join("")||'<div class="inventory-empty-state"><b>No hay pedidos.</b><span>Los nuevos pedidos aparecerán aquí.</span></div>';
+  async function renderShopOrdersV38(){
+    const box=document.getElementById("shopOrders");
+    if(!currentShop){box.innerHTML='<div class="inventory-empty-state"><b>No hay una tienda vinculada</b>Contacta al administrador.</div>';return;}
+    box.innerHTML='<div class="inventory-empty-state">Cargando pedidos reales…</div>';
+    try{
+      const orders=(await loadVisibleOrders()).filter(o=>o.shop_id===currentShop.id);
+      const pending=orders.filter(o=>o.status==="pending");
+      document.getElementById("pendingCount").textContent=pending.length+" pendientes";
+      box.innerHTML=orders.length?orders.map(o=>{
+        const p=orderProduct(o),u=orderTechnician(o),line=orderPrimaryItem(o);
+        let action="";
+        if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
+        else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
+        else action='<span class="tiny">Pedido '+statusLabel(o.status).toLowerCase()+'</span>';
+        return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
+          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Cantidad</span><b>'+Number(line.quantity||1)+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
+      }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
+    }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
 
-  window.advanceOrderV38=function(id,next){
-    const o=state.orders.find(x=>x.id===id);if(!o)return;
-    o.status=next;save();renderShopOrdersV38();renderOrders();renderMarket();toast(next==="accepted"?"Pedido aceptado ✓":"Pedido finalizado ✓");
+  window.advanceOrderV38=async function(id,next){
+    try{
+      const r=await CeluPiezazBackend.updateOrderStatus(id,next);if(r.error)throw r.error;
+      toast(next==="accepted"?"Pedido aceptado.":"Pedido finalizado.");
+      await renderShopOrdersV38();await renderOrders();
+      offersLoadedForModel="";
+    }catch(e){toast(e.message||"No se pudo actualizar el pedido.");}
   };
-  window.rejectOrderV38=function(id){
-    const o=state.orders.find(x=>x.id===id);if(!o)return;
-    const i=inventoryFor(o.shopId,o.productId);if(i)i.qty+=o.qty;
-    o.status="rejected";save();renderShopOrdersV38();renderMarket();renderOrders();toast("Pedido rechazado y stock restaurado");
-  };
+  window.rejectOrderV38=async function(id){await window.advanceOrderV38(id,"rejected");};
 
-  function renderShopSales(){
-    const delivered=state.orders.filter(o=>o.shopId==="shop1"&&o.status==="delivered");
-    document.getElementById("shopSales").innerHTML='<div class="shop-stats"><div class="shop-stat"><span>Pedidos</span><b>'+delivered.length+'</b></div><div class="shop-stat"><span>Ventas</span><b>'+money(delivered.reduce((a,o)=>a+o.total,0))+'</b></div></div>';
+  async function renderShopSales(){
+    const el=document.getElementById("shopSales");
+    try{
+      const orders=(await loadVisibleOrders()).filter(o=>currentShop&&o.shop_id===currentShop.id&&o.status==="delivered");
+      el.innerHTML='<div class="shop-stats"><div class="shop-stat"><span>Pedidos entregados</span><b>'+orders.length+'</b></div><div class="shop-stat"><span>Ventas entregadas</span><b>'+money(orders.reduce((sum,o)=>sum+Number(o.total||0),0))+'</b></div></div>';
+    }catch(e){el.innerHTML='<div class="inventory-empty-state">No se pudieron cargar las ventas.</div>';}
   }
   function renderShopCatalog(){
     const list=document.getElementById("shopCatalog");
-    list.innerHTML=state.catalog.filter(p=>p.active).slice(0,120).map(p=>'<div class="shop-catalog-item"><div><b>'+esc(p.model)+'</b><div class="tiny">'+esc(p.type)+' · '+esc(p.variant)+'</div></div></div>').join("");
+    list.innerHTML='<div class="inventory-empty-state"><b>Catálogo maestro</b><span>'+masterModels.length+' modelos oficiales disponibles. Para publicar un repuesto, entra en Mi tienda → Inventario → Crear inventario. Solo aparecerán productos del catálogo maestro y no habrá productos de demostración.</span></div>';
   }
 
   function renderAdminV38(){
