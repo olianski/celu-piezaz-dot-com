@@ -32,7 +32,9 @@ window.CeluPiezazBackend = (() => {
   async function createDemandRequest(productId){
     const c=requireClient(); const u=await c.auth.getUser();
     if(u.error) return {data:null,error:u.error};
-    return c.from('demand_requests').insert({technician_id:u.data.user.id,product_id:productId,status:'open'}).select().single();
+    const r=await c.from('demand_requests').insert({technician_id:u.data.user.id,product_id:productId,status:'open'}).select().single();
+    if(r.error?.code==='23505') return {...r,error:{...r.error,message:'Ya tienes una solicitud abierta para este repuesto.'}};
+    return r;
   }
   async function adminCreateAccount(payload){
     const r=await requireClient().functions.invoke('admin-create-account',{body:payload});
