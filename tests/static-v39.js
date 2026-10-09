@@ -6,7 +6,8 @@ const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1] || "";
 
 assert(script, "No se encontró el bloque JavaScript principal.");
 
-const ids = [...html.matchAll(/id=["']([^"']+)["']/g)].map(m => m[1]);
+const htmlMarkup = html.replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<style\b[\s\S]*?<\/style>/gi, "");
+const ids = [...htmlMarkup.matchAll(/\bid=["']([^"']+)["']/g)].map(m => m[1]);
 const counts = ids.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{});
 const duplicateIds = Object.entries(counts).filter(([,n])=>n>1);
 assert.deepStrictEqual(duplicateIds, [], "Hay IDs HTML duplicados.");
