@@ -2,6 +2,11 @@ name: Browser role tests
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/browser-role-tests.yml"
   pull_request:
     paths:
       - "app/**"
@@ -40,9 +45,27 @@ jobs:
 
           const site = process.env.SITE_URL;
           const roles = [
-            { name: 'admin', email: process.env.TEST_ADMIN_EMAIL, password: process.env.TEST_ADMIN_PASSWORD, expected: /administraci[oó]n|resumen|usuarios|tiendas/i },
-            { name: 'shop', email: process.env.TEST_SHOP_EMAIL, password: process.env.TEST_SHOP_PASSWORD, expected: /inventario|pedidos|tienda/i },
-            { name: 'technician', email: process.env.TEST_TECHNICIAN_EMAIL, password: process.env.TEST_TECHNICIAN_PASSWORD, expected: /cat[aá]logo|buscar|pedidos|modelo/i },
+            {
+              name: 'admin',
+              email: process.env.TEST_ADMIN_EMAIL,
+              password: process.env.TEST_ADMIN_PASSWORD,
+              bodyClass: 'role-admin',
+              expectedPage: '#adminConsole',
+            },
+            {
+              name: 'shop',
+              email: process.env.TEST_SHOP_EMAIL,
+              password: process.env.TEST_SHOP_PASSWORD,
+              bodyClass: 'role-shop',
+              expectedPage: '#admin',
+            },
+            {
+              name: 'technician',
+              email: process.env.TEST_TECHNICIAN_EMAIL,
+              password: process.env.TEST_TECHNICIAN_PASSWORD,
+              bodyClass: 'role-technician',
+              expectedPage: '#market',
+            },
           ];
 
           test('public login screen loads', async ({ page }) => {
@@ -57,24 +80,27 @@ jobs:
 
           for (const role of roles) {
             test(`role login: ${role.name}`, async ({ page }) => {
-              test.skip(!role.email || !role.password, `Configure TEST_${role.name.toUpperCase()}_EMAIL and PASSWORD repository secrets`);
+              test.skip(!role.email || !role.password, `Configure TEST_${role.name.toUpperCase()}_EMAIL and TEST_${role.name.toUpperCase()}_PASSWORD repository secrets`);
               await page.goto(site, { waitUntil: 'domcontentloaded', timeout: 60000 });
               await page.locator('#authEmail').fill(role.email);
               await page.locator('#authPassword').fill(role.password);
               await page.getByRole('button', { name: 'Entrar' }).click();
+
               await expect(page.locator('#authGate')).toBeHidden({ timeout: 30000 });
-              await expect(page.locator('body')).toContainText(role.expected, { timeout: 20000 });
-              await page.screenshot({ path: `artifacts/role-${role.name}.png`, fullPage: true });
+              await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${role.bodyClass}\\b`), { timeout: 20000 });
+              await expect(page.locator(role.expectedPage)).toBeVisible({ timeout: 20000 });
+
+              // Do not upload authenticated screenshots: they may contain account or inventory data.
             });
           }
           EOF
       - name: Run browser tests
         run: npx playwright test tests/browser/roles.spec.cjs --reporter=list
-      - name: Upload screenshots
+      - name: Upload public login screenshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: role-browser-screenshots
-          path: artifacts/
+          path: artifacts/login-screen.png
           if-no-files-found: ignore
           retention-days: 7
