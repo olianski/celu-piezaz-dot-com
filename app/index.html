@@ -1278,7 +1278,43 @@ body.role-shop #admin.active{display:block!important}
 
 <style id="delivery-choice-polish">
 .delivery-choice-list{display:grid;gap:10px}.delivery-choice{width:100%;display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:15px;background:#fff;text-align:left;transition:border-color .15s,background .15s;box-shadow:0 2px 8px #10182806}.delivery-choice.active{border-color:#8fb5ff;background:#f4f8ff;box-shadow:0 0 0 2px #0b63f610}.delivery-choice-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:12px;background:#eef4ff;color:var(--blue);font-size:24px;font-weight:800}.delivery-choice-copy{display:grid;gap:4px;flex:1}.delivery-choice-copy strong{font-size:14px;color:var(--ink)}.delivery-choice-copy small{font-size:12px;line-height:1.4;color:var(--muted)}.delivery-choice-check{width:23px;height:23px;display:grid;place-items:center;border:1.5px solid #d0d5dd;border-radius:50%;color:transparent;font-size:13px}.delivery-choice.active .delivery-choice-check{background:var(--blue);border-color:var(--blue);color:#fff}.saved-address-card{display:flex;gap:12px;align-items:center;padding:13px;border:1px solid #e3eaf5;border-radius:13px;background:#f8faff}.saved-address-pin{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:#eaf2ff;color:var(--blue);font-size:22px}.saved-address-card small{display:block;font-size:10px;letter-spacing:.08em;font-weight:800;color:var(--muted);margin-bottom:4px}.saved-address-card strong{font-size:13px;line-height:1.4}.checkout-delivery .checkout-fee-row{margin-top:14px}
-</style></head>
+</style>
+<style id="admin-user-ux">
+.ac-user-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,220px);gap:9px;margin:4px 0 8px}
+.ac-user-toolbar .ac-input,.ac-user-toolbar .ac-select{min-height:46px}
+.ac-user-count{font-size:12px;color:#667085;margin:4px 2px 12px}
+.ac-user-list .ac-item{padding:16px;border-radius:16px}
+.ac-user-list .ac-item-top{align-items:center}
+.ac-user-list .ac-item-title{font-size:15px}
+.ac-user-list .ac-item-actions{margin-top:14px}
+.ac-user-list .ac-role-editor{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.ac-user-list .ac-role-editor .ac-select{max-width:none;width:100%;min-height:42px}
+.ac-user-list .ac-role-editor .ac-btn{min-height:42px;white-space:nowrap}
+.ac-user-edit-slot{grid-column:1/-1;width:100%;min-width:0}
+.ac-user-edit-slot:empty{display:none}
+.ac-user-edit-slot>.ac-panel{margin-top:8px!important;background:#f8faff;border-color:#dce6ff;padding:16px}
+.ac-user-edit-slot .ac-panel-head{align-items:flex-start}
+.ac-user-edit-slot .ac-panel-head h3{font-size:17px}
+.ac-user-edit-slot .ac-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.ac-user-edit-slot .ac-form>label{min-width:0;font-size:12px}
+.ac-user-edit-slot .ac-form .ac-input{min-height:46px;background:#fff;font-size:14px}
+.ac-user-edit-slot .ac-form>label:nth-child(3){grid-column:1/-1}
+.ac-user-edit-slot .ac-form .ac-actions{grid-column:1/-1;display:flex;gap:9px;padding-top:12px;margin-top:2px;border-top:1px solid #e1e8f5}
+.ac-user-edit-slot .ac-form .ac-actions .ac-btn{min-height:45px;padding:11px 16px}
+@media(max-width:560px){
+ .ac-user-toolbar{grid-template-columns:1fr}
+ .ac-user-list .ac-item{padding:13px}
+ .ac-user-list .ac-item-top{align-items:flex-start}
+ .ac-user-list .ac-role-editor{grid-template-columns:1fr 1fr}
+ .ac-user-list .ac-role-editor .ac-select{grid-column:1/-1}
+ .ac-user-list .ac-role-editor .ac-btn{width:100%;white-space:normal}
+ .ac-user-edit-slot .ac-form{grid-template-columns:1fr}
+ .ac-user-edit-slot .ac-form>label,.ac-user-edit-slot .ac-form>label:nth-child(3){grid-column:1}
+ .ac-user-edit-slot .ac-form .ac-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+</style>
+
+</head>
 
 <body>
 <div id="authGate" class="auth-gate">
@@ -2482,21 +2518,23 @@ async function submitAuth(e){
   }
   async function renderUsers(){
     const data=await checked(CeluPiezazBackend.adminListUsers());A.users=data||[];
-    $('acContent').innerHTML=heading('Usuarios','Consulta perfiles y gestiona permisos de la plataforma.','<button class="ac-btn" onclick="adminConsoleExport(\'users\')">Exportar CSV</button>')+
-      '<div class="ac-filterbar"><input id="acUserSearch" class="ac-input" placeholder="Buscar nombre, teléfono o rol" oninput="adminConsoleFilterUsers()"></div><div id="acUserList" class="ac-list"></div>'+
-      '<div class="ac-footer-note">Por seguridad, tu propio rol de administrador no se puede cambiar desde esta pantalla.</div>';
+    $('acContent').innerHTML=heading('Usuarios','Encuentra un perfil y edita sus datos desde una sola pantalla.','<button class="ac-btn" onclick="adminConsoleExport(\'users\')">Exportar CSV</button>')+
+      '<div class="ac-user-toolbar"><input id="acUserSearch" class="ac-input" placeholder="Buscar por nombre o teléfono" oninput="adminConsoleFilterUsers()"><select id="acUserRoleFilter" class="ac-select" onchange="adminConsoleFilterUsers()"><option value="all">Todos los perfiles</option><option value="technician">Técnicos</option><option value="shop">Tiendas</option><option value="admin">Administradores</option></select></div>'+
+      '<div class="ac-user-count" id="acUserCount"></div><div id="acUserList" class="ac-list ac-user-list"></div>'+
+      '<div class="ac-footer-note">Los perfiles de administrador están protegidos. Editar datos no cambia contraseñas ni modifica pedidos o inventario.</div>';
     filterUsers();
   }
   function filterUsers(){
-    const q=norm($('acUserSearch')&&$('acUserSearch').value);
-    const rows=A.users.filter(x=>!q||norm([x.name,x.phone,x.role].join(' ')).includes(q));
+    const q=norm($('acUserSearch')&&$('acUserSearch').value),role=$('acUserRoleFilter')&&$('acUserRoleFilter').value||'all';
+    const rows=A.users.filter(x=>(!q||norm([x.name,x.phone,x.role].join(' ')).includes(q))&&(role==='all'||x.role===role));
+    const count=$('acUserCount');if(count)count.textContent=rows.length+' de '+A.users.length+' perfiles';
     $('acUserList').innerHTML=rows.length?rows.map(x=>{
       const self=x.id===A.uid, protectedAdmin=x.role==='admin';
       const edit=protectedAdmin
         ?'<span class="ac-badge ok">Administrador protegido</span>'
-        :'<div class="ac-role-editor"><select class="ac-select" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn primary" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar rol</button><button class="ac-btn" onclick="adminConsoleEditUser(\''+x.id+'\')">Editar datos</button><div id="acUserEdit-'+x.id+'" style="width:100%;grid-column:1/-1"></div></div>';
-      return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · '+esc(date(x.created_at)),badge(x.role),'',edit);
-    }).join(''):empty('Sin usuarios','No coincide ninguna cuenta.');
+        :'<div class="ac-role-editor"><select class="ac-select" aria-label="Rol de '+esc(x.name||'usuario')+'" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar rol</button><button class="ac-btn primary" onclick="adminConsoleEditUser(\''+x.id+'\')">Editar datos</button><div id="acUserEdit-'+x.id+'" class="ac-user-edit-slot"></div></div>';
+      return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · Creado '+esc(date(x.created_at)),badge(x.role),'',edit);
+    }).join(''):empty('Sin perfiles','Prueba otra búsqueda o cambia el filtro.');
   }
   async function editUser(id){
     const box=$('acUserEdit-'+id);if(!box)return;
