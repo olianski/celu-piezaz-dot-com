@@ -43,6 +43,13 @@ for(const f of files){
       [s.includes('grant execute on function public.place_order'),'RPC de pedido autorizado']
     );
   }
+  if(f.includes('009_revoke_internal_trigger_function_execution')){
+    checks.push(
+      [s.includes('revoke execute on function public.guard_shop_lifecycle() from public, anon, authenticated'),'helpers internos sin RPC público'],
+      [s.includes('grant execute on function public.current_user_role() to authenticated'),'rol actual solo para sesiones válidas'],
+      [s.includes('revoke execute on function public.handle_new_user() from public, anon, authenticated'),'trigger de registro protegido']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
