@@ -1778,12 +1778,39 @@ async function renderOrders(){
     const orders=await loadVisibleOrders();
     el.innerHTML=orders.length?orders.map(o=>{
       const p=orderProduct(o),sh=orderShop(o),line=orderPrimaryItem(o);
+      const deliveryText=o.delivery_type==="pickup"?"Recoger en tienda":(o.delivery_address||"Domicilio");
+      const deadline=o.status==="pending"&&o.response_deadline_at?"La tienda tiene hasta "+new Date(o.response_deadline_at).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})+" para responder.":"";
+      const reason=o.rejection_reason?'<div class="tiny" style="margin-top:8px">'+escapeHtml(o.rejection_reason)+'</div>':"";
+      const alternatives=o.status==="rejected"?'<button class="buy" style="margin-top:12px;width:100%" onclick="showAlternativeShops('+inlineArg(o.id)+','+inlineArg(line.product_id)+','+inlineArg(o.shop_id)+')">Ver otras tiendas disponibles</button><div id="alternatives-'+escapeHtml(o.id)+'"></div>':"";
       return '<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml((p.type||"Repuesto")+' '+p.model)+'</div><div class="sub">'+escapeHtml((p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
       '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
       '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
-      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+escapeHtml(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</div></div>';
+      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+escapeHtml(deliveryText)+'</div>'+
+      (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
+}
+async function showAlternativeShops(orderId,productId,originalShopId){
+  const target=document.getElementById("alternatives-"+orderId);
+  if(!target)return;
+  target.innerHTML='<div class="tiny" style="padding:12px 0">Buscando tiendas con disponibilidad…</div>';
+  try{
+    const r=await CeluPiezazBackend.getInventoryByProducts([productId]);
+    if(r.error)throw r.error;
+    const offers=(r.data||[]).filter(x=>String(x.shop_id)!==String(originalShopId)&&Number(x.quantity)>0&&x.active!==false).map(x=>{
+      const p=mapDbProduct(x.products)||catalogProduct(x.product_id),sh=unwrapDbRelation(x.shops);
+      return {...x,p,shop:sh};
+    }).filter(x=>x.p&&x.shop&&x.shop.id);
+    if(!offers.length){target.innerHTML='<div class="tiny" style="padding:12px 0">No encontramos otra tienda con unidades disponibles. Inténtalo más tarde.</div>';return;}
+    target.innerHTML='<div style="display:grid;gap:9px;margin-top:12px">'+offers.map(x=>{
+      const fee=x.delivery_type==="pickup"?0:Number(x.shop.delivery_local_fee||0);
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+')">Solicitar a esta tienda</button></div>';
+    }).join('')+'</div>';
+  }catch(e){target.innerHTML='<div class="tiny" style="padding:12px 0">No se pudieron consultar alternativas. '+escapeHtml(e.message||"")+'</div>';}
+}
+function chooseAlternativeShop(shopId,productId){
+  offersLoadedForModel="";
+  startCheckout(shopId,productId);
 }
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
