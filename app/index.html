@@ -1828,7 +1828,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if(sub==="create") resetCreateInventory();
   };
 
-  function ownInventory(){return state.inventory.filter(i=>i.shopId==="shop1"&&i.active);}
+  function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id&&i.active):[];}
   function productFor(id){return state.catalog.find(p=>String(p.id)===String(id));}
 
   window.renderInventorySearch=function(){
@@ -1856,12 +1856,14 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       '<div class="inventory-edit-actions"><button class="inventory-cancel" onclick="renderInventorySearch()">Cancelar</button><button class="inventory-save" onclick="saveInventoryV38(\''+id+'\')">Guardar cambios</button></div></div>';
   };
 
-  window.saveInventoryV38=function(id){
-    const i=state.inventory.find(x=>String(x.id)===String(id)); if(!i)return;
-    const p=Number(document.getElementById("ep-"+id).value), q=Number(document.getElementById("eq-"+id).value);
+  window.saveInventoryV38=async function(id){
+    const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
+    const p=Number(document.getElementById("ep-"+id).value),q=Number(document.getElementById("eq-"+id).value);
     if(!Number.isFinite(p)||p<0){toast("Indica un precio válido.");return;}
     if(!Number.isInteger(q)||q<0){toast("Indica una cantidad válida.");return;}
-    i.price=p;i.qty=q;i.active=true;save();renderInventorySearch();renderMarket();toast("Inventario actualizado ✓");
+    try{const r=await CeluPiezazBackend.saveInventoryItem(i.productId,p,q);if(r.error)throw r.error;
+      await loadCurrentShop();renderInventorySearch();toast("Inventario actualizado correctamente.");}
+    catch(e){toast(e.message||"No se pudo actualizar el inventario.");}
   };
 
   function resetCreateInventory(){
