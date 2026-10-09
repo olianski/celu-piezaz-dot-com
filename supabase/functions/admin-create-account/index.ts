@@ -57,6 +57,7 @@ Deno.serve(async (req: Request) => {
   const role = String(input.role || "");
   const shopName = String(input.shopName || "").trim();
   const address = String(input.address || "").trim();
+  const deliveryFee = Number(input.deliveryFee ?? 0);
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return respond({ error: "Introduce un correo válido." }, 400);
   if (password.length < 10) return respond({ error: "La contraseña inicial debe tener al menos 10 caracteres." }, 400);
@@ -65,6 +66,8 @@ Deno.serve(async (req: Request) => {
   if (!["technician", "shop"].includes(role)) return respond({ error: "Solo puedes crear perfiles de técnico o tienda." }, 400);
   if (role === "shop" && !shopName) return respond({ error: "El nombre de la tienda es obligatorio." }, 400);
   if (shopName.length > 160 || address.length > 240) return respond({ error: "Los datos de la tienda son demasiado largos." }, 400);
+  if (role === "technician" && (!address || address.length < 6)) return respond({ error: "La dirección del técnico es obligatoria y debe tener al menos 6 caracteres." }, 400);
+  if (role === "technician" && (!Number.isFinite(deliveryFee) || deliveryFee < 0 || deliveryFee > 1000000)) return respond({ error: "La tarifa de domicilio debe ser un valor válido entre $0 y $1.000.000." }, 400);
 
   const authorizationToken = crypto.randomUUID();
   const { error: tokenError } = await adminClient.from("account_authorization_tokens").insert({
@@ -105,6 +108,14 @@ Deno.serve(async (req: Request) => {
   if (metadataError) {
     await adminClient.auth.admin.deleteUser(created.user.id);
     return respond({ error: "No se pudo finalizar la creación del perfil. Intenta de nuevo." }, 500);
+  }
+
+  if (role === "technician") {
+    const { error: technicianError } = await adminClient.from("users").update({ address, delivery_fee: deliveryFee }).eq("id", created.user.id);
+    if (technicianError) {
+      await adminClient.auth.admin.deleteUser(created.user.id);
+      return respond({ error: "No se pudo guardar la dirección y tarifa del técnico. La cuenta fue revertida." }, 500);
+    }
   }
 
   if (role === "shop") {
