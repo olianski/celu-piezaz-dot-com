@@ -2045,6 +2045,27 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 const smartSearch=document.getElementById("q");
 if(smartSearch) smartSearch.addEventListener("input",()=>{techSelectedModel="";techSelectedPart="";techSelectedVariant="";renderMarket();});
 
+document.addEventListener("keydown",function(event){
+  if(event.key!=="Enter"||event.isComposing)return;
+  const input=event.target;
+  if(!(input instanceof HTMLInputElement))return;
+  const actions={
+    q:()=>{if(typeof renderMarket==="function")renderMarket();},
+    inventorySearch:()=>{if(typeof renderInventorySearch==="function")renderInventorySearch();},
+    spSearch:()=>{if(typeof renderStoreModels==="function")renderStoreModels();},
+    acShopSearch:()=>{if(typeof adminConsoleFilterShops==="function")adminConsoleFilterShops();},
+    acProductSearch:()=>{if(typeof adminConsoleFindProducts==="function")adminConsoleFindProducts();},
+    acModelSearch:()=>{if(typeof adminConsoleFilterModels==="function")adminConsoleFilterModels();},
+    acUserSearch:()=>{if(typeof adminConsoleFilterUsers==="function")adminConsoleFilterUsers();},
+    acOrderSearch:()=>{if(typeof adminConsoleFilterOrders==="function")adminConsoleFilterOrders();}
+  };
+  const action=actions[input.id];
+  if(!action)return;
+  event.preventDefault();
+  action();
+  input.blur();
+});
+
 async function submitAuth(e){
   e.preventDefault();
   const msg=document.getElementById("authMsg"),btn=document.getElementById("authSubmit");
