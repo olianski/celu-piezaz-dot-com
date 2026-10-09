@@ -1188,7 +1188,45 @@ body.role-shop #navOrders{display:block!important}
 body.role-shop #market,body.role-shop #orders{display:none!important}
 body.role-shop #admin.active{display:block!important}
 
-</style></head>
+</style>
+<style id="shop-layout-polish-v1">
+/* Ajustes de alineación móvil para el panel de tienda */
+#admin .shop-shell{gap:18px}
+#admin .shop-topbar{align-items:center;gap:14px;padding:6px 0 2px}
+#admin .shop-topbar>div:first-child{min-width:0;flex:1}
+#admin .shop-topbar h1{line-height:1.12;margin:4px 0 0}
+#admin .shop-topbar p{line-height:1.45;max-width:32ch;margin-top:8px}
+#admin .shop-pending{flex:0 0 auto;padding:9px 12px;line-height:1.2;text-align:center}
+#admin .shop-main-tabs{width:100%;min-width:0;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:5px;margin:0 0 2px;box-sizing:border-box}
+#admin .shop-main-tab{min-width:0;white-space:nowrap;padding:12px 3px;font-size:12px;line-height:1.2}
+#admin .shop-main-tabs:has(#shopTabCatalog[style*="display: none"]){grid-template-columns:repeat(3,minmax(0,1fr))}
+#admin .shop-section-head{display:block;margin:2px 0 14px}
+#admin .shop-section-head h2{font-size:20px;line-height:1.25;letter-spacing:-.35px;margin:0}
+#admin .shop-section-head span{display:block;margin-top:6px;font-size:14px;line-height:1.45}
+#admin #shopOrders,#admin #shopSales,#admin #shopCatalog{min-width:0}
+#admin .inventory-empty-state{padding:22px 16px;text-align:center;line-height:1.5;border-radius:15px}
+#admin .inventory-empty-state b{display:block;line-height:1.35;margin-bottom:7px}
+#admin .inventory-empty-state span{display:block;line-height:1.5;margin-top:0}
+#admin .shop-order-card{padding:15px;margin-bottom:12px}
+#admin .shop-order-top{align-items:flex-start;min-width:0}
+#admin .shop-order-top>div{min-width:0;overflow-wrap:anywhere}
+#admin .shop-order-items{gap:2px}
+#admin .shop-order-item{align-items:flex-start;line-height:1.4;gap:12px}
+#admin .shop-order-item span{color:var(--muted)}
+#admin .shop-order-item b{text-align:right;overflow-wrap:anywhere}
+#admin .shop-order-actions{gap:8px}
+#admin .shop-order-actions button{min-height:42px;flex:1 1 120px}
+@media(max-width:430px){
+ #admin main{padding-left:16px;padding-right:16px}
+ #admin .shop-shell{gap:17px}
+ #admin .shop-topbar h1{font-size:27px}
+ #admin .shop-pending{font-size:11px;padding:9px 10px}
+ #admin .shop-main-tab{font-size:11px;padding:12px 2px}
+ #admin .shop-section-head h2{font-size:19px}
+}
+</style>
+
+</head>
 
 <body>
 <div id="authGate" class="auth-gate">
