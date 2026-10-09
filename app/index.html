@@ -1531,6 +1531,16 @@ function isScreenDisplayType(name){
 function isVisibleVariant(name){
   return normalize(String(name||"").trim())!=="compatible";
 }
+function sortScreenVariants(values,model){
+  const isIPhone=normalize(String(model||"")).includes("iphone");
+  const priority=(isIPhone?["incell","jk","gx","original"]:["incell","oled","amoled","original"]).map(normalize);
+  return [...values].sort((a,b)=>{
+    const na=normalize(String(a||"").trim()),nb=normalize(String(b||"").trim());
+    const ia=priority.indexOf(na),ib=priority.indexOf(nb);
+    const pa=ia<0?priority.length:ia,pb=ib<0?priority.length:ib;
+    return pa-pb||String(a).localeCompare(String(b),"es",{sensitivity:"base"});
+  });
+}
 function mapDbProduct(r){
   if(!r)return null;
   const m=unwrapDbRelation(r.phone_models),t=unwrapDbRelation(r.part_types),v=unwrapDbRelation(r.part_variants);
@@ -1601,7 +1611,7 @@ function techPartsForSelection(){
 }
 function techVariantsForSelection(){
   if(!techSelectedModel||!techSelectedPart) return [];
-  return [...new Set(state.catalog.filter(p=>p.active&&p.model===techSelectedModel&&p.type===techSelectedPart&&isVisibleVariant(p.variant)).map(p=>p.variant))];
+  return sortScreenVariants([...new Set(state.catalog.filter(p=>p.active&&p.model===techSelectedModel&&p.type===techSelectedPart&&isVisibleVariant(p.variant)).map(p=>p.variant))],techSelectedModel);
 }
 function renderTechFlow(){
   const q=normalize(document.getElementById("q").value.trim());
@@ -2041,7 +2051,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   window.chooseStoreTypeV38=function(model,type){
     const products=(window.__storeCreateProducts||[]).filter(p=>p.active&&normalize(p.model)===normalize(model)&&p.type===type);
-    const variants=[...new Set(products.map(p=>p.variant).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+    const variants=sortScreenVariants([...new Set(products.map(p=>p.variant).filter(Boolean))],model);
     const vs=document.getElementById("spVariantStep"), step=document.getElementById("spChoiceStep"), btn=document.getElementById("partPickerBtn"), arrow=document.getElementById("partPickerArrow"), prod=document.getElementById("prod"), selected=document.getElementById("spSelected"), data=document.getElementById("spDataStep");
     if(step)step.classList.remove("open");
     if(btn)btn.classList.remove("open");
