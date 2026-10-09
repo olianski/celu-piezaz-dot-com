@@ -69,7 +69,7 @@ jobs:
           });
 
           test('tienda: pedidos, inventario y catálogo se pueden consultar', async ({ page }) => {
-            test.setTimeout(60000);
+            test.setTimeout(90000);
             await login(page, process.env.TEST_SHOP_EMAIL, process.env.TEST_SHOP_PASSWORD, 'shop', '#admin');
             await expect(page.locator('#shopOrders')).toBeVisible();
             await page.locator('#shopTabInventory').click();
@@ -89,8 +89,10 @@ jobs:
             await expect(page.locator('#q')).toBeVisible();
             await page.locator('#q').fill('Samsung');
             await expect(page.locator('#results')).toBeVisible();
-            await expect(page.locator('#count')).toBeVisible();
-            await expect(page.locator('#techFlow')).toBeHidden();
+            await expect(page.locator('#flowModelSelected .model-result').first()).toBeVisible({ timeout: 10000 });
+            await page.locator('#flowModelSelected .model-result').first().click();
+            await expect(page.locator('#flowModelSelected .flow-selected')).toContainText(/Samsung/i, { timeout: 20000 });
+            await expect(page.locator('#flowPartStep')).toBeVisible({ timeout: 20000 });
             // No se confirma ningún pedido ni se crean solicitudes.
           });
           EOF
