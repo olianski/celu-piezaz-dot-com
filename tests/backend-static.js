@@ -77,6 +77,14 @@ for(const f of files){
       [s.includes("s.status = 'approved'") && s.includes('s.active = true'),'inventario de tiendas aprobadas y activas únicamente']
     );
   }
+  if(f.includes('014_allow_validated_order_stock_transactions')){
+    checks.push(
+      [s.includes("current_setting('app.internal_stock_change', true) = 'true'"),'solo RPC validadas pueden actualizar stock transaccional'],
+      [s.includes("set_config('app.internal_stock_change','true',true)"),'pedido marca el descuento interno de stock'],
+      [s.includes("perform public.update_order_status(v_order.id,'"),'flujo de estados de pedido protegido'],
+      [s.includes("p_next_status='out_for_delivery'"),'flujo de despacho de pedidos']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
