@@ -2590,6 +2590,24 @@ async function submitAuth(e){
   window.adminConsoleExport=kind=>exportCsv(kind);
 })();
 
+let orderRefreshTimer=null;
+let orderRealtimeChannel=null;
+function startOrderUpdates(){
+  if(orderRefreshTimer)clearInterval(orderRefreshTimer);
+  if(orderRealtimeChannel&&window.CeluSupabaseClient){
+    window.CeluSupabaseClient.removeChannel(orderRealtimeChannel);
+    orderRealtimeChannel=null;
+  }
+  const refreshIfVisible=()=>{
+    if(state.role==="technician"&&document.getElementById("orders")?.classList.contains("active"))renderOrders();
+  };
+  if(window.CeluSupabaseClient){
+    orderRealtimeChannel=window.CeluSupabaseClient.channel("technician-order-statuses")
+      .on("postgres_changes",{event:"*",schema:"public",table:"orders"},refreshIfVisible)
+      .subscribe();
+  }
+  orderRefreshTimer=setInterval(refreshIfVisible,12000);
+}
 async function bootAuthenticated(){
   const p=await CeluPiezazBackend.profile();
   if(p.error||!p.data||!p.data.length)throw new Error("No se encontró el perfil del usuario.");
@@ -2604,7 +2622,7 @@ async function bootAuthenticated(){
     if(role==="shop")await loadCurrentShop();
     document.getElementById("authGate").style.display="none";
     if(role==="technician"){
-      openPage("market");await renderMarket();await renderOrders();
+      openPage("market");await renderMarket();await renderOrders();startOrderUpdates();
     }else if(role==="admin"){
       openPage("adminConsole");if(window.adminConsoleInit)await window.adminConsoleInit();
     }else{
@@ -2638,6 +2656,7 @@ async function initRealBackend(){
   try{
     if(!window.supabase||!window.CELU_SUPABASE_CONFIG) throw new Error("Backend no configurado");
     const client=window.supabase.createClient(window.CELU_SUPABASE_CONFIG.url,window.CELU_SUPABASE_CONFIG.anonKey);
+    window.CeluSupabaseClient=client;
     CeluPiezazBackend.configure(client);window.CeluPiezazBackendReady=true;
     const s=await CeluPiezazBackend.session();
     if(s.data?.session) await bootAuthenticated(); else showRoleGate();
