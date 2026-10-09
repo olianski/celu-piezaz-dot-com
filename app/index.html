@@ -1483,7 +1483,7 @@ localStorage.removeItem("celu_piezaz_tecnico_v11");
 localStorage.removeItem("celu_piezaz_real_v1");
 const KEY="celu_piezaz_real_v1";
 const money=n=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(n||0));
-let selectedProduct=null, selectedShop=null, selectedInventoryId=null, filter="Todos";
+let selectedProduct=null, selectedShop=null, selectedInventoryId=null, replacementForOrderId=null, filter="Todos";
 let masterModels=[];
 let currentShop=null;
 let offersLoadedForModel="";
@@ -1738,8 +1738,9 @@ function openProduct(productId){
       '<button class="buy" onclick="startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></div>').join(''):
       '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
 }
-function startCheckout(shopId,productId){
+function startCheckout(shopId,productId,priorOrderId=null){
   selectedShop=shopId;
+  replacementForOrderId=priorOrderId||null;
   if(productId)selectedProduct=productId;
   const p=catalogProduct(selectedProduct),inv=inventoryFor(shopId,selectedProduct);
   if(!p||!inv){toast("La disponibilidad cambió. Vuelve a buscar el repuesto.");openPage("market");return;}
@@ -1763,6 +1764,12 @@ async function confirmOrder(){
   try{
     const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId,quantity:1}]);
     if(r.error)throw r.error;
+    const createdOrderId=typeof r.data==="string"?r.data:(r.data?.id||r.data?.order_id||null);
+    if(replacementForOrderId&&createdOrderId){
+      const linked=await CeluPiezazBackend.linkReplacementOrder(createdOrderId,replacementForOrderId);
+      if(linked.error)console.warn("No se pudo vincular el pedido alternativo:",linked.error);
+    }
+    replacementForOrderId=null;
     toast("Pedido enviado a la tienda.");
     document.getElementById("address").value="";
     document.getElementById("delivery").value="local";
@@ -1809,13 +1816,13 @@ async function showAlternativeShops(orderId,productId,originalShopId){
     state.shops=[...new Map(offers.map(x=>[x.shop.id,x.shop])).values()];
     target.innerHTML='<div style="display:grid;gap:9px;margin-top:12px">'+offers.map(x=>{
       const fee=x.delivery_type==="pickup"?0:Number(x.shop.delivery_local_fee||0);
-      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+')">Solicitar a esta tienda</button></div>';
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+','+inlineArg(orderId)+')">Solicitar a esta tienda</button></div>';
     }).join('')+'</div>';
   }catch(e){target.innerHTML='<div class="tiny" style="padding:12px 0">No se pudieron consultar alternativas. '+escapeHtml(e.message||"")+'</div>';}
 }
-function chooseAlternativeShop(shopId,productId){
+function chooseAlternativeShop(shopId,productId,priorOrderId){
   offersLoadedForModel="";
-  startCheckout(shopId,productId);
+  startCheckout(shopId,productId,priorOrderId);
 }
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
