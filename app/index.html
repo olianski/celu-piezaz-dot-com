@@ -1854,9 +1854,13 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     const prodSelect=document.getElementById("prod");if(prodSelect){prodSelect.innerHTML="";prodSelect.value="";}
     window.__storeCreateProducts=[];
-    const m=document.getElementById("spModels"), ch=document.getElementById("spChoices"), vs=document.getElementById("spVariantStep"), sel=document.getElementById("spSelected"), ds=document.getElementById("spDataStep"), btn=document.getElementById("partPickerBtn");
+    const m=document.getElementById("spModels"), ch=document.getElementById("spChoices"), vs=document.getElementById("spVariantStep"), sel=document.getElementById("spSelected"), ds=document.getElementById("spDataStep"), btn=document.getElementById("partPickerBtn"), step=document.getElementById("spChoiceStep"), arrow=document.getElementById("partPickerArrow"), value=document.getElementById("partPickerValue");
     if(m){m.innerHTML="";m.hidden=true;}
     if(ch)ch.innerHTML="";
+    if(step)step.classList.remove("open");
+    if(btn){btn.classList.remove("open");}
+    if(arrow)arrow.textContent="⌄";
+    if(value)value.textContent="Primero selecciona un modelo";
     if(vs){vs.style.display="none";vs.innerHTML="";}
     if(sel){sel.style.display="none";sel.classList.add("is-disabled");sel.innerHTML="";}
     if(ds){ds.style.display="none";ds.classList.add("is-disabled");}
@@ -1923,6 +1927,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const prodSelect=document.getElementById("prod");
     prodSelect.innerHTML='<option value="'+esc(p.id)+'">'+esc(p.displayName||[type,model,variant].filter(Boolean).join(" · "))+'</option>';
     prodSelect.value=String(p.id);
+    const variantPanel=document.getElementById("spVariantStep");if(variantPanel){variantPanel.style.display="none";variantPanel.innerHTML="";}
     const sel=document.getElementById("spSelected"); sel.style.display="flex";sel.classList.remove("is-disabled");
     sel.innerHTML='<div><strong>'+esc(type)+' · '+esc(model)+'</strong><small>'+esc(variant)+'</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button>';
     const ds=document.getElementById("spDataStep");ds.style.display="block";ds.classList.remove("is-disabled");
