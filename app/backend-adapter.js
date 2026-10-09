@@ -24,7 +24,7 @@ window.CeluPiezazBackend = (() => {
   }
   async function getInventoryByProducts(productIds){
     if(!productIds||!productIds.length)return {data:[],error:null};
-    return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,shops!inventory_shop_id_fkey(id,name,address,status,delivery_local_fee,delivery_outside_fee),products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').in('product_id',productIds).eq('active',true).gt('quantity',0).eq('shops.status','approved').order('price');
+    return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,shops!inventory_shop_id_fkey!inner(id,name,address,status,delivery_local_fee,delivery_outside_fee),products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').in('product_id',productIds).eq('active',true).gt('quantity',0).eq('shops.status','approved').order('price');
   }
   async function listShopInventory(shopId){
     return requireClient().from('inventory').select('id,shop_id,product_id,price,quantity,active,updated_at,products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').eq('shop_id',shopId).order('updated_at',{ascending:false});
