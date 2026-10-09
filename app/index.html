@@ -1681,8 +1681,8 @@ async function renderOrders(){
 // Inventario, catálogo y pedidos se gestionan desde Supabase.
 function openPage(id){
   const isShop=state.role==="shop";
-  const bottomNav=document.getElementById("bottomNav");
-  if(bottomNav) bottomNav.style.display=(isShop||state.role==="admin")?"none":"";
+  const roleBottomBar=document.getElementById("bottomNav");
+  if(roleBottomBar) roleBottomBar.style.display=(isShop||state.role==="admin")?"none":"";
   const shopOrdersPage=isShop&&id==="orders";
   if(shopOrdersPage)id="admin";
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
