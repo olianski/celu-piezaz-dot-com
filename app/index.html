@@ -1226,6 +1226,31 @@ body.role-shop #admin.active{display:block!important}
 }
 </style>
 
+
+<style id="inventory-layout-polish-v1">
+#shopSectionInventory .inventory-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 14px}
+#shopSectionInventory .inventory-choice{min-width:0;min-height:112px;padding:17px 16px;border-radius:17px;gap:7px;justify-content:center;box-shadow:0 2px 7px rgba(16,24,40,.035)}
+#shopSectionInventory .inventory-choice b{font-size:17px;line-height:1.25;letter-spacing:-.2px}
+#shopSectionInventory .inventory-choice span{font-size:12px;line-height:1.45}
+#shopSectionInventory .shop-action{min-width:0;padding:16px;border-radius:18px}
+#inventoryCreate .shop-action>h2{font-size:21px;line-height:1.25;margin:0 0 6px}
+#inventoryCreate .shop-action>p{font-size:14px;line-height:1.5;margin:0 0 14px}
+#inventoryCreate #storePicker>.picker-step{padding:13px;border-radius:15px}
+#inventoryCreate .picker-search input{min-width:0;font-size:15px;min-height:49px}
+#inventoryCreate .picker-results{max-height:260px;gap:7px}
+#inventoryCreate .picker-option{padding:12px;border-radius:13px;line-height:1.35}
+#inventoryCreate .picker-option strong{font-size:15px;line-height:1.35}
+#inventoryCreate .picker-option small{font-size:12px;line-height:1.4}
+@media(max-width:430px){
+ #shopSectionInventory .inventory-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #shopSectionInventory .inventory-choice{min-height:112px;padding:15px 13px;border-radius:15px}
+ #shopSectionInventory .inventory-choice b{font-size:16px}
+ #shopSectionInventory .inventory-choice span{font-size:12px}
+ #inventoryCreate .shop-action{padding:14px}
+ #inventoryCreate #storePicker>.picker-step{padding:11px}
+}
+</style>
+
 </head>
 
 <body>
@@ -1772,17 +1797,19 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   };
 
   window.inventorySection=function(view){
-    const v=document.getElementById("inventoryView"), c=document.getElementById("inventoryCreate");
-    if(!v||!c)return;
-    const sub=view==="view"?"view":view==="create"?"create":"home";
-    v.classList.toggle("active",sub==="view");
-    c.classList.toggle("active",sub==="create");
-    if(sub==="view"){
-      document.getElementById("inventorySearch").value="";
-      document.getElementById("inventoryResults").innerHTML='<div class="inventory-empty-state"><b>Busca un modelo</b><span>Tu inventario aparecerá aquí.</span></div>';
-    }
-    if(sub==="create") resetCreateInventory();
-  };
+     const v=document.getElementById("inventoryView"), c=document.getElementById("inventoryCreate");
+     const choices=document.querySelector("#shopSectionInventory .inventory-choice-grid");
+     if(!v||!c)return;
+     const sub=view==="view"?"view":view==="create"?"create":"home";
+     v.classList.toggle("active",sub==="view");
+     c.classList.toggle("active",sub==="create");
+     if(choices)choices.style.display=sub==="home"?"grid":"none";
+     if(sub==="view"){
+       document.getElementById("inventorySearch").value="";
+       document.getElementById("inventoryResults").innerHTML='<div class="inventory-empty-state"><b>Busca un modelo</b><span>Tu inventario aparecerá aquí.</span></div>';
+     }
+     if(sub==="create") resetCreateInventory();
+   };
 
   function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id&&i.active):[];}
   function productFor(id){return state.catalog.find(p=>String(p.id)===String(id));}
