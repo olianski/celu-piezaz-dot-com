@@ -1453,9 +1453,7 @@ let techSelectedModel="";
 let techSelectedPart="";
 let techSelectedVariant="";
 
-function techModels(){
-  return [...new Set(state.catalog.filter(p=>p.active).map(p=>p.model))].sort((a,b)=>a.localeCompare(b));
-}
+function techModels(){return masterModels.map(m=>m.label).sort((a,b)=>a.localeCompare(b,"es"));}
 function techPartsForSelection(){
   if(!techSelectedModel) return [];
   return [...new Set(state.catalog.filter(p=>p.active&&p.model===techSelectedModel).map(p=>p.type))];
@@ -1549,12 +1547,13 @@ function changeTechVariant(){
   renderMarket();
 }
 
-function selectTechModel(model){
-  techSelectedModel=model;
-  techSelectedPart="";
-  techSelectedVariant="";
+async function selectTechModel(model){
+  techSelectedModel=model;techSelectedPart="";techSelectedVariant="";
+  offersLoadedForModel="";
   document.getElementById("q").value="";
-  renderMarket();
+  document.getElementById("flowModelSelected").innerHTML='<div class="flow-empty">Cargando catálogo…</div>';
+  try{await loadProductsForModel(model);renderMarket();}
+  catch(e){document.getElementById("flowModelSelected").innerHTML='<div class="flow-empty">No pudimos cargar el catálogo.</div>';toast("No se pudo cargar el catálogo.");}
 }
 function selectTechPart(part){
   techSelectedPart=part;
