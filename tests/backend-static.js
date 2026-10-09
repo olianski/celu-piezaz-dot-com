@@ -50,6 +50,15 @@ for(const f of files){
       [s.includes('revoke execute on function public.handle_new_user() from public, anon, authenticated'),'trigger de registro protegido']
     );
   }
+  if(f.includes('010_restrict_authenticated_writes_and_inventory_guard')){
+    checks.push(
+      [s.includes('alter policy inventory_insert_own on public.inventory to authenticated'),'inventario restringido a sesiones válidas'],
+      [s.includes('guard_inventory_write'),'inventario validado en el servidor'],
+      [s.includes("v_shop.status <> 'approved'"),'tienda aprobada antes de escribir inventario'],
+      [s.includes("public.current_user_role() = 'technician'"),'solicitudes reservadas a técnicos'],
+      [s.includes('from anon, public'),'sin privilegios heredados para invitados']
+    );
+  }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
 }
 console.log('Backend static checks OK');
