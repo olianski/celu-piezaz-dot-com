@@ -8,6 +8,15 @@ assert(script, "No se encontró el bloque JavaScript principal.");
 
 assert(script.includes('function isScreenDisplayType(name)'), "Falta el filtro común de pantallas/displays.");
 assert(script.includes('type==="pantalla"||type==="display"'), "Solo Pantalla y Display deben estar visibles en el MVP.");
+
+const screenTypeFn = script.match(/function isScreenDisplayType\\(name\\)\\s*\\{[\\s\\S]*?\\n\\}/)?.[0];
+assert(screenTypeFn, "No se pudo extraer el filtro de tipos para probarlo.");
+const typeContext = { normalize: s => (s || "").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "") };
+require("vm").runInNewContext(screenTypeFn, typeContext);
+assert.strictEqual(typeContext.isScreenDisplayType("Pantalla"), true, "Pantalla debe habilitarse.");
+assert.strictEqual(typeContext.isScreenDisplayType("Display"), true, "Display debe tratarse como pantalla.");
+assert.strictEqual(typeContext.isScreenDisplayType("Flex"), false, "Flex debe quedar fuera del MVP.");
+assert.strictEqual(typeContext.isScreenDisplayType("Batería"), false, "Batería debe quedar fuera del MVP.");
 assert(script.includes("A.types.filter(x=>x.active&&isScreenDisplayType(x.name))"), "El formulario admin no debe ofrecer Flex ni otros repuestos.");
 assert(script.includes("(r||[]).filter(p=>isScreenDisplayType(obj(p.part_types).name))"), "La búsqueda administrativa debe filtrar por tipo de pantalla/display.");
 assert(script.includes("const tabs=[['products','Pantallas / displays'],['models','Modelos']]"), "El catálogo inicial solo debe mostrar pantallas y modelos.");
