@@ -1004,8 +1004,10 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
   font-size:13px;
 }
 #inventoryView .inventory-edit-btn{
-  margin-top:11px;
-  width:100%;
+  margin-top:0;
+  width:auto;
+  min-width:76px;
+  flex-shrink:0;
   min-height:43px;
   border:1px solid #dbe3ef;
   background:#f8fafc;
@@ -1833,7 +1835,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   function inventoryCard(x){
     return '<article class="inventory-card">'+
-      '<div class="inventory-card-top"><div><div class="inventory-card-title">'+esc(x.p.model)+'</div><div class="tiny">'+esc(x.p.type)+' · '+esc(x.p.variant)+'</div></div>'+
+      '<div class="inventory-card-top"><div class="inventory-card-heading"><div class="inventory-card-title"><b>'+esc(x.p.model)+'</b><small>'+esc(x.p.type)+' · '+esc(x.p.variant)+'</small></div></div>'+
       '<button class="inventory-edit-btn" onclick="editInventoryV38(\''+x.id+'\')">Editar</button></div>'+
       '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock">Cantidad: <b>'+x.qty+'</b></div>'+
       '<div id="edit-'+esc(x.id)+'"></div></article>';
