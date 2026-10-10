@@ -95,7 +95,7 @@ for(const f of files){
       [!s.includes('new.quantity') && !s.includes('i.quantity'),'sin validaciones ni descuentos por cantidad'],
       [s.includes('values(v_order_id, v_inventory.id, v_inventory.product_id, 1, v_inventory.price)'),'cada línea de pedido representa un producto'],
       [s.includes('grant execute on function public.place_order(uuid, text, text, jsonb) to authenticated'),'RPC de pedidos limitada a usuarios autenticados'],
-      [s.includes("when 'local' then delivery_local_fee") && s.includes("when 'outside_zone' then delivery_outside_fee"),'tarifas de entrega según zona']
+      [s.includes('coalesce(v_technician.delivery_fee, 0)') && s.includes('trim(v_technician.address)'),'tarifa y dirección del técnico conservadas']
     );
   }
   if(f.includes('016_remove_stock_return_on_order_rejection')){
