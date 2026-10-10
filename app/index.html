@@ -1742,7 +1742,7 @@ function orderTechnician(order){return unwrapDbRelation(order.users);}
 function catalogProduct(id){return state.catalog.find(x=>x.id===id);}
 function shop(id){return state.shops.find(x=>x.id===id);}
 function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId===shopId&&String(x.productId)===String(productId));}
-function activeInventory(){return state.inventory.filter(x=>x.active&&x.qty>0);}
+function activeInventory(){return state.inventory.filter(x=>x.active!==false);}
 function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function inlineArg(value){return escapeHtml(JSON.stringify(String(value??"")).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026"));}
@@ -2154,7 +2154,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   };
 
   function resetCreateInventory(){
-    const ids=["spSearch","price","qty"];
+    const ids=["spSearch","price"];
     ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     const prodSelect=document.getElementById("prod");if(prodSelect){prodSelect.innerHTML="";prodSelect.value="";}
     window.__storeCreateProducts=[];
@@ -2218,7 +2218,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if(prod){prod.innerHTML="";prod.value="";}
     if(selected){selected.style.display="none";selected.classList.add("is-disabled");selected.innerHTML="";}
     if(data){data.style.display="none";data.classList.add("is-disabled");}
-    ["price","qty"].forEach(id=>{const input=document.getElementById(id);if(input)input.value="";});
+    ["price"].forEach(id=>{const input=document.getElementById(id);if(input)input.value="";});
     if(!vs)return;
     vs.style.display="none";vs.innerHTML="";
     if(variants.length===1)return chooseStoreVariantV38(model,type,variants[0]);
@@ -2368,9 +2368,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   window.renderAdmin=renderAdminV38;
   const saveBtn=document.getElementById("spSave"); if(saveBtn)saveBtn.onclick=saveCreateInventory;
   const search=document.getElementById("spSearch"); if(search)search.addEventListener("input",renderStoreModels);
-  const priceInput=document.getElementById("price"),qtyInput=document.getElementById("qty");
-  if(priceInput)priceInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(qtyInput)qtyInput.focus();}});
-  if(qtyInput)qtyInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(saveBtn)saveBtn.click();}});
+  const priceInput=document.getElementById("price");
+  if(priceInput)priceInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(saveBtn)saveBtn.click();}});
   window.renderStoreProductPicker=function(){resetCreateInventory();};
   window.renderAdmin=renderAdminV38;
   renderAdminV38();
