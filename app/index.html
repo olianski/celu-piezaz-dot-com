@@ -2011,7 +2011,6 @@ function orderHistoryMatches(order,prefix,view){
   const to=document.getElementById(prefix+"OrderTo")?.value||yesterdayKey();
   const status=document.getElementById(prefix+"OrderStatus")?.value||"all";
   const q=normalize(document.getElementById(prefix+"OrderSearch")?.value||"").trim();
-  if(key===today&&!from&&!document.getElementById(prefix+"OrderTo")?.value)return false;
   if(from&&key<from)return false;
   if(to&&key>to)return false;
   if(status!=="all"&&order.status!==status)return false;
@@ -2026,6 +2025,7 @@ function setTechnicianOrdersView(view){
   document.getElementById("techOrdersTodayTab").classList.toggle("active",technicianOrdersView==="today");
   document.getElementById("techOrdersHistoryTab").classList.toggle("active",technicianOrdersView==="history");
   document.getElementById("techOrdersHistoryFilters").hidden=technicianOrdersView!=="history";
+  if(technicianOrdersView==="history"&&!document.getElementById("techOrderTo").value)document.getElementById("techOrderTo").value=yesterdayKey();
   renderOrders();
 }
 function setShopOrdersView(view){
@@ -2033,6 +2033,7 @@ function setShopOrdersView(view){
   document.getElementById("shopOrdersTodayTab").classList.toggle("active",shopOrdersView==="today");
   document.getElementById("shopOrdersHistoryTab").classList.toggle("active",shopOrdersView==="history");
   document.getElementById("shopOrdersHistoryFilters").hidden=shopOrdersView!=="history";
+  if(shopOrdersView==="history"&&!document.getElementById("shopOrderTo").value)document.getElementById("shopOrderTo").value=yesterdayKey();
   renderShopOrdersV38();
 }
 async function renderOrders(){
