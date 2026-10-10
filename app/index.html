@@ -1993,10 +1993,12 @@ function renderTechFlow(){
 function changeTechPart(){
   techSelectedPart="";
   techSelectedVariant="";
+  techSelectedFrame="sin_marco";
   renderMarket();
 }
 function changeTechVariant(){
   techSelectedVariant="";
+  techSelectedFrame="sin_marco";
   renderMarket();
 }
 
@@ -2010,6 +2012,7 @@ async function selectTechModel(model){
 }
 function selectTechPart(part){
   techSelectedPart=part;
+  techSelectedFrame="sin_marco";
   const variants=techVariantsForSelection();
   techSelectedVariant=variants.length===1?variants[0]:"";
   renderMarket();
@@ -2079,7 +2082,7 @@ async function renderMarket(){
 }
 function setFilter(x){filter=x;renderMarket();}
 async function requestDemand(){
-  const product=state.catalog.find(p=>normalize(p.model)===normalize(techSelectedModel)&&normalize(p.type)===normalize(techSelectedPart)&&(!techSelectedVariant||normalize(p.variant)===normalize(techSelectedVariant)));
+  const product=state.catalog.find(p=>normalize(p.model)===normalize(techSelectedModel)&&normalize(p.type)===normalize(techSelectedPart)&&(!techSelectedVariant||normalize(p.variant)===normalize(techSelectedVariant))&&(!isScreenDisplayType(p.type)||p.frameType===techSelectedFrame));
   if(!product){toast("Selecciona primero el modelo y el repuesto.");return;}
   try{
     const r=await CeluPiezazBackend.createDemandRequest(product.id);
