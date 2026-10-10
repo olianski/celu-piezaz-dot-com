@@ -2751,9 +2751,15 @@ async function submitAuth(e){
     }).join(''):empty('No hay pedidos','Los pedidos aparecerán aquí cuando se registren.');
   }
   async function orderAction(id,next){
-    const action=next==='accepted'?'aceptar':next==='rejected'?'rechazar y devolver las cantidades al inventario':'marcar como entregado';
+    const action=next==='accepted'?'aceptar':next==='rejected'?'rechazar y devolver las cantidades al inventario':'finalizar';
     if(!confirm('¿Confirmas '+action+' este pedido?'))return;
-    await checked(CeluPiezazBackend.updateOrderStatus(id,next));notice('Pedido actualizado correctamente.');await refresh();
+    let reason=null;
+    if(next==='rejected'){
+      reason=prompt('Indica el motivo del rechazo (obligatorio):');
+      if(reason===null)return;
+      if(!reason.trim()){notice('Debes indicar el motivo del rechazo.',true);return;}
+    }
+    await checked(CeluPiezazBackend.updateOrderStatus(id,next,reason));notice('Pedido actualizado correctamente.');await refresh();
   }
   async function renderRequests(){
     A.requests=await checked(CeluPiezazBackend.adminListDemandRequests())||[];
