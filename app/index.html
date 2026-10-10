@@ -1869,7 +1869,7 @@ function mapDbProduct(r){
   if(!r)return null;
   const m=unwrapDbRelation(r.phone_models),t=unwrapDbRelation(r.part_types),v=unwrapDbRelation(r.part_variants);
   if(!isScreenDisplayType(t.name)||!isVisibleVariant(v.name))return null;
-  return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",active:r.active!==false,displayName:r.display_name||""};
+  return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",frameType:r.frame_type||"",active:r.active!==false,displayName:r.display_name||""};
 }
 async function loadMasterModels(){
   const r=await CeluPiezazBackend.listPhoneModels();if(r.error)throw r.error;
@@ -1976,12 +1976,8 @@ function renderTechFlow(){
   partStep.classList.remove("is-disabled");
   partsEl.innerHTML='<div class="selection-summary"><span>Repuesto</span><strong>'+escapeHtml(techSelectedPart)+'</strong><button onclick="changeTechPart()">Cambiar</button></div>';
   const variants=techVariantsForSelection();
-  if(variants.length<=1){
-    techSelectedVariant=variants[0]||"";
-    variantStep.classList.add("is-disabled");
-    return;
-  }
-  if(!techSelectedVariant){
+  if(variants.length<=1) techSelectedVariant=variants[0]||"";
+  if(variants.length>1&&!techSelectedVariant){
     variantStep.classList.remove("is-disabled");
     variantTitle.textContent="¿Qué tipo necesitas?";
     variantsEl.innerHTML=variants.map(v=>
@@ -1989,16 +1985,20 @@ function renderTechFlow(){
     ).join("");
   }else{
     variantStep.classList.remove("is-disabled");
-    variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant)+'</strong><button onclick="changeTechVariant()">Cambiar</button></div>';
+    variantTitle.textContent="¿La pantalla viene con marco?";
+    variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant||"Estándar")+'</strong>'+(variants.length>1?'<button onclick="changeTechVariant()">Cambiar</button>':'')+'</div>'+
+      ['sin_marco','con_marco'].map(f=>'<button class="part-option" onclick="selectTechFrame(\''+f+'\')" style="'+(techSelectedFrame===f?'border:2px solid #2563eb;':'')+'"><span>'+(f==='sin_marco'?'Sin marco (opción habitual)':'Con marco')+'</span><span class="part-arrow">'+(techSelectedFrame===f?'✓':'›')+'</span></button>').join("");
   }
 }
 function changeTechPart(){
   techSelectedPart="";
   techSelectedVariant="";
+  techSelectedFrame="sin_marco";
   renderMarket();
 }
 function changeTechVariant(){
   techSelectedVariant="";
+  techSelectedFrame="sin_marco";
   renderMarket();
 }
 
@@ -2012,6 +2012,7 @@ async function selectTechModel(model){
 }
 function selectTechPart(part){
   techSelectedPart=part;
+  techSelectedFrame="sin_marco";
   const variants=techVariantsForSelection();
   techSelectedVariant=variants.length===1?variants[0]:"";
   renderMarket();
@@ -2081,7 +2082,7 @@ async function renderMarket(){
 }
 function setFilter(x){filter=x;renderMarket();}
 async function requestDemand(){
-  const product=state.catalog.find(p=>normalize(p.model)===normalize(techSelectedModel)&&normalize(p.type)===normalize(techSelectedPart)&&(!techSelectedVariant||normalize(p.variant)===normalize(techSelectedVariant)));
+  const product=state.catalog.find(p=>normalize(p.model)===normalize(techSelectedModel)&&normalize(p.type)===normalize(techSelectedPart)&&(!techSelectedVariant||normalize(p.variant)===normalize(techSelectedVariant))&&(!isScreenDisplayType(p.type)||p.frameType===techSelectedFrame));
   if(!product){toast("Selecciona primero el modelo y el repuesto.");return;}
   try{
     const r=await CeluPiezazBackend.createDemandRequest(product.id);
