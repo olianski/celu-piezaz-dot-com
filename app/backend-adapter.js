@@ -166,6 +166,13 @@ window.CeluPiezazBackend = (() => {
   async function adminListUsers(){
     return requireClient().from('users').select('id,role,name,phone,created_at').order('created_at',{ascending:false}).limit(500);
   }
+  async function adminDeleteAccount(userId){
+    if(!userId)throw new Error('Selecciona una cuenta válida.');
+    const {data,error}=await requireClient().functions.invoke('admin-delete-account',{body:{userId}});
+    if(error)throw error;
+    if(data?.error)throw new Error(data.error);
+    return {data,error:null};
+  }
   async function adminSetUserRole(id,role){
     if(!['technician','shop'].includes(role))throw new Error('Solo puedes asignar roles de técnico o tienda.');
     const c=requireClient();
@@ -188,5 +195,5 @@ window.CeluPiezazBackend = (() => {
     if(!['open','notified','closed'].includes(status))throw new Error('Estado de solicitud no válido');
     return requireClient().from('demand_requests').update({status}).eq('id',id).select().single();
   }
-  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,linkReplacementOrder,updateOrderStatus,listMyOrders,listPhoneModels,listProductsByModel,getInventoryByProducts,listShopInventory,createDemandRequest,adminCreateAccount,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
+  return {configure,ready,signIn,profile,signOut,session,searchProducts,getMyShop,getMyInventory,getInventoryByProduct,saveInventoryItem,placeOrder,linkReplacementOrder,updateOrderStatus,listMyOrders,listPhoneModels,listProductsByModel,getInventoryByProducts,listShopInventory,createDemandRequest,adminCreateAccount,adminDeleteAccount,adminOverview,adminListShops,adminSetShopStatus,adminListModels,adminCreateModel,adminSetModelActive,adminListTypes,adminCreateType,adminSetTypeActive,adminListVariants,adminCreateVariant,adminSetVariantActive,adminListProducts,adminCreateProduct,adminSetProductActive,adminListUsers,adminSetUserRole,adminListOrders,adminListDemandRequests,adminSetDemandStatus};
 })();
