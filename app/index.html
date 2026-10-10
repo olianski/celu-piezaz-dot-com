@@ -2064,7 +2064,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       const types=[...new Set(window.__storeCreateProducts.map(p=>p.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
       if(step)step.classList.add("open");
       choices.innerHTML=types.length?types.map(t=>'<button type="button" onclick="chooseStoreTypeV38('+inlineArg(model)+','+inlineArg(t)+')">'+esc(t)+'</button>').join(""):'<div class="picker-empty">Este modelo no tiene repuestos activos disponibles. Contacta al administrador.</div>';
-      document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button></div>';
+      document.getElementById("spModels").innerHTML='<div class="picker-selected"><div><strong>'+esc(model)+'</strong><small>Modelo seleccionado</small></div><button type="button" class="picker-change" onclick="window.renderStoreProductPicker()">Cambiar</button></div>';
     }catch(e){window.__storeCreateProducts=[];document.getElementById("spModels").innerHTML='<div class="picker-empty">No se pudo consultar el catálogo. Intenta de nuevo.</div>';}
   };
 
@@ -2102,7 +2102,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     prodSelect.value=String(p.id);
     const variantPanel=document.getElementById("spVariantStep");if(variantPanel){variantPanel.style.display="none";variantPanel.innerHTML="";}
     const sel=document.getElementById("spSelected"); sel.style.display="flex";sel.classList.remove("is-disabled");
-    sel.innerHTML='<div><strong>'+esc(type)+' · '+esc(model)+'</strong><small>'+esc(variant)+'</small></div><button type="button" class="picker-change" onclick="resetCreateInventory()">Cambiar</button>';
+    sel.innerHTML='<div><strong>'+esc(type)+' · '+esc(model)+'</strong><small>'+esc(variant)+'</small></div><button type="button" class="picker-change" onclick="window.renderStoreProductPicker()">Cambiar</button>';
     const ds=document.getElementById("spDataStep");ds.style.display="block";ds.classList.remove("is-disabled");
     document.getElementById("price").focus();
   };
