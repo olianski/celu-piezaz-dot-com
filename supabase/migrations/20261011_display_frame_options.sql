@@ -6,6 +6,8 @@ ALTER TABLE public.products DROP CONSTRAINT IF EXISTS products_frame_type_check;
 ALTER TABLE public.products ADD CONSTRAINT products_frame_type_check
   CHECK (frame_type IS NULL OR frame_type IN ('sin_marco', 'con_marco'));
 
+DROP INDEX IF EXISTS public.products_unique_catalog_key_uidx;
+
 UPDATE public.products p
 SET frame_type = 'sin_marco',
     display_name = CASE WHEN p.display_name ILIKE '%sin marco%' THEN p.display_name ELSE p.display_name || ' · Sin marco' END,
@@ -33,7 +35,6 @@ WHERE (lower(t.name) LIKE '%pantalla%' OR lower(t.name) LIKE '%display%')
       AND x.frame_type = 'con_marco'
   );
 
-DROP INDEX IF EXISTS public.products_unique_catalog_key_uidx;
 CREATE UNIQUE INDEX products_unique_catalog_key_uidx
   ON public.products (
     phone_model_id, part_type_id,
