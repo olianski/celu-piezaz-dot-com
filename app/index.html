@@ -1435,14 +1435,14 @@ body.role-shop #admin.active{display:block!important}
 
     <section id="shopSectionInventory" class="shop-main-section">
       <div class="inventory-choice-grid">
-        <button class="inventory-choice" onclick="inventorySection('view')"><b>Ver inventario</b><span>Consulta productos, precios y cantidades.</span></button>
-        <button class="inventory-choice" onclick="inventorySection('create')"><b>Crear inventario</b><span>Agrega un producto disponible en tu tienda.</span></button>
+        <button class="inventory-choice" onclick="inventorySection('view')"><b>Mis productos</b><span>Activa o marca como agotado lo que vendes.</span></button>
+        <button class="inventory-choice" onclick="inventorySection('create')"><b>Ofrecer producto</b><span>Busca una pantalla y publícala con tu precio.</span></button>
       </div>
       <div id="inventoryView" class="inventory-subsection">
         <div class="inventory-manager">
           <div class="inventory-search-head">
-            <h2>Buscar en mi inventario</h2>
-            <p>Busca un modelo para consultar o cambiar su precio y cantidad.</p>
+            <h2>Mis productos publicados</h2>
+            <p>Actualiza el precio o cambia la disponibilidad con un toque.</p>
           </div>
 
           <div class="inventory-search-box">
@@ -1460,7 +1460,7 @@ body.role-shop #admin.active{display:block!important}
       </div>
       <div id="inventoryCreate" class="inventory-subsection">
         <div class="shop-action">
-          <h2>Crear inventario</h2><p>Busca el modelo, elige el repuesto y define precio y cantidad.</p>
+          <h2>Ofrecer una pantalla</h2><p>Busca el modelo, elige la calidad y define tu precio. No necesitas registrar cantidades.</p>
           <div id="storePicker" class="product-picker shop-create-flow">
   <div class="picker-step">
     <div class="picker-label"><span>1. Busca el modelo</span></div>
@@ -1972,9 +1972,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const available=Number(x.qty)>0;
     return '<article class="inventory-card">'+
       '<div class="inventory-card-top"><div class="inventory-card-heading"><div class="inventory-card-title"><b>'+esc(x.p.model)+'</b><small>'+esc(x.p.type)+' · '+esc(x.p.variant)+'</small></div></div>'+
-      '<button class="inventory-edit-btn" onclick="editInventoryV38(\\''+x.id+'\\')">Editar precio</button></div>'+
+      '<button class="inventory-edit-btn" onclick="editInventoryV38(\''+x.id+'\')">Editar precio</button></div>'+
       '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+
-      '<button class="inventory-edit-btn" style="width:100%;margin-top:10px" onclick="toggleStoreAvailabilityV38(\\''+x.id+'\\')">'+(available?'Marcar como agotado':'Volver a activar')+'</button>'+
+      '<button class="inventory-edit-btn" style="width:100%;margin-top:10px" onclick="toggleStoreAvailabilityV38(\''+x.id+'\')">'+(available?'Marcar como agotado':'Volver a activar')+'</button>'+
       '<div id="edit-'+esc(x.id)+'"></div></article>';
   }
 
