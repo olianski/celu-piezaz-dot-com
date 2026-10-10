@@ -911,7 +911,7 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
   font-size:14px;
 }
 
-/* Precio + cantidad juntos */
+/* Precio de publicación sin conteo de unidades */
 #inventoryCreate #spDataStep{
   padding:12px;
   border-radius:16px;
@@ -1715,7 +1715,7 @@ async function loadLiveOffersForModel(label){
   const rows=(r.data||[]).map(x=>{
     const p=mapDbProduct(x.products)||catalogProduct(x.product_id), sh=unwrapDbRelation(x.shops);
     if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
-    return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p,s:sh};
+    return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,p,s:sh};
   });
   state.inventory=rows;
   state.shops=[...new Map(rows.filter(x=>x.s&&x.s.id).map(x=>[x.s.id,x.s])).values()];
@@ -1729,7 +1729,7 @@ async function loadCurrentShop(){
     const q=await CeluPiezazBackend.listShopInventory(currentShop.id);if(q.error)throw q.error;
     state.inventory=(q.data||[]).map(x=>{
       const p=mapDbProduct(x.products);if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
-      return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,updatedAt:x.updated_at};
+      return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,updatedAt:x.updated_at};
     });
   }else state.inventory=[];
   return currentShop;
@@ -1945,13 +1945,13 @@ async function confirmOrder(){
   const inv=state.inventory.find(x=>String(x.id)===String(selectedInventoryId));
   const delivery=document.getElementById("delivery").value;
   const address=technicianProfile?.address||"";
-  if(!inv||Number(inv.qty)<1){toast("Ese repuesto se agotó. Busca otra opción.");openPage("market");return;}
+  if(!inv||inv.active===false){toast("Ese repuesto ya no está disponible. Busca otra opción.");openPage("market");return;}
   if(delivery!=="pickup"&&!address.trim()){toast("Tu perfil no tiene dirección de entrega. Contacta al administrador.");return;}
   const deliveryType=delivery==="far"?"outside_zone":delivery;
   const btn=document.getElementById("confirmOrderButton");
   if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
   try{
-    const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId,quantity:1}]);
+    const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId}]);
     if(r.error)throw r.error;
     const createdOrderId=typeof r.data==="string"?r.data:(r.data?.id||r.data?.order_id||null);
     if(replacementForOrderId&&createdOrderId){
@@ -1983,7 +1983,7 @@ async function renderOrders(){
       return '<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml((p.type||"Repuesto")+' '+p.model)+'</div><div class="sub">'+escapeHtml((p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
       '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
       '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
-      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+escapeHtml(deliveryText)+'</div>'+
+      '<div class="tiny" style="margin-top:9px">Entrega: '+escapeHtml(deliveryText)+'</div>'+ 
       (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
@@ -1995,17 +1995,17 @@ async function showAlternativeShops(orderId,productId,originalShopId){
   try{
     const r=await CeluPiezazBackend.getInventoryByProducts([productId]);
     if(r.error)throw r.error;
-    const offers=(r.data||[]).filter(x=>String(x.shop_id)!==String(originalShopId)&&Number(x.quantity)>0&&x.active!==false).map(x=>{
+    const offers=(r.data||[]).filter(x=>String(x.shop_id)!==String(originalShopId)&&x.active!==false).map(x=>{
       const p=mapDbProduct(x.products)||catalogProduct(x.product_id),sh=unwrapDbRelation(x.shops);
       return {...x,p,shop:sh};
     }).filter(x=>x.p&&x.shop&&x.shop.id);
     if(!offers.length){target.innerHTML='<div class="tiny" style="padding:12px 0">No encontramos otra tienda con unidades disponibles. Inténtalo más tarde.</div>';return;}
     offers.forEach(x=>{if(x.p&&!state.catalog.some(p=>String(p.id)===String(x.p.id)))state.catalog.push(x.p);});
-    state.inventory=offers.map(x=>({id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p:x.p,s:x.shop}));
+    state.inventory=offers.map(x=>({id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,p:x.p,s:x.shop}));
     state.shops=[...new Map(offers.map(x=>[x.shop.id,x.shop])).values()];
     target.innerHTML='<div style="display:grid;gap:9px;margin-top:12px">'+offers.map(x=>{
       const fee=x.delivery_type==="pickup"?0:Number(x.shop.delivery_local_fee||0);
-      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+','+inlineArg(orderId)+')">Solicitar a esta tienda</button></div>';
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">Disponible</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+','+inlineArg(orderId)+')">Solicitar a esta tienda</button></div>';
     }).join('')+'</div>';
   }catch(e){target.innerHTML='<div class="tiny" style="padding:12px 0">No se pudieron consultar alternativas. '+escapeHtml(e.message||"")+'</div>';}
 }
@@ -2097,7 +2097,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
      if(sub==="create") resetCreateInventory();
    };
 
-  function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id&&i.active):[];}
+  function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id):[];}
   function productFor(id){return state.catalog.find(p=>String(p.id)===String(id));}
 
   window.renderInventorySearch=function(){
@@ -2117,18 +2117,18 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   };
 
   function inventoryCard(x){
-    const available=Number(x.qty)>0;
+    const available=x.active!==false;
     return '<article class="inventory-card">'+
       '<div class="inventory-card-top"><div class="inventory-card-heading"><div class="inventory-card-title"><b>'+esc(x.p.model)+'</b><small>'+esc(x.p.type)+' · '+esc(x.p.variant)+'</small></div></div>'+
       '<button class="inventory-edit-btn" onclick="editInventoryV38(\''+x.id+'\')">Editar precio</button></div>'+
-      '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+
+      '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+ 
       '<button class="inventory-edit-btn" style="width:100%;margin-top:10px" onclick="toggleStoreAvailabilityV38(\''+x.id+'\')">'+(available?'Marcar como agotado':'Volver a activar')+'</button>'+
       '<div id="edit-'+esc(x.id)+'"></div></article>';
   }
 
   window.toggleStoreAvailabilityV38=async function(id){
     const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
-    const next=Number(i.qty)>0?0:999999;
+    const next=i.active===false;
     try{
       const r=await CeluPiezazBackend.saveInventoryItem(i.productId,Number(i.price),next);if(r.error)throw r.error;
       await loadCurrentShop();renderInventorySearch();
@@ -2146,9 +2146,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   window.saveInventoryV38=async function(id){
     const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
-    const p=Number(document.getElementById("ep-"+id).value),q=Number(i.qty)>0?999999:0;
+    const p=Number(document.getElementById("ep-"+id).value);
     if(!Number.isFinite(p)||p<=0){toast("Indica un precio válido mayor que cero.");return;}
-    try{const r=await CeluPiezazBackend.saveInventoryItem(i.productId,p,q);if(r.error)throw r.error;
+    try{const r=await CeluPiezazBackend.saveInventoryItem(i.productId,p,i.active!==false);if(r.error)throw r.error;
       await loadCurrentShop();renderInventorySearch();toast("Inventario actualizado correctamente.");}
     catch(e){toast(e.message||"No se pudo actualizar el inventario.");}
   };
@@ -2241,7 +2241,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   async function saveCreateInventory(){
     const prod=document.getElementById("prod").value;
     const priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,"");
-    const qty=999999,price=Number(priceRaw);
+    const price=Number(priceRaw);
     if(!currentShop){toast("No encontramos la tienda de esta cuenta.");return;}
     if(currentShop.status!=="approved"||!currentShop.active){toast("Tu tienda debe ser aprobada por el administrador antes de publicar inventario.");return;}
     if(!prod){toast("Primero selecciona el producto.");return;}
@@ -2249,7 +2249,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const btn=document.getElementById("spSave"),st=document.getElementById("spSaveStatus");
     if(btn){btn.disabled=true;btn.textContent="Guardando…";}
     try{
-      const r=await CeluPiezazBackend.saveInventoryItem(prod,price,qty);
+      const r=await CeluPiezazBackend.saveInventoryItem(prod,price,true);
       if(r.error)throw r.error;
       await loadCurrentShop();
       if(st)st.textContent="✓ Inventario guardado correctamente";
@@ -2355,7 +2355,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       ?"Esta cuenta no tiene una tienda vinculada. Contacta al administrador."
       :currentShop.status==="suspended"
         ?"Tu tienda está suspendida. Contacta al administrador."
-        :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
+        :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar productos y precios.";
     document.querySelectorAll("#admin .inventory-choice").forEach(b=>{b.disabled=!approved;b.style.opacity=approved?"1":".45";});
     document.getElementById("shopSectionOrders").classList.add("active");
     document.getElementById("shopSectionInventory").classList.remove("active");
