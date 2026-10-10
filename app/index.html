@@ -1985,7 +1985,7 @@ function renderTechFlow(){
     ).join("");
   }else{
     variantStep.classList.remove("is-disabled");
-    const isIPhone=/\\biphone\\b/i.test(techSelectedModel);
+    const isIPhone=normalize(techSelectedModel).includes("iphone");
     variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant||"Estándar")+'</strong>'+(variants.length>1?'<button onclick="changeTechVariant()">Cambiar</button>':'')+'</div>';
     if(isIPhone){
       variantTitle.textContent="Tipo de pantalla";
