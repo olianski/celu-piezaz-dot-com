@@ -87,6 +87,15 @@ for(const f of files){
       [s.includes('grant execute on function public.update_order_status(uuid,text,text) to authenticated'),'RPC final solo para usuarios autenticados']
     );
   }
+  if(f.includes('018_inventory_availability_without_quantities')){
+    checks.push(
+      [s.includes('alter table public.inventory drop column if exists quantity'),'columna de cantidades eliminada del inventario'],
+      [s.includes('p_active boolean default true'),'disponibilidad controlada por estado activo'],
+      [!s.includes('new.quantity') && !s.includes('i.quantity'),'sin validaciones ni descuentos por cantidad'],
+      [s.includes('values(v_order_id, v_inventory.id, v_inventory.product_id, 1, v_inventory.price)'),'cada línea de pedido representa un producto'],
+      [s.includes('grant execute on function public.place_order(uuid, text, text, jsonb) to authenticated'),'RPC de pedidos limitada a usuarios autenticados']
+    );
+  }
   if(f.includes('016_remove_stock_return_on_order_rejection')){
     checks.push(
       [s.includes("v_order.status = 'pending' and p_next_status = 'rejected'"),'rechazo solo desde pendiente'],
