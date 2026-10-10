@@ -2122,6 +2122,16 @@ async function confirmOrder(){
   }catch(e){toast(e.message||"No se pudo crear el pedido.");}
   finally{if(btn){btn.disabled=false;btn.textContent="Confirmar pedido";}}
 }
+function copyOrderReference(id){
+  const value=String(id||"").slice(0,8).toUpperCase();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(String(id)).then(()=>toast("Identificador completo copiado.")).catch(()=>toast("No se pudo copiar el identificador."));
+  }else{
+    const area=document.createElement("textarea");area.value=String(id);area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();
+    try{document.execCommand("copy");toast("Identificador completo copiado.");}catch(e){toast("No se pudo copiar el identificador.");}
+    area.remove();
+  }
+}
 let technicianOrdersView="today";
 let shopOrdersView="today";
 function localDayKey(value){
@@ -2175,9 +2185,10 @@ async function renderOrders(){
       const deadline=o.status==="pending"&&o.response_deadline_at?"La tienda tiene hasta "+new Date(o.response_deadline_at).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})+" para responder.":"";
       const reason=o.rejection_reason?'<div class="tiny" style="margin-top:8px">'+escapeHtml(o.rejection_reason)+'</div>':"";
       const alternatives=o.status==="rejected"?'<button class="buy" style="margin-top:12px;width:100%" onclick="showAlternativeShops('+inlineArg(o.id)+','+inlineArg(line.product_id)+','+inlineArg(o.shop_id)+')">Ver otras tiendas disponibles</button><div id="alternatives-'+escapeHtml(o.id)+'"></div>':"";
-      return '<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml((p.type||"Repuesto")+' '+p.model)+'</div><div class="sub">'+escapeHtml((p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
+      return '<div class="card"><div class="cardtop"><div><div class="title">Pedido de '+escapeHtml((p.type||"repuesto").toLowerCase())+'</div><div class="sub">'+escapeHtml(p.model+' · '+(p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
       '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
+      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Realizado · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
+      '<div class="tiny order-reference">N.º de pedido: <code>'+escapeHtml(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
       '<div class="tiny" style="margin-top:9px">Entrega: '+escapeHtml(deliveryText)+'</div>'+ 
       (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
@@ -2253,6 +2264,10 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
 
 
+.order-reference{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;color:var(--muted,#667085);font-size:12px}
+.order-reference code{font-family:inherit;font-size:11px;letter-spacing:.04em;color:#667085;background:#f2f4f7;border-radius:6px;padding:3px 6px}
+.order-reference button{border:0;background:transparent;color:#245dcc;font-size:12px;font-weight:650;padding:3px 5px;border-radius:6px}
+.order-reference button:active{background:#eef4ff}
 /* Tienda — interfaz operativa conectada al backend */
 (function(){
   const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
@@ -2495,7 +2510,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         let action="";
         if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
         else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
-        return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
+        return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido de '+esc((p.type||"repuesto").toLowerCase())+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.variant||"")+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
+          '<div class="tiny order-reference">N.º de pedido: <code>'+esc(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
           '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
     }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
