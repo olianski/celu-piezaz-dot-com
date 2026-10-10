@@ -174,7 +174,11 @@ revoke all on function public.place_order(uuid, text, text, jsonb) from public, 
 grant execute on function public.place_order(uuid, text, text, jsonb) to authenticated;
 
 -- Conserva como agotadas las publicaciones que antes tenían cero unidades.
+-- Esta actualización de migración no representa una escritura de tienda; evita que el trigger
+-- de autorización por usuario rechace la operación ejecutada por el migrador.
+alter table public.inventory disable trigger guard_inventory_write_before_change;
 update public.inventory set active = false, updated_at = now() where quantity <= 0 and active = true;
+alter table public.inventory enable trigger guard_inventory_write_before_change;
 
 alter table public.inventory drop column if exists quantity;
 
