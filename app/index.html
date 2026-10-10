@@ -18,6 +18,23 @@
 .order-reference code{font-family:inherit;font-size:11px;letter-spacing:.04em;color:#667085;background:#f2f4f7;border-radius:6px;padding:3px 6px}
 .order-reference button{border:0;background:transparent;color:#245dcc;font-size:12px;font-weight:650;padding:3px 5px;border-radius:6px}
 .order-reference button:active{background:#eef4ff}
+.order-compact-card{display:block;overflow:hidden;margin-bottom:9px}
+.order-compact-summary{display:flex;align-items:center;gap:10px;justify-content:space-between;cursor:pointer;list-style:none;padding:13px 14px}
+.order-compact-summary::-webkit-details-marker{display:none}
+.order-compact-main{flex:1;min-width:0}
+.order-compact-main .title,.order-compact-main>b{display:block;font-size:16px;line-height:1.25;font-weight:750}
+.order-compact-main .sub,.order-compact-main .tiny{margin-top:3px;overflow-wrap:anywhere}
+.order-compact-meta{display:flex;align-items:center;gap:10px;margin-top:7px;color:var(--muted,#667085);font-size:12px}
+.order-compact-meta strong{font-size:15px;color:var(--ink,#101828)}
+.order-expand-icon{flex-shrink:0;color:var(--muted,#667085);font-size:19px;transition:transform .15s ease}
+.order-compact-card[open] .order-expand-icon{transform:rotate(180deg)}
+.order-compact-details{padding:0 14px 14px;border-top:1px solid var(--line,#e4e7ec)}
+.order-compact-details>.tiny:first-child{margin-top:10px}
+.order-compact-card .order-reference{margin-top:8px}
+.shop-order-card.order-compact-card{padding:0}
+.shop-order-card.order-compact-card .shop-order-top{margin:0}
+.shop-order-card.order-compact-card .shop-order-items{margin-top:10px}
+@media(max-width:390px){.order-compact-summary{padding:12px;gap:7px}.order-compact-main .title,.order-compact-main>b{font-size:15px}.order-compact-meta{gap:7px}.order-compact-details{padding:0 12px 12px}}
 </style>
 <style>
 :root{--blue:#0b63f6;--blue2:#084dcc;--ink:#101828;--muted:#667085;--bg:#f6f8fc;--card:#fff;--line:#e7ebf2;--green:#087443;--orange:#b54708}
@@ -2179,7 +2196,7 @@ function setShopOrdersView(view){
 }
 async function renderOrders(){
   const el=document.getElementById("orderList");
-  el.innerHTML='<div class="card empty">Cargando tus pedidos…</div>';
+  if(!el.innerHTML.trim())el.innerHTML='<div class="card empty">Cargando tus pedidos…</div>';
   try{
     const allOrders=await loadVisibleOrders();
     const orders=allOrders.filter(o=>orderHistoryMatches(o,"tech",technicianOrdersView));
@@ -2189,12 +2206,10 @@ async function renderOrders(){
       const deadline=o.status==="pending"&&o.response_deadline_at?"La tienda tiene hasta "+new Date(o.response_deadline_at).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})+" para responder.":"";
       const reason=o.rejection_reason?'<div class="tiny" style="margin-top:8px">'+escapeHtml(o.rejection_reason)+'</div>':"";
       const alternatives=o.status==="rejected"?'<button class="buy" style="margin-top:12px;width:100%" onclick="showAlternativeShops('+inlineArg(o.id)+','+inlineArg(line.product_id)+','+inlineArg(o.shop_id)+')">Ver otras tiendas disponibles</button><div id="alternatives-'+escapeHtml(o.id)+'"></div>':"";
-      return '<div class="card"><div class="cardtop"><div><div class="title">Pedido de '+escapeHtml((p.type||"repuesto").toLowerCase())+'</div><div class="sub">'+escapeHtml(p.model+' · '+(p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
-      '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Realizado · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
-      '<div class="tiny order-reference">N.º de pedido: <code>'+escapeHtml(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
-      '<div class="tiny" style="margin-top:9px">Entrega: '+escapeHtml(deliveryText)+'</div>'+ 
-      (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div>';
+      return '<details class="card order-compact-card" data-order-id="'+escapeHtml(o.id)+'"><summary class="order-compact-summary"><div class="order-compact-main"><div class="title">Pedido de '+escapeHtml((p.type||"repuesto").toLowerCase())+'</div><div class="sub">'+escapeHtml(p.model+' · '+(p.variant||"")+' · '+(sh.name||"Tienda"))+'</div><div class="order-compact-meta"><strong>'+money(o.total)+'</strong><span>'+escapeHtml(new Date(o.created_at).toLocaleDateString("es-CO"))+'</span></div></div><span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span><span class="order-expand-icon" aria-hidden="true">⌄</span></summary>'+
+      '<div class="order-compact-details"><div class="tiny">Realizado · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div><div class="tiny" style="margin-top:8px">Entrega: '+escapeHtml(deliveryText)+'</div>'+
+      '<div class="tiny order-reference">N.º de pedido: <code>'+escapeHtml(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="event.preventDefault();copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
+      (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div></details>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
 }
@@ -2510,9 +2525,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         let action="";
         if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
         else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
-        return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido de '+esc((p.type||"repuesto").toLowerCase())+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.variant||"")+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
-          '<div class="tiny order-reference">N.º de pedido: <code>'+esc(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
-          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
+        return '<details class="shop-order-card order-compact-card" data-order-id="'+esc(o.id)+'"><summary class="shop-order-top order-compact-summary"><div class="order-compact-main"><b>Pedido de '+esc((p.type||"repuesto").toLowerCase())+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.variant||"")+'</div><div class="order-compact-meta"><strong>'+money(o.total)+'</strong><span>'+esc(new Date(o.created_at).toLocaleDateString("es-CO"))+'</span></div></div><span class="badge">'+esc(statusLabel(o.status))+'</span><span class="order-expand-icon" aria-hidden="true">⌄</span></summary>'+
+          '<div class="order-compact-details"><div class="tiny order-reference">N.º de pedido: <code>'+esc(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="event.preventDefault();copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
+          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></div></details>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
     }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
@@ -3115,6 +3130,10 @@ function orderScreenIsVisible(){
 }
 async function refreshCurrentOrderViews(){
   if(orderRefreshInFlight||!orderScreenIsVisible())return;
+  // No reemplazar tarjetas mientras el usuario está interactuando con ellas.
+  const active=document.activeElement;
+  const list=state.role==="technician"?document.getElementById("orderList"):document.getElementById("shopOrders");
+  if(active&&list&&list.contains(active))return;
   orderRefreshInFlight=true;
   try{
     if(state.role==="technician")await renderOrders();
