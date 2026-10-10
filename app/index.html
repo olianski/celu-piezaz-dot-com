@@ -1869,7 +1869,7 @@ function mapDbProduct(r){
   if(!r)return null;
   const m=unwrapDbRelation(r.phone_models),t=unwrapDbRelation(r.part_types),v=unwrapDbRelation(r.part_variants);
   if(!isScreenDisplayType(t.name)||!isVisibleVariant(v.name))return null;
-  return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",active:r.active!==false,displayName:r.display_name||""};
+  return {id:r.id,phoneModelId:r.phone_model_id,partTypeId:r.part_type_id,partVariantId:r.part_variant_id||null,model:modelDisplayName(m).trim(),brand:m.brand||"",type:t.name||"",variant:v.name||"",frameType:r.frame_type||"",active:r.active!==false,displayName:r.display_name||""};
 }
 async function loadMasterModels(){
   const r=await CeluPiezazBackend.listPhoneModels();if(r.error)throw r.error;
