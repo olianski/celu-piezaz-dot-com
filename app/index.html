@@ -1540,6 +1540,34 @@ select[data-custom-dropdown-source]{position:absolute!important;width:1px!import
 #admin .sales-empty{margin-top:8px}
 @media(min-width:560px){#admin .sales-overview{grid-template-columns:1.15fr 1fr;align-items:stretch}#admin .sales-kpis{grid-template-columns:1fr;align-content:stretch}#admin .sales-kpis .shop-stat{display:flex;flex-direction:column;justify-content:center}}
 </style>
+
+<style id="shop-sales-today-priority">
+#admin .sales-today{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:22px}
+#admin .sales-today-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#admin .sales-today-eyebrow{font-size:10px;font-weight:850;letter-spacing:.09em;color:#2563b8}
+#admin .sales-today-head h3{font-size:21px;line-height:1.2;margin:5px 0 4px;letter-spacing:-.4px}
+#admin .sales-today-head p{font-size:12px;color:var(--muted);margin:0}
+#admin .sales-today-date{font-size:12px;font-weight:750;color:#344054;background:#f2f5f9;border-radius:999px;padding:7px 10px;white-space:nowrap}
+#admin .sales-today-total{margin-top:18px;padding:17px;border-radius:14px;background:linear-gradient(135deg,#102a43,#174b72);color:#fff}
+#admin .sales-today-total span{display:block;color:#d6e6f3;font-size:13px;font-weight:650}
+#admin .sales-today-total b{display:block;font-size:30px;line-height:1.2;letter-spacing:-.7px;margin-top:6px}
+#admin .sales-today-count{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 2px 0;font-size:13px;color:#475467}
+#admin .sales-today-count b{font-size:19px;color:var(--ink)}
+#admin .sales-archive{margin-top:24px;border:1px solid var(--line);border-radius:15px;background:#fff;overflow:hidden}
+#admin .sales-archive>summary{list-style:none;cursor:pointer;padding:15px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#admin .sales-archive>summary::-webkit-details-marker{display:none}
+#admin .sales-archive>summary:after{content:"＋";font-size:18px;color:#667085;font-weight:700}
+#admin .sales-archive[open]>summary:after{content:"−"}
+#admin .sales-archive>summary span{font-size:14px;font-weight:800;color:var(--ink)}
+#admin .sales-archive>summary small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+#admin .sales-archive-content{padding:0 13px 14px}
+#admin .sales-archive-content .sales-kpis{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 20px}
+#admin .sales-archive-content .sales-kpis .shop-stat:last-child{grid-column:1/-1}
+#admin .sales-archive-content .sales-kpis .shop-stat b{font-size:18px;overflow-wrap:anywhere}
+#admin .sales-archive-content .sales-history-head{margin-top:8px}
+#admin .sales-empty-note{font-size:12px;color:var(--muted);padding:10px 2px}
+@media(min-width:560px){#admin .sales-archive-content .sales-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}#admin .sales-archive-content .sales-kpis .shop-stat:last-child{grid-column:auto}}
+</style>
 </head>
 
 <body>
@@ -2440,13 +2468,20 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const el=document.getElementById("shopSales");
     try{
       const orders=(await loadVisibleOrders()).filter(o=>currentShop&&o.shop_id===currentShop.id&&o.status==="delivered");
+      const completedAt=o=>o.updated_at||o.delivered_at||o.created_at;
+      const dayKey=value=>{if(!value)return "";const d=new Date(value);if(Number.isNaN(d.getTime()))return "";return new Intl.DateTimeFormat("en-CA",{timeZone:"America/Bogota",year:"numeric",month:"2-digit",day:"2-digit"}).format(d);};
+      const todayKey=dayKey(new Date());
+      const today=orders.filter(o=>dayKey(completedAt(o))===todayKey).sort((a,b)=>new Date(completedAt(b)||0)-new Date(completedAt(a)||0));
+      const todayTotal=today.reduce((sum,o)=>sum+Number(o.total||0),0);
       const total=orders.reduce((sum,o)=>sum+Number(o.total||0),0);
       const average=orders.length?total/orders.length:0;
-      const recent=[...orders].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
-      const dateLabel=value=>{if(!value)return "Fecha no disponible";const d=new Date(value);return Number.isNaN(d.getTime())?"Fecha no disponible":d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"});};
-      el.innerHTML='<div class="sales-overview"><div class="sales-main-metric"><span>Ventas entregadas</span><b>'+money(total)+'</b><small>Acumulado de pedidos finalizados</small></div><div class="sales-kpis"><div class="shop-stat"><span>Pedidos entregados</span><b>'+orders.length+'</b></div><div class="shop-stat"><span>Ticket promedio</span><b>'+money(average)+'</b></div></div></div>'+
-        '<div class="sales-history-head"><div><h3>Últimas ventas</h3><span>Detalle de tus pedidos finalizados</span></div><span class="sales-count">'+orders.length+'</span></div>'+
-        (recent.length?'<div class="sales-list">'+recent.slice(0,20).map(o=>{const p=orderProduct(o),u=orderTechnician(o);return '<article class="sales-row"><div class="sales-row-top"><div class="sales-product"><b>'+esc(p.model||"Repuesto")+'</b><span>'+esc([p.type,p.variant].filter(Boolean).join(" · ")||"Detalle no disponible")+'</span></div><b class="sales-amount">'+money(o.total)+'</b></div><div class="sales-row-meta"><span>Pedido '+esc(String(o.id).slice(0,8))+'</span><span>'+esc(u.name||"Técnico")+'</span><span>'+esc(dateLabel(o.created_at))+'</span></div></article>';}).join("")+'</div>':'<div class="inventory-empty-state sales-empty"><b>Aún no tienes ventas finalizadas</b><span>Cuando completes tu primer pedido, aquí verás el total vendido y el detalle de cada venta.</span></div>');
+      const recent=[...orders].sort((a,b)=>new Date(completedAt(b)||0)-new Date(completedAt(a)||0));
+      const dateLabel=value=>{if(!value)return "Fecha no disponible";const d=new Date(value);return Number.isNaN(d.getTime())?"Fecha no disponible":d.toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short",year:"numeric"});};
+      const saleRows=list=>list.map(o=>{const p=orderProduct(o),u=orderTechnician(o);return '<article class="sales-row"><div class="sales-row-top"><div class="sales-product"><b>'+esc(p.model||"Repuesto")+'</b><span>'+esc([p.type,p.variant].filter(Boolean).join(" · ")||"Detalle no disponible")+'</span></div><b class="sales-amount">'+money(o.total)+'</b></div><div class="sales-row-meta"><span>Pedido '+esc(String(o.id).slice(0,8))+'</span><span>'+esc(u.name||"Técnico")+'</span><span>'+esc(dateLabel(completedAt(o)))+'</span></div></article>';}).join("");
+      el.innerHTML='<div class="sales-today"><div class="sales-today-head"><div><span class="sales-today-eyebrow">RESUMEN DE HOY</span><h3>Ventas de hoy</h3><p>Pedidos finalizados durante el día</p></div><span class="sales-today-date">'+esc(new Date().toLocaleDateString("es-CO",{timeZone:"America/Bogota",day:"2-digit",month:"short"}))+'</span></div><div class="sales-today-total"><span>Total vendido hoy</span><b>'+money(todayTotal)+'</b></div><div class="sales-today-count"><span>Pedidos entregados hoy</span><b>'+today.length+'</b></div></div>'+
+        '<div class="sales-history-head"><div><h3>Actividad de hoy</h3><span>Ventas finalizadas hoy</span></div><span class="sales-count">'+today.length+'</span></div>'+
+        (today.length?'<div class="sales-list">'+saleRows(today)+'</div>':'<div class="inventory-empty-state sales-empty"><b>Aún no hay ventas finalizadas hoy</b><span>Cuando finalices un pedido, aparecerá aquí el detalle de la venta.</span></div>')+
+        '<details class="sales-archive"><summary><span>Totales e historial</span><small>Ver acumulados y ventas anteriores</small></summary><div class="sales-archive-content"><div class="sales-kpis"><div class="shop-stat"><span>Ventas acumuladas</span><b>'+money(total)+'</b></div><div class="shop-stat"><span>Pedidos entregados</span><b>'+orders.length+'</b></div><div class="shop-stat"><span>Ticket promedio</span><b>'+money(average)+'</b></div></div><div class="sales-history-head"><div><h3>Historial de ventas</h3><span>Últimas 20 ventas finalizadas</span></div></div>'+(recent.length?'<div class="sales-list">'+saleRows(recent.slice(0,20))+'</div>':'<div class="sales-empty-note">Todavía no hay historial de ventas.</div>')+'</div></details>';
     }catch(e){el.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar las ventas</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
   function renderShopCatalog(){
