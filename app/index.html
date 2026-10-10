@@ -26,8 +26,11 @@
 .order-compact-main .sub,.order-compact-main .tiny{margin-top:3px;overflow-wrap:anywhere}
 .order-compact-meta{display:flex;align-items:center;gap:10px;margin-top:7px;color:var(--muted,#667085);font-size:12px}
 .order-compact-meta strong{font-size:15px;color:var(--ink,#101828)}
-.order-expand-icon{flex-shrink:0;color:var(--muted,#667085);font-size:19px;transition:transform .15s ease}
-.order-compact-card[open] .order-expand-icon{transform:rotate(180deg)}
+.order-expand-icon{flex-shrink:0;position:relative;width:22px;height:22px;border:1px solid var(--line,#d0d5dd);border-radius:50%;color:var(--muted,#667085);font-size:0;transition:background .15s ease,border-color .15s ease}
+.order-expand-icon:before,.order-expand-icon:after{content:"";position:absolute;left:6px;top:9px;width:8px;height:2px;border-radius:2px;background:currentColor}
+.order-expand-icon:after{transform:rotate(90deg);transition:transform .15s ease}
+.order-compact-card[open] .order-expand-icon{background:#eef4ff;border-color:#c7d7fe;color:#245dcc}
+.order-compact-card[open] .order-expand-icon:after{transform:rotate(0deg)}
 .order-compact-details{padding:0 14px 14px;border-top:1px solid var(--line,#e4e7ec)}
 .order-compact-details>.tiny:first-child{margin-top:10px}
 .order-compact-card .order-reference{margin-top:8px}
@@ -2200,6 +2203,11 @@ async function renderOrders(){
   try{
     const allOrders=await loadVisibleOrders();
     const orders=allOrders.filter(o=>orderHistoryMatches(o,"tech",technicianOrdersView));
+    const signature=JSON.stringify(orders.map(o=>[o.id,o.status,o.updated_at,o.rejection_reason,o.total,o.response_deadline_at]));
+    window.orderRenderSignatures=window.orderRenderSignatures||{};
+    if(window.orderRenderSignatures.technician===signature)return;
+    const expanded=new Set([...el.querySelectorAll("details[open][data-order-id]")].map(d=>String(d.dataset.orderId)));
+    window.orderRenderSignatures.technician=signature;
     el.innerHTML=orders.length?orders.map(o=>{
       const p=orderProduct(o),sh=orderShop(o),line=orderPrimaryItem(o);
       const deliveryText=o.delivery_type==="pickup"?"Recoger en tienda":(o.delivery_address||"Domicilio");
@@ -2211,7 +2219,8 @@ async function renderOrders(){
       '<div class="tiny order-reference">N.º de pedido: <code>'+escapeHtml(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="event.preventDefault();copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
       (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div></details>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
-  }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
+    el.querySelectorAll("details[data-order-id]").forEach(d=>{if(expanded.has(String(d.dataset.orderId)))d.open=true;});
+  }catch(e){if(!el.innerHTML.trim())el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';else console.warn("No se pudieron actualizar pedidos:",e);}
 }
 async function showAlternativeShops(orderId,productId,originalShopId){
   const target=document.getElementById("alternatives-"+orderId);
@@ -2514,11 +2523,16 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   async function renderShopOrdersV38(){
     const box=document.getElementById("shopOrders");
     if(!currentShop){box.innerHTML='<div class="inventory-empty-state"><b>No hay una tienda vinculada</b>Contacta al administrador.</div>';return;}
-    box.innerHTML='<div class="inventory-empty-state">Cargando pedidos reales…</div>';
+    if(!box.innerHTML.trim())box.innerHTML='<div class="inventory-empty-state">Cargando pedidos reales…</div>';
     try{
       const allOrders=(await loadVisibleOrders()).filter(o=>o.shop_id===currentShop.id);
       const orders=allOrders.filter(o=>orderHistoryMatches(o,"shop",shopOrdersView));
       const pending=allOrders.filter(o=>o.status==="pending");
+      const signature=JSON.stringify(orders.map(o=>[o.id,o.status,o.updated_at,o.rejection_reason,o.total,o.response_deadline_at]));
+      window.orderRenderSignatures=window.orderRenderSignatures||{};
+      if(window.orderRenderSignatures.shop===signature){document.getElementById("pendingCount").textContent=pending.length+" pendientes";return;}
+      const expanded=new Set([...box.querySelectorAll("details[open][data-order-id]")].map(d=>String(d.dataset.orderId)));
+      window.orderRenderSignatures.shop=signature;
       document.getElementById("pendingCount").textContent=pending.length+" pendientes";
       box.innerHTML=orders.length?orders.map(o=>{
         const p=orderProduct(o),u=orderTechnician(o),line=orderPrimaryItem(o);
@@ -2529,7 +2543,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
           '<div class="order-compact-details"><div class="tiny order-reference">N.º de pedido: <code>'+esc(String(o.id).slice(0,8).toUpperCase())+'</code> <button type="button" onclick="event.preventDefault();copyOrderReference('+inlineArg(String(o.id))+')" aria-label="Copiar número de pedido">Copiar</button></div>'+
           '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></div></details>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
-    }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
+      box.querySelectorAll("details[data-order-id]").forEach(d=>{if(expanded.has(String(d.dataset.orderId)))d.open=true;});
+    }catch(e){if(!box.innerHTML.trim())box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';else console.warn("No se pudieron actualizar pedidos:",e);}
   }
 
   window.renderShopOrdersV38=renderShopOrdersV38;
