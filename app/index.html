@@ -6,6 +6,16 @@
 <meta name="theme-color" content="#0b63f6">
 <title>Celu Piezaz Dot Com</title>
 <style>
+.order-view-tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.order-view-tab{border:1px solid var(--line,#d9e0e8);border-radius:12px;padding:10px 15px;background:var(--surface,#fff);color:var(--text,#172033);font:inherit;font-weight:650;cursor:pointer}
+.order-view-tab.active{background:var(--primary,#183b31);border-color:var(--primary,#183b31);color:#fff}
+.order-history-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 14px;padding:12px;border:1px solid var(--line,#e2e8f0);border-radius:14px;background:var(--surface-soft,#f8fafc)}
+.order-history-filters[hidden]{display:none!important}
+.order-history-filters input,.order-history-filters select{min-width:135px;max-width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#172033;font:inherit}
+.order-history-filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:#475569}
+@media(max-width:600px){.order-history-filters>*{width:100%;flex:1}.order-history-filters label input{flex:1;min-width:0}}
+</style>
+<style>
 :root{--blue:#0b63f6;--blue2:#084dcc;--ink:#101828;--muted:#667085;--bg:#f6f8fc;--card:#fff;--line:#e7ebf2;--green:#087443;--orange:#b54708}
 *{box-sizing:border-box}html{font-size:16px}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:78px}
 button,input,select{font:inherit}button{cursor:pointer}.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px}.topin{max-width:760px;margin:auto;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:950;letter-spacing:-.5px}.logo i{font-style:normal;color:var(--blue)}
@@ -1526,7 +1536,17 @@ body.role-shop #admin.active{display:block!important}
 </section>
 
 <section id="orders" class="page">
-<div class="hero"><h1>Mis pedidos</h1><p>Consulta el estado de tus pedidos recientes.</p></div>
+<div class="hero"><h1>Mis pedidos</h1><p>Consulta primero tus pedidos de hoy. El historial queda aparte.</p></div>
+<div class="order-view-tabs" role="tablist" aria-label="Vista de pedidos">
+<button type="button" id="techOrdersTodayTab" class="order-view-tab active" onclick="setTechnicianOrdersView('today')">Pedidos de hoy</button>
+<button type="button" id="techOrdersHistoryTab" class="order-view-tab" onclick="setTechnicianOrdersView('history')">Ver historial</button>
+</div>
+<div id="techOrdersHistoryFilters" class="order-history-filters" hidden>
+<input id="techOrderSearch" type="search" placeholder="Buscar repuesto o tienda" aria-label="Buscar en historial" oninput="renderOrders()">
+<select id="techOrderStatus" aria-label="Filtrar por estado" onchange="renderOrders()"><option value="all">Todos los estados</option><option value="pending">Pendientes</option><option value="accepted">Aceptados</option><option value="delivered">Finalizados</option><option value="rejected">Rechazados</option><option value="cancelled">Cancelados</option></select>
+<label>Desde <input id="techOrderFrom" type="date" onchange="renderOrders()"></label>
+<label>Hasta <input id="techOrderTo" type="date" onchange="renderOrders()"></label>
+</div>
 <div id="orderList"></div>
 </section>
 
@@ -1565,7 +1585,17 @@ body.role-shop #admin.active{display:block!important}
     </nav>
 
     <section id="shopSectionOrders" class="shop-main-section active">
-      <div class="shop-section-head"><div><h2>Pedidos pendientes</h2><span>Acéptalos y finalízalos.</span></div></div>
+      <div class="shop-section-head"><div><h2>Pedidos</h2><span>Hoy primero; el resto permanece disponible en el historial.</span></div></div>
+      <div class="order-view-tabs" role="tablist" aria-label="Vista de pedidos de la tienda">
+        <button type="button" id="shopOrdersTodayTab" class="order-view-tab active" onclick="setShopOrdersView('today')">Pedidos de hoy</button>
+        <button type="button" id="shopOrdersHistoryTab" class="order-view-tab" onclick="setShopOrdersView('history')">Ver historial</button>
+      </div>
+      <div id="shopOrdersHistoryFilters" class="order-history-filters" hidden>
+        <input id="shopOrderSearch" type="search" placeholder="Buscar técnico, repuesto o pedido" aria-label="Buscar en historial" oninput="renderShopOrdersV38()">
+        <select id="shopOrderStatus" aria-label="Filtrar por estado" onchange="renderShopOrdersV38()"><option value="all">Todos los estados</option><option value="pending">Pendientes</option><option value="accepted">Aceptados</option><option value="delivered">Finalizados</option><option value="rejected">Rechazados</option><option value="cancelled">Cancelados</option></select>
+        <label>Desde <input id="shopOrderFrom" type="date" onchange="renderShopOrdersV38()"></label>
+        <label>Hasta <input id="shopOrderTo" type="date" onchange="renderShopOrdersV38()"></label>
+      </div>
       <div id="shopOrders"></div>
     </section>
 
@@ -1965,11 +1995,53 @@ async function confirmOrder(){
   }catch(e){toast(e.message||"No se pudo crear el pedido.");}
   finally{if(btn){btn.disabled=false;btn.textContent="Confirmar pedido";}}
 }
+let technicianOrdersView="today";
+let shopOrdersView="today";
+function localDayKey(value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return "";
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function todayKey(){return localDayKey(new Date());}
+function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return localDayKey(d);}
+function orderHistoryMatches(order,prefix,view){
+  const key=localDayKey(order.created_at),today=todayKey();
+  if(view==="today")return key===today;
+  const from=document.getElementById(prefix+"OrderFrom")?.value||"";
+  const to=document.getElementById(prefix+"OrderTo")?.value||yesterdayKey();
+  const status=document.getElementById(prefix+"OrderStatus")?.value||"all";
+  const q=normalize(document.getElementById(prefix+"OrderSearch")?.value||"").trim();
+  if(from&&key<from)return false;
+  if(to&&key>to)return false;
+  if(status!=="all"&&order.status!==status)return false;
+  if(q){
+    const p=orderProduct(order),sh=orderShop(order),u=orderTechnician(order);
+    if(!normalize([p.model,p.type,p.variant,sh.name,u.name,order.status,order.id].join(" ")).includes(q))return false;
+  }
+  return true;
+}
+function setTechnicianOrdersView(view){
+  technicianOrdersView=view==="history"?"history":"today";
+  document.getElementById("techOrdersTodayTab").classList.toggle("active",technicianOrdersView==="today");
+  document.getElementById("techOrdersHistoryTab").classList.toggle("active",technicianOrdersView==="history");
+  document.getElementById("techOrdersHistoryFilters").hidden=technicianOrdersView!=="history";
+  if(technicianOrdersView==="history"&&!document.getElementById("techOrderTo").value)document.getElementById("techOrderTo").value=yesterdayKey();
+  renderOrders();
+}
+function setShopOrdersView(view){
+  shopOrdersView=view==="history"?"history":"today";
+  document.getElementById("shopOrdersTodayTab").classList.toggle("active",shopOrdersView==="today");
+  document.getElementById("shopOrdersHistoryTab").classList.toggle("active",shopOrdersView==="history");
+  document.getElementById("shopOrdersHistoryFilters").hidden=shopOrdersView!=="history";
+  if(shopOrdersView==="history"&&!document.getElementById("shopOrderTo").value)document.getElementById("shopOrderTo").value=yesterdayKey();
+  renderShopOrdersV38();
+}
 async function renderOrders(){
   const el=document.getElementById("orderList");
   el.innerHTML='<div class="card empty">Cargando tus pedidos…</div>';
   try{
-    const orders=await loadVisibleOrders();
+    const allOrders=await loadVisibleOrders();
+    const orders=allOrders.filter(o=>orderHistoryMatches(o,"tech",technicianOrdersView));
     el.innerHTML=orders.length?orders.map(o=>{
       const p=orderProduct(o),sh=orderShop(o),line=orderPrimaryItem(o);
       const deliveryText=o.delivery_type==="pickup"?"Recoger en tienda":(o.delivery_address||"Domicilio");
@@ -2261,8 +2333,9 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if(!currentShop){box.innerHTML='<div class="inventory-empty-state"><b>No hay una tienda vinculada</b>Contacta al administrador.</div>';return;}
     box.innerHTML='<div class="inventory-empty-state">Cargando pedidos reales…</div>';
     try{
-      const orders=(await loadVisibleOrders()).filter(o=>o.shop_id===currentShop.id);
-      const pending=orders.filter(o=>o.status==="pending");
+      const allOrders=(await loadVisibleOrders()).filter(o=>o.shop_id===currentShop.id);
+      const orders=allOrders.filter(o=>orderHistoryMatches(o,"shop",shopOrdersView));
+      const pending=allOrders.filter(o=>o.status==="pending");
       document.getElementById("pendingCount").textContent=pending.length+" pendientes";
       box.innerHTML=orders.length?orders.map(o=>{
         const p=orderProduct(o),u=orderTechnician(o),line=orderPrimaryItem(o);

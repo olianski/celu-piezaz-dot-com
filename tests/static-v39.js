@@ -115,3 +115,9 @@ console.log("PASS: HTML/IDs, sintaxis JS, consola admin, registro privado, dedup
 assert(html.includes('adminConsoleDeleteUser'), "Falta la opción de eliminación definitiva en usuarios.");
 assert(html.includes("confirmation!=='ELIMINAR'"), "La eliminación debe requerir confirmación escrita.");
 assert(adapter.includes("functions.invoke('admin-delete-account'"), "La eliminación debe pasar por una función segura del servidor.");
+
+assert(html.includes('setTechnicianOrdersView(\'today\')'), "Los técnicos deben abrir la vista de pedidos de hoy.");
+assert(html.includes('setShopOrdersView(\'today\')'), "Las tiendas deben abrir la vista de pedidos de hoy.");
+assert(html.includes('techOrdersHistoryFilters'), "Faltan filtros de historial para técnicos.");
+assert(html.includes('shopOrdersHistoryFilters'), "Faltan filtros de historial para tiendas.");
+assert(html.includes('orderHistoryMatches'), "Falta el filtrado de pedidos por fecha/vista.");
