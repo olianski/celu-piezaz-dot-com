@@ -922,9 +922,7 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
   gap:9px;
 }
 #inventoryCreate #spDataStep .money-field,
-#inventoryCreate #spDataStep #qty{
-  min-height:48px;
-}
+
 #inventoryCreate #spDataStep #spSave{
   grid-column:1 / -1;
   min-height:48px;
@@ -1634,7 +1632,6 @@ body.role-shop #admin.active{display:block!important}
         <span class="money-symbol">$</span>
         <input id="price" inputmode="numeric" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
       </div>
-      <input id="qty" type="hidden" value="999999">
       <button class="save" id="spSave" type="button">Agregar al inventario</button><div id="spSaveStatus" class="tiny" style="margin-top:8px;min-height:20px"></div>
     </div>
   </div>
@@ -2274,7 +2271,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
         else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
         return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
-          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Cantidad</span><b>'+Number(line.quantity||1)+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
+          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
     }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
