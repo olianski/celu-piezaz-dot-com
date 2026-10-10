@@ -1480,13 +1480,13 @@ body.role-shop #admin.active{display:block!important}
   <div class="picker-selected product-summary is-disabled" id="spSelected" style="display:none"></div>
 
   <div class="picker-step is-disabled" id="spDataStep" style="display:none">
-    <div class="picker-label"><span>4. Precio y cantidad</span></div>
+    <div class="picker-label"><span>4. Precio de venta</span></div>
     <div class="form">
       <div class="money-field">
         <span class="money-symbol">$</span>
         <input id="price" inputmode="numeric" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
       </div>
-      <input id="qty" inputmode="numeric" class="field" type="number" min="0" placeholder="Cantidad">
+      <input id="qty" type="hidden" value="999999">
       <button class="save" id="spSave" type="button">Agregar al inventario</button><div id="spSaveStatus" class="tiny" style="margin-top:8px;min-height:20px"></div>
     </div>
   </div>
@@ -1992,9 +1992,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const i=state.inventory.find(x=>String(x.id)===String(id)); if(!i)return;
     const p=productFor(i.productId), box=document.getElementById("edit-"+id); if(!box)return;
     box.innerHTML='<div class="inventory-edit-form"><div class="inventory-edit-grid">'+
-      '<label>Precio<input id="ep-'+id+'" inputmode="numeric" value="'+Number(i.price)+'"></label>'+
-      '<label>Cantidad<input id="eq-'+id+'" type="number" min="0" value="'+Number(i.qty)+'"></label></div>'+
-      '<div class="inventory-edit-actions"><button class="inventory-cancel" onclick="renderInventorySearch()">Cancelar</button><button class="inventory-save" onclick="saveInventoryV38(\''+id+'\')">Guardar cambios</button></div></div>';
+      '<label>Precio de venta<input id="ep-'+id+'" inputmode="numeric" value="'+Number(i.price)+'"></label></div>'+
+      '<div class="inventory-edit-actions"><button class="inventory-cancel" onclick="renderInventorySearch()">Cancelar</button><button class="inventory-save" onclick="saveInventoryV38(\''+id+'\')">Guardar precio</button></div></div>';
   };
 
   window.saveInventoryV38=async function(id){
@@ -2094,7 +2093,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   async function saveCreateInventory(){
     const prod=document.getElementById("prod").value;
     const priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,"");
-    const qtyRaw=document.getElementById("qty").value.trim();
     const qty=999999,price=Number(priceRaw);
     if(!currentShop){toast("No encontramos la tienda de esta cuenta.");return;}
     if(currentShop.status!=="approved"||!currentShop.active){toast("Tu tienda debe ser aprobada por el administrador antes de publicar inventario.");return;}
