@@ -92,7 +92,8 @@ assert(html.includes('localStorage.removeItem("celu_piezaz_real_v1")'), "Debe li
 assert(!html.includes("funciones locales de prueba"), "Quedó texto de funciones de demostración.");
 assert(html.includes('Empieza buscando un modelo'), "Debe mostrarse un estado vacío útil antes de buscar.");
 assert(html.includes('if(step)step.style.display="none"'), "El contador de disponibilidad debe ocultarse hasta seleccionar modelo.");
-assert(html.includes('Iniciar preparación')&&html.includes('Marcar en camino'), "Faltan pasos intermedios del flujo de pedido.");
+assert(html.includes('Finalizar pedido')&&html.includes('Marcar entregado'), "La tienda debe poder finalizar pedidos aceptados.");
+assert(!html.includes('Iniciar preparación')&&!html.includes('Marcar en camino'), "La interfaz no debe ofrecer estados intermedios eliminados.");
 assert(html.includes("function escapeHtml(value)"), "Falta escapar texto dinámico del catálogo.");
 assert(html.includes("function inlineArg(value)"), "Falta codificar de forma segura los argumentos de los selectores.");
 assert(html.includes("chooseStoreModelV38('+inlineArg(m)+')"), "El selector de modelo de tienda debe escapar los argumentos.");
