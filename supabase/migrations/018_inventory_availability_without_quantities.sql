@@ -128,7 +128,7 @@ begin
   from jsonb_array_elements(p_items) x;
   if v_count <> v_distinct then raise exception 'El pedido contiene productos repetidos o inválidos'; end if;
 
-  select case p_delivery_type when 'outside_zone' then delivery_outside_fee else 0 end
+  select case p_delivery_type when 'local' then delivery_local_fee when 'outside_zone' then delivery_outside_fee else 0 end
   into v_fee
   from public.shops
   where id = p_shop_id and active = true and status = 'approved';
