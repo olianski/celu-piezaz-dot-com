@@ -2751,7 +2751,7 @@ async function submitAuth(e){
     }).join(''):empty('No hay pedidos','Los pedidos aparecerán aquí cuando se registren.');
   }
   async function orderAction(id,next){
-    const action=next==='accepted'?'aceptar':next==='rejected'?'rechazar y devolver las cantidades al inventario':'finalizar';
+    const action=next==='accepted'?'aceptar':next==='rejected'?'rechazar':'finalizar';
     if(!confirm('¿Confirmas '+action+' este pedido?'))return;
     let reason=null;
     if(next==='rejected'){
