@@ -175,6 +175,9 @@ $$;
 revoke all on function public.place_order(uuid, text, text, jsonb) from public, anon;
 grant execute on function public.place_order(uuid, text, text, jsonb) to authenticated;
 
+-- Conserva como agotadas las publicaciones que antes tenían cero unidades.
+update public.inventory set active = false, updated_at = now() where quantity <= 0 and active = true;
+
 alter table public.inventory drop column if exists quantity;
 
 commit;
