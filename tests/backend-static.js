@@ -90,6 +90,7 @@ for(const f of files){
   if(f.includes('018_inventory_availability_without_quantities')){
     checks.push(
       [s.includes('alter table public.inventory drop column if exists quantity'),'columna de cantidades eliminada del inventario'],
+      [s.includes('where quantity <= 0 and active = true'),'publicaciones agotadas preservadas durante la migración'],
       [s.includes('p_active boolean default true'),'disponibilidad controlada por estado activo'],
       [!s.includes('new.quantity') && !s.includes('i.quantity'),'sin validaciones ni descuentos por cantidad'],
       [s.includes('values(v_order_id, v_inventory.id, v_inventory.product_id, 1, v_inventory.price)'),'cada línea de pedido representa un producto'],
