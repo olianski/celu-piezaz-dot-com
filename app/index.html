@@ -3041,7 +3041,7 @@ let orderRefreshInFlight=false;
 function orderScreenIsVisible(){
   if(document.visibilityState==="hidden")return false;
   if(state.role==="technician")return !!document.getElementById("orders")?.classList.contains("active");
-  if(state.role==="shop")return !!document.getElementById("shopSectionOrders")&&!document.getElementById("shopSectionOrders").classList.contains("hidden");
+  if(state.role==="shop")return !!document.getElementById("shopSectionOrders")&&document.getElementById("shopSectionOrders").classList.contains("active");
   return false;
 }
 async function refreshCurrentOrderViews(){
@@ -3073,14 +3073,13 @@ function startOrderUpdates(){
     orderRealtimeChannel=null;
   }
   if(window.CeluSupabaseClient&&["technician","shop"].includes(state.role)){
-    let channel=window.CeluSupabaseClient.channel("order-updates-"+state.role+"-"+(currentShop?.id||technicianProfile?.id||"session"));
-    channel=channel.on("postgres_changes",{event:"*",schema:"public",table:"orders"},scheduleOrderRefresh);
-    if(state.role==="shop"&&currentShop?.id){
-      // La suscripción de la tienda se filtra en el servidor para evitar eventos ajenos.
-      window.CeluSupabaseClient.removeChannel(channel);
-      channel=window.CeluSupabaseClient.channel("shop-order-updates-"+currentShop.id)
-        .on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:"shop_id=eq."+currentShop.id},scheduleOrderRefresh);
-    }
+    const channelName=state.role==="shop"&&currentShop?.id
+      ?"shop-order-updates-"+currentShop.id
+      :"technician-order-updates-"+(technicianProfile?.id||"session");
+    let channel=window.CeluSupabaseClient.channel(channelName);
+    const options={event:"*",schema:"public",table:"orders"};
+    if(state.role==="shop"&&currentShop?.id)options.filter="shop_id=eq."+currentShop.id;
+    channel=channel.on("postgres_changes",options,scheduleOrderRefresh);
     orderRealtimeChannel=channel.subscribe((status)=>{
       if(status==="SUBSCRIBED")scheduleOrderRefresh();
       if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Canal de pedidos desconectado; se mantiene la sincronización de respaldo.");
