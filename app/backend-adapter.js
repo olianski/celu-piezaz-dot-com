@@ -11,25 +11,25 @@ window.CeluPiezazBackend = (() => {
   async function session(){ if(!client) return {data:{session:null},error:null}; return client.auth.getSession(); }
   async function searchProducts(search){ return requireClient().rpc('search_products',{p_query:String(search||'').trim()}); }
   async function getMyShop(){ const c=requireClient(); const u=await c.auth.getUser(); return c.from('shops').select('id,user_id,name,address,delivery_local_fee,delivery_outside_fee,active,status').eq('user_id',u.data.user?.id).maybeSingle(); }
-  async function getMyInventory(){ return requireClient().from('inventory').select('id,shop_id,product_id,price,active,listed,updated_at,products(id,display_name,phone_models(brand,model),part_types(name),part_variants(name))').eq('listed',true).order('updated_at',{ascending:false}); }
+  async function getMyInventory(){ return requireClient().from('inventory').select('id,shop_id,product_id,price,active,listed,updated_at,products(id,display_name,frame_type,phone_models(brand,model),part_types(name),part_variants(name))').eq('listed',true).order('updated_at',{ascending:false}); }
   async function getInventoryByProduct(productId){ return requireClient().from('inventory').select('id,shop_id,product_id,price,shops!inventory_shop_id_fkey!inner(id,name,address,delivery_local_fee,delivery_outside_fee,status,active)').eq('product_id',productId).eq('active',true).eq('shops.status','approved').eq('shops.active',true); }
   async function saveInventoryItem(productId,price,active=true){ return requireClient().rpc('save_inventory_item',{p_product_id:productId,p_price:Number(price),p_active:Boolean(active)}); }
   async function unpublishInventoryItem(inventoryId){ return requireClient().rpc('unpublish_inventory_item',{p_inventory_id:inventoryId}); }
   async function placeOrder(shopId,deliveryType,deliveryAddress,items){ return requireClient().rpc('place_order',{p_shop_id:shopId,p_delivery_type:deliveryType,p_delivery_address:deliveryAddress||null,p_items:items}); }
   async function linkReplacementOrder(newOrderId,previousOrderId){ return requireClient().rpc('link_replacement_order',{p_new_order_id:newOrderId,p_previous_order_id:previousOrderId}); }
   async function updateOrderStatus(orderId,nextStatus,rejectionReason=null){ return requireClient().rpc('update_order_status',{p_order_id:orderId,p_next_status:nextStatus,p_rejection_reason:rejectionReason}); }
-  async function listMyOrders(){ return requireClient().from('orders').select('id,technician_id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,response_deadline_at,rejection_reason,replacement_for_order_id,shops!orders_shop_id_fkey(id,name,address,status),users!orders_technician_id_fkey(name,phone),order_items!order_items_order_id_fkey(id,inventory_id,product_id,unit_price,products!order_items_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)))').order('created_at',{ascending:false}).limit(300); }
+  async function listMyOrders(){ return requireClient().from('orders').select('id,technician_id,shop_id,status,delivery_type,delivery_fee,delivery_address,total,created_at,updated_at,response_deadline_at,rejection_reason,replacement_for_order_id,shops!orders_shop_id_fkey(id,name,address,status),users!orders_technician_id_fkey(name,phone),order_items!order_items_order_id_fkey(id,inventory_id,product_id,unit_price,products!order_items_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,frame_type,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)))').order('created_at',{ascending:false}).limit(300); }
   // Funciones del panel administrativo: las políticas RLS de Supabase restringen estas operaciones a admins.
   async function listPhoneModels(){ return requireClient().from('phone_models').select('id,brand,model,normalized_name,active').eq('active',true).order('brand').order('model').limit(500); }
   async function listProductsByModel(modelId){
-    return requireClient().from('products').select('id,phone_model_id,part_type_id,part_variant_id,display_name,normalized_search,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)').eq('phone_model_id',modelId).eq('active',true).order('display_name').limit(200);
+    return requireClient().from('products').select('id,phone_model_id,part_type_id,part_variant_id,frame_type,display_name,normalized_search,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name)').eq('phone_model_id',modelId).eq('active',true).order('display_name').limit(200);
   }
   async function getInventoryByProducts(productIds){
     if(!productIds||!productIds.length)return {data:[],error:null};
-    return requireClient().from('inventory').select('id,shop_id,product_id,price,active,shops!inventory_shop_id_fkey!inner(id,name,address,status,delivery_local_fee,delivery_outside_fee),products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').in('product_id',productIds).eq('active',true).eq('shops.status','approved').eq('shops.active',true).order('price');
+    return requireClient().from('inventory').select('id,shop_id,product_id,price,active,shops!inventory_shop_id_fkey!inner(id,name,address,status,delivery_local_fee,delivery_outside_fee),products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,frame_type,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').in('product_id',productIds).eq('active',true).eq('shops.status','approved').eq('shops.active',true).order('price');
   }
   async function listShopInventory(shopId){
-    return requireClient().from('inventory').select('id,shop_id,product_id,price,active,listed,updated_at,products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').eq('shop_id',shopId).eq('listed',true).order('updated_at',{ascending:false});
+    return requireClient().from('inventory').select('id,shop_id,product_id,price,active,listed,updated_at,products!inventory_product_id_fkey(id,display_name,phone_model_id,part_type_id,part_variant_id,frame_type,active,phone_models!products_phone_model_id_fkey(brand,model),part_types!products_part_type_id_fkey(name),part_variants!products_part_variant_id_fkey(name))').eq('shop_id',shopId).eq('listed',true).order('updated_at',{ascending:false});
   }
   async function createDemandRequest(productId){
     const c=requireClient(); const u=await c.auth.getUser();
@@ -137,7 +137,7 @@ window.CeluPiezazBackend = (() => {
     return r;
   }
   async function adminListProducts(search,active){
-    let q=requireClient().from('products').select('id,display_name,normalized_search,active,phone_model_id,part_type_id,part_variant_id,phone_models!products_phone_model_id_fkey(brand,model,active),part_types!products_part_type_id_fkey(name,active),part_variants!products_part_variant_id_fkey(name,active)').order('display_name').limit(250);
+    let q=requireClient().from('products').select('id,display_name,normalized_search,active,phone_model_id,part_type_id,part_variant_id,frame_type,phone_models!products_phone_model_id_fkey(brand,model,active),part_types!products_part_type_id_fkey(name,active),part_variants!products_part_variant_id_fkey(name,active)').order('display_name').limit(250);
     if(search) q=q.ilike('display_name','%'+String(search).trim()+'%');
     if(active==='active') q=q.eq('active',true);
     if(active==='inactive') q=q.eq('active',false);
@@ -149,6 +149,7 @@ window.CeluPiezazBackend = (() => {
     if(!String(fields.display_name||'').trim()||!String(fields.normalized_search||'').trim())throw new Error('El nombre del producto está incompleto.');
     let q=c.from('products').select('id',{count:'exact',head:true}).eq('phone_model_id',fields.phone_model_id).eq('part_type_id',fields.part_type_id);
     q=fields.part_variant_id?q.eq('part_variant_id',fields.part_variant_id):q.is('part_variant_id',null);
+    q=fields.frame_type?q.eq('frame_type',fields.frame_type):q.is('frame_type',null);
     const check=await q;
     if(check.error)throw check.error;
     if((check.count||0)>0)throw new Error('Ese producto ya existe en el catálogo.');
