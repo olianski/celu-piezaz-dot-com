@@ -2074,7 +2074,8 @@ async function confirmOrder(){
   if(delivery!=="pickup"&&!address.trim()){toast("Tu perfil no tiene dirección de entrega. Contacta al administrador.");return;}
   const deliveryType=delivery==="far"?"outside_zone":delivery;
   const btn=document.getElementById("confirmOrderButton");
-  if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
+  if(btn?.disabled)return;
+  if(btn){btn.disabled=true;btn.textContent="Guardando pedido…";}
   try{
     const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId}]);
     if(r.error)throw r.error;
@@ -2084,7 +2085,7 @@ async function confirmOrder(){
       if(linked.error)console.warn("No se pudo vincular el pedido alternativo:",linked.error);
     }
     replacementForOrderId=null;
-    toast("Pedido enviado a la tienda.");
+    toast("Pedido guardado y enviado a la tienda.");
     document.getElementById("address").value="";
     document.getElementById("delivery").value="local";
     deliveryChanged();
@@ -2447,6 +2448,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
 
+  window.renderShopOrdersV38=renderShopOrdersV38;
+  window.refreshShopOrdersRealtime=renderShopOrdersV38;
   window.advanceOrderV38=async function(id,next){
     try{
       const r=await CeluPiezazBackend.updateOrderStatus(id,next);if(r.error)throw r.error;
@@ -3033,22 +3036,61 @@ async function submitAuth(e){
 
 let orderRefreshTimer=null;
 let orderRealtimeChannel=null;
+let orderRefreshQueued=false;
+let orderRefreshInFlight=false;
+function orderScreenIsVisible(){
+  if(document.visibilityState==="hidden")return false;
+  if(state.role==="technician")return !!document.getElementById("orders")?.classList.contains("active");
+  if(state.role==="shop")return !!document.getElementById("shopSectionOrders")&&document.getElementById("shopSectionOrders").classList.contains("active");
+  return false;
+}
+async function refreshCurrentOrderViews(){
+  if(orderRefreshInFlight||!orderScreenIsVisible())return;
+  orderRefreshInFlight=true;
+  try{
+    if(state.role==="technician")await renderOrders();
+    else if(state.role==="shop"){
+      await renderShopOrdersV38Safe();
+      if(typeof renderShopSales==="function")await renderShopSales();
+    }
+  }catch(e){console.warn("No se pudieron sincronizar los pedidos:",e);}
+  finally{orderRefreshInFlight=false;}
+}
+function renderShopOrdersV38Safe(){
+  if(typeof window.renderShopOrdersV38==="function")return window.renderShopOrdersV38();
+  if(typeof window.refreshShopOrdersRealtime==="function")return window.refreshShopOrdersRealtime();
+  return Promise.resolve();
+}
+function scheduleOrderRefresh(){
+  if(orderRefreshQueued)return;
+  orderRefreshQueued=true;
+  setTimeout(()=>{orderRefreshQueued=false;refreshCurrentOrderViews();},180);
+}
 function startOrderUpdates(){
   if(orderRefreshTimer)clearInterval(orderRefreshTimer);
   if(orderRealtimeChannel&&window.CeluSupabaseClient){
     window.CeluSupabaseClient.removeChannel(orderRealtimeChannel);
     orderRealtimeChannel=null;
   }
-  const refreshIfVisible=()=>{
-    if(state.role==="technician"&&document.getElementById("orders")?.classList.contains("active"))renderOrders();
-  };
-  if(window.CeluSupabaseClient){
-    orderRealtimeChannel=window.CeluSupabaseClient.channel("technician-order-statuses")
-      .on("postgres_changes",{event:"*",schema:"public",table:"orders"},refreshIfVisible)
-      .subscribe();
+  if(window.CeluSupabaseClient&&["technician","shop"].includes(state.role)){
+    const channelName=state.role==="shop"&&currentShop?.id
+      ?"shop-order-updates-"+currentShop.id
+      :"technician-order-updates-"+(technicianProfile?.id||"session");
+    let channel=window.CeluSupabaseClient.channel(channelName);
+    const options={event:"*",schema:"public",table:"orders"};
+    if(state.role==="shop"&&currentShop?.id)options.filter="shop_id=eq."+currentShop.id;
+    channel=channel.on("postgres_changes",options,scheduleOrderRefresh);
+    orderRealtimeChannel=channel.subscribe((status)=>{
+      if(status==="SUBSCRIBED")scheduleOrderRefresh();
+      if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Canal de pedidos desconectado; se mantiene la sincronización de respaldo.");
+    });
   }
-  orderRefreshTimer=setInterval(refreshIfVisible,12000);
+  // Respaldo para cambios de red, suspensión del móvil o pérdida de eventos realtime.
+  orderRefreshTimer=setInterval(()=>{if(orderScreenIsVisible())refreshCurrentOrderViews();},7000);
 }
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleOrderRefresh();});
+window.addEventListener("online",scheduleOrderRefresh);
+window.addEventListener("focus",scheduleOrderRefresh);
 async function bootAuthenticated(){
   const p=await CeluPiezazBackend.profile();
   if(p.error||!p.data||!p.data.length)throw new Error("No se encontró el perfil del usuario.");
@@ -3069,6 +3111,8 @@ async function bootAuthenticated(){
     }else{
       activeShopSection="orders";
       openPage("admin");
+      await renderShopOrdersV38();
+      startOrderUpdates();
     }
   }catch(e){
     document.body.classList.remove("role-active","role-technician","role-shop","role-admin");
