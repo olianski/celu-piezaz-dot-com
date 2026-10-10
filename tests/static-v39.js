@@ -121,3 +121,8 @@ assert(html.includes('setShopOrdersView(\'today\')'), "Las tiendas deben abrir l
 assert(html.includes('techOrdersHistoryFilters'), "Faltan filtros de historial para técnicos.");
 assert(html.includes('shopOrdersHistoryFilters'), "Faltan filtros de historial para tiendas.");
 assert(html.includes('orderHistoryMatches'), "Falta el filtrado de pedidos por fecha/vista.");
+
+assert(html.includes('id="custom-dropdown-design"'), "Todos los desplegables deben compartir el diseño visual de la aplicación.");
+assert(html.includes('id="custom-dropdown-behavior"'), "Falta el componente de desplegables personalizados.");
+assert(html.includes('MutationObserver'), "Los desplegables creados dinámicamente por administración también deben personalizarse.");
+assert(html.includes('custom-dropdown-option'), "Las opciones deben usar el menú visual personalizado.");
