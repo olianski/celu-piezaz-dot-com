@@ -2473,7 +2473,7 @@ async function submitAuth(e){
     const activeOrders=A.orders.filter(o=>['pending','accepted'].includes(o.status));
     const recent=activeOrders.slice(0,4).map(o=>{
       const sh=obj(o.shops),u=obj(o.users);
-      const acts=o.status==='pending'?'<button class="ac-btn success" onclick="adminConsoleOrder(\\''+o.id+'\\',\\'accepted\\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\\''+o.id+'\\',\\'rejected\\')">Rechazar</button>':o.status==='accepted'?'<button class="ac-btn success" onclick="adminConsoleOrder(\\''+o.id+'\\',\\'delivered\\')">Marcar entregado</button>':'';
+      const acts=o.status==='pending'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+o.id+'\',\'rejected\')">Rechazar</button>':o.status==='accepted'?'<button class="ac-btn success" onclick="adminConsoleOrder(\''+o.id+'\',\'delivered\')">Marcar entregado</button>':'';
       return item('Pedido · '+esc(sh.name||'Tienda')+' · '+cash(o.total),esc(u.name||'Técnico')+' · '+date(o.created_at),badge(o.status),acts);
     }).join('');
     const pending=A.shops.filter(x=>x.status==='pending').slice(0,4).map(x=>{
