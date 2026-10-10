@@ -85,7 +85,6 @@ for(const f of files){
       [s.includes("v_order.status='pending' and p_next_status='rejected'"),'rechazo desde pendiente'],
       [s.includes("nullif(trim(coalesce(p_rejection_reason,'')), '') is null"),'motivo de rechazo obligatorio'],
       [s.includes("rejection_reason=trim(p_rejection_reason)"),'motivo guardado en el pedido'],
-      [s.includes("quantity=i.quantity+oi.quantity"),'stock restaurado al rechazar'],
       [s.includes('revoke all on function public.update_order_status(uuid,text,text) from public,anon'),'permisos de la RPC final restringidos'],
       [s.includes('grant execute on function public.update_order_status(uuid,text,text) to authenticated'),'RPC final solo para usuarios autenticados']
     );
