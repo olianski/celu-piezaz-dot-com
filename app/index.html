@@ -1490,6 +1490,29 @@ select[data-custom-dropdown-source]{position:absolute!important;width:1px!import
 @keyframes dropdown-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.custom-dropdown-menu[data-open=true]{animation:none}}
 </style>
+<style id="admin-friendly-redesign">
+#acConsole{max-width:1180px;margin:0 auto;padding:clamp(12px,2.5vw,28px)}
+#acConsole .ac-hero{padding:clamp(18px,3vw,30px);border-radius:22px;background:linear-gradient(135deg,#f2f6ff,#f7f9fc);border:1px solid #e1e8f2;margin-bottom:16px}
+#acConsole .ac-hero h1{margin:6px 0;font-size:clamp(25px,4vw,34px);letter-spacing:-.035em}
+#acConsole .ac-hero p{max-width:620px;line-height:1.5;color:#657186;margin:0}
+#acConsole .ac-tabs{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:thin;position:relative}
+#acConsole .ac-tab{flex:0 0 auto;border:1px solid #e0e6ef;border-radius:12px;padding:10px 13px;background:#fff;color:#455166;font-weight:650;white-space:nowrap}
+#acConsole .ac-tab.active{background:#1d3f8f;border-color:#1d3f8f;color:#fff}
+#acConsole .ac-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 16px}
+#acConsole .ac-metric{border:1px solid #e5eaf1;border-radius:16px;padding:15px;background:#fff;min-width:0}
+#acConsole .ac-metric b{font-size:clamp(20px,3vw,27px);letter-spacing:-.03em}
+#acConsole .ac-dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#acConsole .ac-panel{border:1px solid #e5eaf1;border-radius:17px;padding:clamp(13px,2vw,20px);box-shadow:0 4px 14px #17203306}
+#acConsole .ac-shortcuts{display:grid;gap:8px;grid-template-columns:1fr}
+#acConsole .ac-shortcut{text-align:left;border:1px solid #e4e9f1;border-radius:12px;padding:13px 14px;background:#fff;display:grid;gap:4px}
+#acConsole .ac-shortcut span{line-height:1.4}
+#acConsole .ac-content-head{gap:12px;align-items:center}
+#acConsole .ac-quick-create{border:1px solid #dce4ef;border-radius:13px;padding:12px 14px;background:#f8fafc}
+#acConsole .ac-quick-create summary{font-weight:700;cursor:pointer;padding:3px 0}
+#acConsole .ac-quick-create .ac-two{margin-top:12px}
+#acConsole .ac-quick-create p{font-size:13px;color:#657186;margin-bottom:0}
+@media(max-width:680px){#acConsole .ac-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#acConsole .ac-dashboard-grid{grid-template-columns:1fr}#acConsole .ac-hero{border-radius:17px}}
+</style>
 </head>
 
 <body>
@@ -2572,24 +2595,18 @@ async function submitAuth(e){
     const openReq=A.requests.filter(x=>x.status==='open').length;
     $('acContent').innerHTML=
       '<div class="ac-metrics">'+
-      metric('Usuarios registrados',d.users,'Todos los perfiles')+
-      metric('Tiendas registradas',d.shops,'Incluye suspendidas')+
-      metric('Tiendas por revisar',d.pendingShops,'Requieren aprobación')+
-      metric('Productos maestros',d.products,'Modelos y repuestos')+
-      metric('Modelos',d.models,'Teléfonos registrados')+
-      metric('Pedidos activos',d.openOrders,'Pendientes de completar')+
-      metric('Solicitudes abiertas',d.openRequests,'Demanda sin resolver')+
-      metric('Ventas entregadas',cash(d.deliveredRevenue),'Suma de pedidos entregados')+
-      '</div><div class="ac-dashboard-grid"><div class="ac-panel"><div class="ac-panel-head"><div><h3>Accesos rápidos</h3><p>Entra directamente al área que necesita atención.</p></div></div><div class="ac-shortcuts">'+
-      '<button class="ac-shortcut" onclick="adminConsoleNav(\'shops\')"><b>Revisar tiendas</b><span>Validar solicitudes, aprobar o suspender.</span></button>'+
-      '<button class="ac-shortcut" onclick="adminConsoleNav(\'catalog\')"><b>Editar catálogo</b><span>Modelos, repuestos, variantes y productos.</span></button>'+
-      '<button class="ac-shortcut" onclick="adminConsoleNav(\'users\')"><b>Administrar usuarios</b><span>Consultar perfiles y asignar roles.</span></button>'+
-      '<button class="ac-shortcut" onclick="adminConsoleNav(\'orders\')"><b>Supervisar pedidos</b><span>Consultar estados y resolver pendientes.</span></button>'+
-      '<button class="ac-shortcut" onclick="adminConsoleNav(\'requests\')"><b>Ver demanda</b><span>Revisar repuestos solicitados.</span></button>'+
-      '<button class="ac-shortcut" onclick="adminConsoleExport(\'overview\')"><b>Exportar resumen</b><span>Descargar indicadores en CSV.</span></button>'+
-      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Tiendas por aprobar</h3><p>Las nuevas tiendas no deberían operar hasta revisarlas.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'shops\')">Ver todas</button></div>'+
-      (pending||empty('No hay tiendas pendientes','Las solicitudes nuevas aparecerán aquí.'))+
-      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Pedidos que requieren atención</h3><p>Acciones disponibles según el estado del pedido.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'orders\')">Ver pedidos</button></div>'+
+      metric('Pedidos por atender',d.openOrders,'Pendientes de completar')+
+      metric('Tiendas por revisar',d.pendingShops,'Solicitudes de registro')+
+      metric('Solicitudes abiertas',d.openRequests,'Repuestos solicitados')+
+      metric('Ventas entregadas',cash(d.deliveredRevenue),'Total acumulado')+
+      '</div><div class="ac-dashboard-grid"><div class="ac-panel"><div class="ac-panel-head"><div><h3>Requiere tu atención</h3><p>Primero lo urgente; el resto queda en sus secciones.</p></div></div>'+
+      '<div class="ac-shortcuts">'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'shops\')"><b>Tiendas por revisar · '+esc(d.pendingShops)+'</b><span>Aprobar o revisar solicitudes.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'orders\')"><b>Pedidos activos · '+esc(d.openOrders)+'</b><span>Consultar y resolver pedidos.</span></button>'+
+      '<button class="ac-shortcut" onclick="adminConsoleNav(\'requests\')"><b>Solicitudes abiertas · '+esc(d.openRequests)+'</b><span>Ver lo que buscan los técnicos.</span></button>'+
+      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Tiendas por aprobar</h3><p>Revisa las nuevas solicitudes.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'shops\')">Ver tiendas</button></div>'+
+      (pending||empty('Todo al día','No hay tiendas pendientes de revisión.'))+
+      '</div></div><div class="ac-panel"><div class="ac-panel-head"><div><h3>Pedidos activos</h3><p>Solo los que requieren seguimiento.</p></div><button class="ac-btn" onclick="adminConsoleNav(\'orders\')">Ver pedidos</button></div>'+
       (recent||empty('Todo al día','No hay pedidos activos pendientes de gestión.'))+
       '</div>';
   }
@@ -2640,7 +2657,7 @@ async function submitAuth(e){
     const variantOptions=A.variants.filter(x=>x.active&&screenTypeIds.has(x.part_type_id)).map(x=>'<option value="'+x.id+'" data-type="'+x.part_type_id+'">'+esc(obj(x.part_types).name||x.name)+' · '+esc(x.name)+'</option>').join('');
     $('acCatalogBody').innerHTML=
       '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Crear producto maestro</h3><p>Selecciona modelo, tipo y variante. No se crean nombres libres para las tiendas.</p></div></div>'+
-      '<form class="ac-form" onsubmit="adminConsoleCreateProduct(event)"><div class="ac-two"><label>Modelo<select required id="acProductModel" class="ac-select"><option value="">Seleccionar modelo</option>'+modelOptions+'</select></label><label>Tipo de repuesto<select required id="acProductType" class="ac-select"><option value="">Seleccionar tipo</option>'+typeOptions+'</select></label></div>'+
+      '<form class="ac-form" onsubmit="adminConsoleCreateProduct(event)"><div class="ac-two"><label>Modelo existente<select id="acProductModel" class="ac-select"><option value="">Seleccionar modelo existente</option>'+modelOptions+'</select></label><label>Tipo de repuesto<select required id="acProductType" class="ac-select"><option value="">Seleccionar tipo</option>'+typeOptions+'</select></label></div><details class="ac-quick-create"><summary>¿No encuentras el modelo? Crear uno nuevo</summary><div class="ac-two"><label>Marca nueva<input id="acProductNewBrand" class="ac-input" placeholder="Ej. Samsung"></label><label>Nombre del modelo<input id="acProductNewModel" class="ac-input" placeholder="Ej. Galaxy A57"></label></div><p>El modelo se añadirá al catálogo maestro y quedará seleccionado para este producto.</p></details>'+
       '<label>Variante<select id="acProductVariant" class="ac-select"><option value="">Sin variante específica</option>'+variantOptions+'</select></label><button class="ac-btn primary" type="submit">Crear producto maestro</button></form></div>'+
       '<div class="ac-panel"><div class="ac-panel-head"><div><h3>Buscar productos</h3><p>Hay muchos registros; busca por modelo, repuesto o nombre del producto.</p></div><button class="ac-btn" onclick="adminConsoleExport(\'products\')">Exportar resultados</button></div>'+
       '<div class="ac-filterbar"><input id="acProductSearch" class="ac-input" placeholder="Ej. Galaxy A15, pantalla OLED"><select id="acProductActive" class="ac-select"><option value="all">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option></select><button class="ac-btn primary" onclick="adminConsoleFindProducts()">Buscar</button></div><div id="acProductList" class="ac-list">'+empty('Busca un producto','Escribe al menos 2 caracteres y pulsa Buscar.')+'</div></div>';
@@ -2669,9 +2686,21 @@ async function submitAuth(e){
   }
   async function createProduct(e){
     e.preventDefault();
-    const mid=$('acProductModel').value,tid=$('acProductType').value,vid=$('acProductVariant').value||null;
+    let mid=$('acProductModel').value,tid=$('acProductType').value,vid=$('acProductVariant').value||null;
+    const brand=$('acProductNewBrand').value.trim(),modelName=$('acProductNewModel').value.trim();
+    if(brand||modelName){
+      if(!brand||!modelName){notice('Completa la marca y el nombre del modelo.',true);return;}
+      const existing=A.models.find(x=>norm(x.brand)===norm(brand)&&norm(x.model)===norm(modelName));
+      if(existing){mid=existing.id;}
+      else{
+        const created=await checked(CeluPiezazBackend.adminCreateModel(brand,modelName));
+        if(!created||!created.id)throw new Error('No se pudo crear el modelo.');
+        mid=created.id;A.catalogRefsLoaded=false;await ensureCatalogRefs();
+      }
+      $('acProductModel').value=mid;
+    }
     const m=A.models.find(x=>x.id===mid),t=A.types.find(x=>x.id===tid),v=A.variants.find(x=>x.id===vid);
-    if(!m||!t||!isScreenDisplayType(t.name)){notice('Solo puedes crear productos de tipo Pantalla o Display.',true);return;}
+    if(!m||!t||!isScreenDisplayType(t.name)){notice('Selecciona o crea un modelo y elige Pantalla o Display.',true);return;}
     if(v&&v.part_type_id!==tid){notice('La variante elegida no corresponde al tipo de repuesto.',true);return;}
     const display_name=[m.brand,m.model,t.name,v&&v.name].filter(Boolean).join(' · ');
     const normalized_search=norm(display_name);
@@ -3062,7 +3091,7 @@ initRealBackend();
   function scan(root){if(root.matches?.("select"))enhance(root);root.querySelectorAll?.("select").forEach(enhance);}
   document.addEventListener("click",e=>{if(opened&&!opened.contains(e.target))close();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
-  window.addEventListener("resize",close);window.addEventListener("scroll",close,true);
+  window.addEventListener("resize",close);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{scan(document);new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType===1)scan(n);}))).observe(document.body,{childList:true,subtree:true});});
   else{scan(document);new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType===1)scan(n);}))).observe(document.body,{childList:true,subtree:true});}
 })();
