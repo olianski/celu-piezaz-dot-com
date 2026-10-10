@@ -2641,7 +2641,7 @@ async function submitAuth(e){
     await ensureCatalogRefs();
     const tabs=[['products','Pantallas / displays'],['models','Modelos']];
     if(!['products','models'].includes(A.catalogMode))A.catalogMode='products';
-    $('acContent').innerHTML=heading('Catálogo de pantallas','Solo se publican pantallas y displays. Los demás repuestos se conservan para futuras etapas.')+
+    $('acContent').innerHTML=heading('Catálogo de pantallas','El catálogo está enfocado en pantallas. Más adelante podremos incorporar otros repuestos.')+
       '<div class="ac-subtabs">'+tabs.map(t=>'<button class="ac-subtab '+(A.catalogMode===t[0]?'active':'')+'" onclick="adminConsoleCatalogMode(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div><div id="acCatalogBody"></div>';
     if(A.catalogMode==='products')renderProducts();
     else if(A.catalogMode==='models')renderModels();
