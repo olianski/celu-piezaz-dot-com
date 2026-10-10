@@ -1515,6 +1515,31 @@ select[data-custom-dropdown-source]{position:absolute!important;width:1px!import
 #acConsole .ac-quick-create p{font-size:13px;color:#657186;margin-bottom:0}
 @media(max-width:680px){#acConsole .ac-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#acConsole .ac-dashboard-grid{grid-template-columns:1fr}#acConsole .ac-hero{border-radius:17px}}
 </style>
+
+<style id="shop-sales-polish-v1">
+#admin .sales-overview{display:grid;gap:10px;margin-bottom:22px}
+#admin .sales-main-metric{padding:20px;border-radius:18px;background:linear-gradient(135deg,#102a43,#174b72);color:#fff;box-shadow:0 8px 20px #102a4318}
+#admin .sales-main-metric>span{display:block;font-size:13px;color:#d6e6f3;font-weight:650}
+#admin .sales-main-metric>b{display:block;font-size:30px;line-height:1.2;letter-spacing:-.7px;margin-top:8px}
+#admin .sales-main-metric>small{display:block;font-size:12px;color:#d6e6f3;margin-top:7px}
+#admin .sales-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#admin .sales-kpis .shop-stat{padding:14px}
+#admin .sales-kpis .shop-stat b{font-size:19px;overflow-wrap:anywhere}
+#admin .sales-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 11px}
+#admin .sales-history-head h3{margin:0;font-size:17px;letter-spacing:-.2px}
+#admin .sales-history-head span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+#admin .sales-history-head .sales-count{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border-radius:999px;background:#eaf2ff;color:#2459b7;font-weight:800;margin:0}
+#admin .sales-list{display:grid;gap:9px}
+#admin .sales-row{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}
+#admin .sales-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#admin .sales-product{min-width:0;display:grid;gap:5px}
+#admin .sales-product b{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+#admin .sales-product span{font-size:12px;line-height:1.4;color:var(--muted)}
+#admin .sales-amount{font-size:15px;white-space:nowrap}
+#admin .sales-row-meta{display:flex;flex-wrap:wrap;gap:6px 12px;border-top:1px solid #edf0f4;margin-top:12px;padding-top:10px;color:var(--muted);font-size:11px}
+#admin .sales-empty{margin-top:8px}
+@media(min-width:560px){#admin .sales-overview{grid-template-columns:1.15fr 1fr;align-items:stretch}#admin .sales-kpis{grid-template-columns:1fr;align-content:stretch}#admin .sales-kpis .shop-stat{display:flex;flex-direction:column;justify-content:center}}
+</style>
 </head>
 
 <body>
@@ -2415,8 +2440,14 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const el=document.getElementById("shopSales");
     try{
       const orders=(await loadVisibleOrders()).filter(o=>currentShop&&o.shop_id===currentShop.id&&o.status==="delivered");
-      el.innerHTML='<div class="shop-stats"><div class="shop-stat"><span>Pedidos entregados</span><b>'+orders.length+'</b></div><div class="shop-stat"><span>Ventas entregadas</span><b>'+money(orders.reduce((sum,o)=>sum+Number(o.total||0),0))+'</b></div></div>';
-    }catch(e){el.innerHTML='<div class="inventory-empty-state">No se pudieron cargar las ventas.</div>';}
+      const total=orders.reduce((sum,o)=>sum+Number(o.total||0),0);
+      const average=orders.length?total/orders.length:0;
+      const recent=[...orders].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+      const dateLabel=value=>{if(!value)return "Fecha no disponible";const d=new Date(value);return Number.isNaN(d.getTime())?"Fecha no disponible":d.toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"});};
+      el.innerHTML='<div class="sales-overview"><div class="sales-main-metric"><span>Ventas entregadas</span><b>'+money(total)+'</b><small>Acumulado de pedidos finalizados</small></div><div class="sales-kpis"><div class="shop-stat"><span>Pedidos entregados</span><b>'+orders.length+'</b></div><div class="shop-stat"><span>Ticket promedio</span><b>'+money(average)+'</b></div></div></div>'+
+        '<div class="sales-history-head"><div><h3>Últimas ventas</h3><span>Detalle de tus pedidos finalizados</span></div><span class="sales-count">'+orders.length+'</span></div>'+
+        (recent.length?'<div class="sales-list">'+recent.slice(0,20).map(o=>{const p=orderProduct(o),u=orderTechnician(o);return '<article class="sales-row"><div class="sales-row-top"><div class="sales-product"><b>'+esc(p.model||"Repuesto")+'</b><span>'+esc([p.type,p.variant].filter(Boolean).join(" · ")||"Detalle no disponible")+'</span></div><b class="sales-amount">'+money(o.total)+'</b></div><div class="sales-row-meta"><span>Pedido '+esc(String(o.id).slice(0,8))+'</span><span>'+esc(u.name||"Técnico")+'</span><span>'+esc(dateLabel(o.created_at))+'</span></div></article>';}).join("")+'</div>':'<div class="inventory-empty-state sales-empty"><b>Aún no tienes ventas finalizadas</b><span>Cuando completes tu primer pedido, aquí verás el total vendido y el detalle de cada venta.</span></div>');
+    }catch(e){el.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar las ventas</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
   function renderShopCatalog(){
     const list=document.getElementById("shopCatalog");
