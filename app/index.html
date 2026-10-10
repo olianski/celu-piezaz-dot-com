@@ -1331,6 +1331,137 @@ body.role-shop #admin.active{display:block!important}
 }
 </style>
 
+
+<style id="offer-product-polish">
+/* Ofrecer producto: jerarquía visual y estados consistentes */
+#inventoryCreate .shop-action{
+  padding:18px;
+  border:1px solid #e7ebf2;
+  border-radius:20px;
+  background:linear-gradient(180deg,#fff 0%,#fbfcff 100%);
+  box-shadow:0 5px 18px rgba(16,24,40,.035);
+}
+#inventoryCreate .shop-action>h2{
+  font-size:21px;
+  letter-spacing:-.45px;
+  line-height:1.2;
+  margin:0 0 6px;
+}
+#inventoryCreate .shop-action>p{
+  font-size:13px;
+  line-height:1.55;
+  max-width:480px;
+  margin:0 0 16px;
+}
+#inventoryCreate #storePicker{gap:11px}
+#inventoryCreate #storePicker>.picker-step,
+#inventoryCreate #spDataStep{
+  padding:14px;
+  border:1px solid #e5eaf2;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(16,24,40,.025);
+}
+#inventoryCreate #storePicker .picker-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  color:#344054;
+}
+#inventoryCreate #storePicker .picker-label span{
+  font-size:14px;
+  font-weight:750;
+}
+#inventoryCreate #storePicker .picker-search input{
+  min-height:49px;
+  border-radius:12px;
+  background:#f8fafc;
+  border-color:#dfe5ee;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+#inventoryCreate #storePicker .picker-search input:focus{
+  border-color:#8fb5ff;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(11,99,246,.09);
+}
+#inventoryCreate #spModels{max-height:250px}
+#inventoryCreate #spModels .picker-option{
+  border-radius:11px;
+  padding:12px;
+}
+#inventoryCreate #partPickerBtn{
+  border:1px solid #e1e7f0;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(16,24,40,.025);
+  transition:border-color .15s,background .15s;
+}
+#inventoryCreate #partPickerBtn.open{
+  border-color:#b8caff;
+  background:#f7f9ff;
+}
+#inventoryCreate #spChoiceStep{
+  margin-top:-11px;
+  padding:10px;
+  border-color:#dce5fb;
+  border-radius:0 0 14px 14px;
+  background:#f9fbff;
+}
+#inventoryCreate #spChoices button,
+#inventoryCreate #spVariantStep .picker-grid button{
+  min-height:46px;
+  padding:10px 12px;
+  border-radius:11px;
+  border-color:#e0e6ef;
+  background:#fff;
+  font-weight:650;
+  transition:border-color .15s,background .15s,transform .15s;
+}
+#inventoryCreate #spChoices button:hover,
+#inventoryCreate #spVariantStep .picker-grid button:hover{
+  border-color:#9bb8ff;
+  background:#f4f7ff;
+}
+#inventoryCreate #spSelected,
+#inventoryCreate #spModels .picker-selected{
+  border-color:#cbd9ff;
+  background:#f3f6ff;
+}
+#inventoryCreate #spSelected{margin:0}
+#inventoryCreate #spDataStep .money-field{
+  border-radius:12px;
+  border-color:#dfe5ee;
+  min-height:52px;
+}
+#inventoryCreate #spDataStep .money-field:focus-within{
+  border-color:#8fb5ff;
+  box-shadow:0 0 0 3px rgba(11,99,246,.09);
+}
+#inventoryCreate #spSave{
+  min-height:51px;
+  border-radius:13px;
+  background:linear-gradient(180deg,#1769f5 0%,#0b63f6 100%);
+  box-shadow:0 4px 10px rgba(11,99,246,.16);
+  font-weight:800;
+  letter-spacing:.05px;
+}
+#inventoryCreate #spSave:disabled{
+  box-shadow:none;
+}
+#inventoryCreate #spSaveStatus{
+  grid-column:1/-1;
+  line-height:1.45;
+  color:#087443;
+}
+@media(max-width:430px){
+  #inventoryCreate .shop-action{padding:14px;border-radius:17px}
+  #inventoryCreate #storePicker>.picker-step,
+  #inventoryCreate #spDataStep{padding:12px}
+  #inventoryCreate #spChoices button,
+  #inventoryCreate #spVariantStep .picker-grid button{min-height:44px}
+}
+</style>
+
 </head>
 
 <body>
