@@ -14,6 +14,10 @@
 .order-history-filters input,.order-history-filters select{min-width:135px;max-width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#172033;font:inherit}
 .order-history-filters label{display:flex;align-items:center;gap:6px;font-size:13px;color:#475569}
 @media(max-width:600px){.order-history-filters>*{width:100%;flex:1}.order-history-filters label input{flex:1;min-width:0}}
+.order-reference{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;color:var(--muted,#667085);font-size:12px}
+.order-reference code{font-family:inherit;font-size:11px;letter-spacing:.04em;color:#667085;background:#f2f4f7;border-radius:6px;padding:3px 6px}
+.order-reference button{border:0;background:transparent;color:#245dcc;font-size:12px;font-weight:650;padding:3px 5px;border-radius:6px}
+.order-reference button:active{background:#eef4ff}
 </style>
 <style>
 :root{--blue:#0b63f6;--blue2:#084dcc;--ink:#101828;--muted:#667085;--bg:#f6f8fc;--card:#fff;--line:#e7ebf2;--green:#087443;--orange:#b54708}
@@ -2264,10 +2268,6 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
 
 
-.order-reference{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;color:var(--muted,#667085);font-size:12px}
-.order-reference code{font-family:inherit;font-size:11px;letter-spacing:.04em;color:#667085;background:#f2f4f7;border-radius:6px;padding:3px 6px}
-.order-reference button{border:0;background:transparent;color:#245dcc;font-size:12px;font-weight:650;padding:3px 5px;border-radius:6px}
-.order-reference button:active{background:#eef4ff}
 /* Tienda — interfaz operativa conectada al backend */
 (function(){
   const norm=v=>String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
