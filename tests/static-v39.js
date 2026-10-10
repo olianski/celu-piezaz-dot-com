@@ -95,6 +95,8 @@ assert(html.includes('if(step)step.style.display="none"'), "El contador de dispo
 assert(html.includes('Finalizar pedido')&&html.includes('Marcar entregado'), "La tienda debe poder finalizar pedidos aceptados.");
 assert(!html.includes('Iniciar preparación')&&!html.includes('Marcar en camino'), "La interfaz no debe ofrecer estados intermedios eliminados.");
 assert(!html.includes('devolver las cantidades al inventario'), "El rechazo no debe prometer una devolución de cantidades que ya no se realiza.");
+assert(!html.includes('id="qty"') && !/x\.qty|inv\.qty|line\.quantity/.test(html), "La interfaz no debe mostrar ni gestionar cantidades.");
+assert(html.includes("function activeInventory(){return state.inventory.filter(x=>x.active!==false); }") || html.includes("function activeInventory(){return state.inventory.filter(x=>x.active!==false);}"), "La disponibilidad debe depender del estado activo, no de cantidades.");
 assert(html.includes("function escapeHtml(value)"), "Falta escapar texto dinámico del catálogo.");
 assert(html.includes("function inlineArg(value)"), "Falta codificar de forma segura los argumentos de los selectores.");
 assert(html.includes("chooseStoreModelV38('+inlineArg(m)+')"), "El selector de modelo de tienda debe escapar los argumentos.");

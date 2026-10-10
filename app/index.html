@@ -911,7 +911,7 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
   font-size:14px;
 }
 
-/* Precio + cantidad juntos */
+/* Precio de publicación sin conteo de unidades */
 #inventoryCreate #spDataStep{
   padding:12px;
   border-radius:16px;
@@ -922,9 +922,6 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
   gap:9px;
 }
 #inventoryCreate #spDataStep .money-field,
-#inventoryCreate #spDataStep #qty{
-  min-height:48px;
-}
 #inventoryCreate #spDataStep #spSave{
   grid-column:1 / -1;
   min-height:48px;
@@ -1608,7 +1605,7 @@ body.role-shop #admin.active{display:block!important}
       </div>
       <div id="inventoryCreate" class="inventory-subsection">
         <div class="shop-action">
-          <h2>Ofrecer una pantalla</h2><p>Busca el modelo, elige la calidad y define tu precio. No necesitas registrar cantidades.</p>
+          <h2>Ofrecer una pantalla</h2><p>Busca el modelo, elige la calidad y define tu precio. Solo necesitas publicar el producto y su precio.</p>
           <div id="storePicker" class="product-picker shop-create-flow">
   <div class="picker-step">
     <div class="picker-label"><span>1. Busca el modelo</span></div>
@@ -1634,7 +1631,6 @@ body.role-shop #admin.active{display:block!important}
         <span class="money-symbol">$</span>
         <input id="price" inputmode="numeric" class="field" type="text" inputmode="numeric" autocomplete="off" placeholder="0">
       </div>
-      <input id="qty" type="hidden" value="999999">
       <button class="save" id="spSave" type="button">Agregar al inventario</button><div id="spSaveStatus" class="tiny" style="margin-top:8px;min-height:20px"></div>
     </div>
   </div>
@@ -1715,7 +1711,7 @@ async function loadLiveOffersForModel(label){
   const rows=(r.data||[]).map(x=>{
     const p=mapDbProduct(x.products)||catalogProduct(x.product_id), sh=unwrapDbRelation(x.shops);
     if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
-    return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p,s:sh};
+    return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,p,s:sh};
   });
   state.inventory=rows;
   state.shops=[...new Map(rows.filter(x=>x.s&&x.s.id).map(x=>[x.s.id,x.s])).values()];
@@ -1729,7 +1725,7 @@ async function loadCurrentShop(){
     const q=await CeluPiezazBackend.listShopInventory(currentShop.id);if(q.error)throw q.error;
     state.inventory=(q.data||[]).map(x=>{
       const p=mapDbProduct(x.products);if(p&&!state.catalog.some(c=>String(c.id)===String(p.id)))state.catalog.push(p);
-      return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,updatedAt:x.updated_at};
+      return {id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,updatedAt:x.updated_at};
     });
   }else state.inventory=[];
   return currentShop;
@@ -1742,7 +1738,7 @@ function orderTechnician(order){return unwrapDbRelation(order.users);}
 function catalogProduct(id){return state.catalog.find(x=>x.id===id);}
 function shop(id){return state.shops.find(x=>x.id===id);}
 function inventoryFor(shopId,productId){return state.inventory.find(x=>x.shopId===shopId&&String(x.productId)===String(productId));}
-function activeInventory(){return state.inventory.filter(x=>x.active&&x.qty>0);}
+function activeInventory(){return state.inventory.filter(x=>x.active!==false);}
 function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function inlineArg(value){return escapeHtml(JSON.stringify(String(value??"")).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026"));}
@@ -1896,8 +1892,8 @@ async function renderMarket(){
     results.innerHTML='<div class="section" style="margin-top:4px"><div><h2>Tiendas que lo tienen</h2><small>'+rows.length+' opciones · ordenadas por precio</small></div></div>'+
       rows.map((x,idx)=>'<article class="card" onclick="openProduct('+inlineArg(x.productId)+')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
       '<div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||'Tienda')+'</div><div class="sub">'+escapeHtml(x.p.type)+' · '+escapeHtml(x.p.variant)+'</div></div>'+
-      '<span class="badge '+(x.qty<=1?'one':'')+'">'+(x.qty<=1?'Última unidad':'Disponible')+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<span class="badge">Disponible</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="event.stopPropagation();startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></article>').join('');
   }else{
     results.innerHTML='<div class="card empty"><b>No encontramos ese repuesto disponible.</b><div class="tiny" style="margin-top:6px">Puedes solicitar que te avisemos cuando una tienda lo publique.</div><button class="save" style="margin-top:12px;width:100%" onclick="requestDemand()">Avisarme cuando aparezca</button></div>';
@@ -1923,8 +1919,8 @@ function openProduct(productId){
     '<div class="panel"><div class="tiny">'+escapeHtml(p.type)+'</div><h1 style="font-size:26px;margin:4px 0">'+escapeHtml(p.model)+'</h1><div class="sub">'+escapeHtml(p.variant)+'</div></div>'+
     '<div class="section"><h2>Tiendas disponibles</h2><small>'+offers.length+' opción(es)</small></div>'+
     (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||"Tienda")+'</div><div class="sub">'+escapeHtml(p.type)+' · '+escapeHtml(p.variant)+'</div></div>'+
-      '<span class="badge '+(x.qty===1?'one':'')+'">'+(x.qty===1?'Última unidad':'Disponible')+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<span class="badge">Disponible</span></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></div>').join(''):
       '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
 }
@@ -1936,7 +1932,7 @@ function startCheckout(shopId,productId,priorOrderId=null){
   if(!p||!inv){toast("La disponibilidad cambió. Vuelve a buscar el repuesto.");openPage("market");return;}
   selectedInventoryId=inv.id;
   const sh=inv.s||shop(shopId);
-  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+Number(inv.qty)+' disponible(s)</div></div>';
+  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">Producto disponible</div></div>';
   const delivery=document.getElementById("delivery");if(delivery)delivery.value="local";
   deliveryChanged();
   openPage("checkout");
@@ -1945,13 +1941,13 @@ async function confirmOrder(){
   const inv=state.inventory.find(x=>String(x.id)===String(selectedInventoryId));
   const delivery=document.getElementById("delivery").value;
   const address=technicianProfile?.address||"";
-  if(!inv||Number(inv.qty)<1){toast("Ese repuesto se agotó. Busca otra opción.");openPage("market");return;}
+  if(!inv||inv.active===false){toast("Ese repuesto ya no está disponible. Busca otra opción.");openPage("market");return;}
   if(delivery!=="pickup"&&!address.trim()){toast("Tu perfil no tiene dirección de entrega. Contacta al administrador.");return;}
   const deliveryType=delivery==="far"?"outside_zone":delivery;
   const btn=document.getElementById("confirmOrderButton");
   if(btn){btn.disabled=true;btn.textContent="Enviando pedido…";}
   try{
-    const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId,quantity:1}]);
+    const r=await CeluPiezazBackend.placeOrder(selectedShop,deliveryType,address,[{inventory_id:selectedInventoryId}]);
     if(r.error)throw r.error;
     const createdOrderId=typeof r.data==="string"?r.data:(r.data?.id||r.data?.order_id||null);
     if(replacementForOrderId&&createdOrderId){
@@ -1983,7 +1979,7 @@ async function renderOrders(){
       return '<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml((p.type||"Repuesto")+' '+p.model)+'</div><div class="sub">'+escapeHtml((p.variant||"")+' · '+(sh.name||"Tienda"))+'</div></div>'+
       '<span class="badge '+(o.status==="delivered"?"":"one")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>'+
       '<div class="meta"><div><div class="price">'+money(o.total)+'</div><div class="shop">Pedido · '+escapeHtml(new Date(o.created_at).toLocaleString("es-CO"))+'</div></div></div>'+
-      '<div class="tiny" style="margin-top:9px">Cantidad: '+Number(line.quantity||1)+' · Entrega: '+escapeHtml(deliveryText)+'</div>'+
+      '<div class="tiny" style="margin-top:9px">Entrega: '+escapeHtml(deliveryText)+'</div>'+ 
       (deadline?'<div class="tiny" style="margin-top:8px">'+escapeHtml(deadline)+'</div>':"")+reason+alternatives+'</div>';
     }).join(''):'<div class="card empty"><b>Aún no tienes pedidos.</b></div>';
   }catch(e){el.innerHTML='<div class="card empty"><b>No se pudieron cargar tus pedidos.</b><div class="tiny">'+escapeHtml(e.message||"")+'</div></div>';}
@@ -1995,17 +1991,17 @@ async function showAlternativeShops(orderId,productId,originalShopId){
   try{
     const r=await CeluPiezazBackend.getInventoryByProducts([productId]);
     if(r.error)throw r.error;
-    const offers=(r.data||[]).filter(x=>String(x.shop_id)!==String(originalShopId)&&Number(x.quantity)>0&&x.active!==false).map(x=>{
+    const offers=(r.data||[]).filter(x=>String(x.shop_id)!==String(originalShopId)&&x.active!==false).map(x=>{
       const p=mapDbProduct(x.products)||catalogProduct(x.product_id),sh=unwrapDbRelation(x.shops);
       return {...x,p,shop:sh};
     }).filter(x=>x.p&&x.shop&&x.shop.id);
     if(!offers.length){target.innerHTML='<div class="tiny" style="padding:12px 0">No encontramos otra tienda con unidades disponibles. Inténtalo más tarde.</div>';return;}
     offers.forEach(x=>{if(x.p&&!state.catalog.some(p=>String(p.id)===String(x.p.id)))state.catalog.push(x.p);});
-    state.inventory=offers.map(x=>({id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),qty:Number(x.quantity),active:x.active!==false,p:x.p,s:x.shop}));
+    state.inventory=offers.map(x=>({id:x.id,shopId:x.shop_id,productId:x.product_id,price:Number(x.price),active:x.active!==false,p:x.p,s:x.shop}));
     state.shops=[...new Map(offers.map(x=>[x.shop.id,x.shop])).values()];
     target.innerHTML='<div style="display:grid;gap:9px;margin-top:12px">'+offers.map(x=>{
       const fee=x.delivery_type==="pickup"?0:Number(x.shop.delivery_local_fee||0);
-      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">'+Number(x.quantity)+' disponible(s)</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+','+inlineArg(orderId)+')">Solicitar a esta tienda</button></div>';
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px"><b>'+escapeHtml(x.shop.name||"Tienda")+'</b><div class="tiny" style="margin-top:4px">'+escapeHtml(x.shop.address||"Dirección no indicada")+'</div><div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px"><strong>'+money(x.price)+'</strong><span class="tiny">Disponible</span></div><button class="buy" style="width:100%;margin-top:10px" onclick="chooseAlternativeShop('+inlineArg(x.shop_id)+','+inlineArg(x.product_id)+','+inlineArg(orderId)+')">Solicitar a esta tienda</button></div>';
     }).join('')+'</div>';
   }catch(e){target.innerHTML='<div class="tiny" style="padding:12px 0">No se pudieron consultar alternativas. '+escapeHtml(e.message||"")+'</div>';}
 }
@@ -2097,7 +2093,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
      if(sub==="create") resetCreateInventory();
    };
 
-  function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id&&i.active):[];}
+  function ownInventory(){return currentShop?state.inventory.filter(i=>i.shopId===currentShop.id):[];}
   function productFor(id){return state.catalog.find(p=>String(p.id)===String(id));}
 
   window.renderInventorySearch=function(){
@@ -2117,22 +2113,22 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   };
 
   function inventoryCard(x){
-    const available=Number(x.qty)>0;
+    const available=x.active!==false;
     return '<article class="inventory-card">'+
       '<div class="inventory-card-top"><div class="inventory-card-heading"><div class="inventory-card-title"><b>'+esc(x.p.model)+'</b><small>'+esc(x.p.type)+' · '+esc(x.p.variant)+'</small></div></div>'+
       '<button class="inventory-edit-btn" onclick="editInventoryV38(\''+x.id+'\')">Editar precio</button></div>'+
-      '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+
+      '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+ 
       '<button class="inventory-edit-btn" style="width:100%;margin-top:10px" onclick="toggleStoreAvailabilityV38(\''+x.id+'\')">'+(available?'Marcar como agotado':'Volver a activar')+'</button>'+
       '<div id="edit-'+esc(x.id)+'"></div></article>';
   }
 
   window.toggleStoreAvailabilityV38=async function(id){
     const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
-    const next=Number(i.qty)>0?0:999999;
+    const next=i.active===false;
     try{
       const r=await CeluPiezazBackend.saveInventoryItem(i.productId,Number(i.price),next);if(r.error)throw r.error;
       await loadCurrentShop();renderInventorySearch();
-      toast(next>0?'Producto activado como disponible.':'Producto marcado como agotado.');
+      toast(next?'Producto activado como disponible.':'Producto marcado como agotado.');
     }catch(e){toast(e.message||'No se pudo cambiar la disponibilidad.');}
   };
 
@@ -2146,15 +2142,15 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
 
   window.saveInventoryV38=async function(id){
     const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
-    const p=Number(document.getElementById("ep-"+id).value),q=Number(i.qty)>0?999999:0;
+    const p=Number(document.getElementById("ep-"+id).value);
     if(!Number.isFinite(p)||p<=0){toast("Indica un precio válido mayor que cero.");return;}
-    try{const r=await CeluPiezazBackend.saveInventoryItem(i.productId,p,q);if(r.error)throw r.error;
+    try{const r=await CeluPiezazBackend.saveInventoryItem(i.productId,p,i.active!==false);if(r.error)throw r.error;
       await loadCurrentShop();renderInventorySearch();toast("Inventario actualizado correctamente.");}
     catch(e){toast(e.message||"No se pudo actualizar el inventario.");}
   };
 
   function resetCreateInventory(){
-    const ids=["spSearch","price","qty"];
+    const ids=["spSearch","price"];
     ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value="";});
     const prodSelect=document.getElementById("prod");if(prodSelect){prodSelect.innerHTML="";prodSelect.value="";}
     window.__storeCreateProducts=[];
@@ -2218,7 +2214,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     if(prod){prod.innerHTML="";prod.value="";}
     if(selected){selected.style.display="none";selected.classList.add("is-disabled");selected.innerHTML="";}
     if(data){data.style.display="none";data.classList.add("is-disabled");}
-    ["price","qty"].forEach(id=>{const input=document.getElementById(id);if(input)input.value="";});
+    ["price"].forEach(id=>{const input=document.getElementById(id);if(input)input.value="";});
     if(!vs)return;
     vs.style.display="none";vs.innerHTML="";
     if(variants.length===1)return chooseStoreVariantV38(model,type,variants[0]);
@@ -2241,7 +2237,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   async function saveCreateInventory(){
     const prod=document.getElementById("prod").value;
     const priceRaw=document.getElementById("price").value.replace(/[^0-9]/g,"");
-    const qty=999999,price=Number(priceRaw);
+    const price=Number(priceRaw);
     if(!currentShop){toast("No encontramos la tienda de esta cuenta.");return;}
     if(currentShop.status!=="approved"||!currentShop.active){toast("Tu tienda debe ser aprobada por el administrador antes de publicar inventario.");return;}
     if(!prod){toast("Primero selecciona el producto.");return;}
@@ -2249,7 +2245,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     const btn=document.getElementById("spSave"),st=document.getElementById("spSaveStatus");
     if(btn){btn.disabled=true;btn.textContent="Guardando…";}
     try{
-      const r=await CeluPiezazBackend.saveInventoryItem(prod,price,qty);
+      const r=await CeluPiezazBackend.saveInventoryItem(prod,price,true);
       if(r.error)throw r.error;
       await loadCurrentShop();
       if(st)st.textContent="✓ Inventario guardado correctamente";
@@ -2274,7 +2270,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
         if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
         else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
         return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
-          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Cantidad</span><b>'+Number(line.quantity||1)+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
+          '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
     }catch(e){box.innerHTML='<div class="inventory-empty-state"><b>No se pudieron cargar los pedidos</b><span>'+esc(e.message||"Intenta de nuevo.")+'</span></div>';}
   }
@@ -2355,7 +2351,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       ?"Esta cuenta no tiene una tienda vinculada. Contacta al administrador."
       :currentShop.status==="suspended"
         ?"Tu tienda está suspendida. Contacta al administrador."
-        :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar precios y cantidades.";
+        :"Tu tienda está pendiente de aprobación. Cuando el administrador la apruebe, podrás publicar productos y precios.";
     document.querySelectorAll("#admin .inventory-choice").forEach(b=>{b.disabled=!approved;b.style.opacity=approved?"1":".45";});
     document.getElementById("shopSectionOrders").classList.add("active");
     document.getElementById("shopSectionInventory").classList.remove("active");
@@ -2368,9 +2364,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
   window.renderAdmin=renderAdminV38;
   const saveBtn=document.getElementById("spSave"); if(saveBtn)saveBtn.onclick=saveCreateInventory;
   const search=document.getElementById("spSearch"); if(search)search.addEventListener("input",renderStoreModels);
-  const priceInput=document.getElementById("price"),qtyInput=document.getElementById("qty");
-  if(priceInput)priceInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(qtyInput)qtyInput.focus();}});
-  if(qtyInput)qtyInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(saveBtn)saveBtn.click();}});
+  const priceInput=document.getElementById("price");
+  if(priceInput)priceInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(saveBtn)saveBtn.click();}});
   window.renderStoreProductPicker=function(){resetCreateInventory();};
   window.renderAdmin=renderAdminV38;
   renderAdminV38();
