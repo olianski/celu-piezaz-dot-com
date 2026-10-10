@@ -1092,6 +1092,23 @@ main{max-width:760px;margin:auto;padding:18px 16px}.hero{padding:8px 0 14px}.her
 
 </style>
 <style id="real-auth-css">
+/* Inicio de sesión: jerarquía visual clara y adaptable */
+.auth-gate{background:radial-gradient(ellipse at 15% 10%,#e4edff 0,transparent 42%),linear-gradient(145deg,#f7f9fd 0%,#eef3fb 100%);padding:28px}
+.auth-card{width:min(440px,100%);padding:36px 34px 30px;border:1px solid #e5eaf2;border-radius:24px;box-shadow:0 24px 70px rgba(16,24,40,.10)}
+.auth-card .logo{display:flex;align-items:center;gap:5px;font-size:21px;letter-spacing:-.6px;margin-bottom:32px!important}
+.auth-card .logo:before{content:"CP";display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:7px;border-radius:12px;background:#155eef;color:#fff;font-size:13px;font-weight:900;letter-spacing:-.5px}
+.auth-card h1{font-size:29px;letter-spacing:-.8px;margin-bottom:8px;color:#101828}
+.auth-card p{font-size:14px;line-height:1.6;color:#667085}
+.auth-card .auth-subnote{margin:0 0 24px!important;padding:12px 13px;border:1px solid #e7edf7;border-radius:12px;background:#f8faff;font-size:12px!important;line-height:1.5;color:#475467!important}
+.auth-form{gap:16px}
+.auth-form label{display:block;font-size:13px;font-weight:750;color:#344054}
+.auth-form input{display:block;box-sizing:border-box;margin-top:7px;padding:13px 14px;border:1px solid #d0d8e5;border-radius:11px;background:#fff;font-size:15px;transition:border-color .15s,box-shadow .15s}
+.auth-form input:focus{border-color:#155eef;box-shadow:0 0 0 3px rgba(21,94,239,.12)}
+.auth-submit{min-height:50px;margin-top:5px;border-radius:11px;background:#155eef;font-size:15px;font-weight:800;box-shadow:0 5px 12px rgba(21,94,239,.18);cursor:pointer}
+.auth-submit:hover{background:#124dcc}
+.auth-msg{font-size:13px;line-height:1.45;margin-top:12px}
+@media(max-width:560px){.auth-gate{padding:18px}.auth-card{padding:27px 22px 23px;border-radius:20px}.auth-card .logo{font-size:19px;margin-bottom:26px!important}.auth-card .logo:before{width:34px;height:34px;border-radius:10px}.auth-card h1{font-size:27px}.auth-card p{font-size:14px}.auth-card .auth-subnote{font-size:12px!important;margin-bottom:22px!important}.auth-form{gap:15px}.auth-form input{padding:13px 12px;font-size:16px}.auth-submit{min-height:49px;font-size:15px}}
+
 .auth-gate{position:fixed;inset:0;z-index:100;background:#f6f8fc;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
 .auth-card{width:min(560px,100%);background:#fff;border:1px solid #e4e7ec;border-radius:30px;padding:38px;box-shadow:0 16px 44px #10182810}
 .auth-card .logo{font-size:24px;letter-spacing:-.8px;margin-bottom:28px!important}
