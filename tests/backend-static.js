@@ -15,15 +15,8 @@ for(const f of files){
       [s.includes('search_products'),'RPC búsqueda']
     );
   }
-  if(f.includes('002_order_transaction')){
-    checks.push(
-      [/for\s+update/i.test(s),'bloqueo stock'],
-      [/quantity\s*=\s*quantity\s*-\s*v_qty/i.test(s),'descuento stock']
-    );
-  }
-  if(f.includes('003_auth_profile')){
-    checks.push([s.includes('on_auth_user_created'),'trigger auth']);
-  }
+  if(f.includes('002_order_transaction')) checks.push([/for\s+update/i.test(s),'bloqueo stock'],[/quantity\s*=\s*quantity\s*-\s*v_qty/i.test(s),'descuento stock']);
+  if(f.includes('003_auth_profile')) checks.push([s.includes('on_auth_user_created'),'trigger auth']);
   if(f.includes('007_audit_integrity_roles_catalog')){
     checks.push(
       [s.includes('phone_models_catalog_key_uidx'),'unicidad normalizada de modelos'],
@@ -31,7 +24,7 @@ for(const f of files){
       [s.includes('users_single_admin_uidx'),'solo una cuenta admin'],
       [s.includes('prevent_shop_self_approval'),'protección contra autoaprobación de tiendas'],
       [s.includes('where id = p_product_id and active = true'),'inventario solo de productos activos'],
-      [s.includes('status = \'approved\''),'validación de tienda aprobada en pedidos']
+      [s.includes("status = 'approved'"),'validación de tienda aprobada en pedidos']
     );
   }
   if(f.includes('008_protect_business_data_and_order_flow')){
@@ -39,7 +32,7 @@ for(const f of files){
       [s.includes('for select to authenticated'),'lectura del catálogo requiere sesión'],
       [s.includes('public.guard_shop_lifecycle'),'ciclo de vida de tienda protegido'],
       [s.includes('revoke insert, update, delete on public.orders, public.order_items'),'mutaciones de pedidos solo por RPC'],
-      [s.includes("p_next_status='preparing'") && s.includes("p_next_status='out_for_delivery'"),'estados intermedios de pedidos'],
+      [s.includes("p_next_status='preparing'") && s.includes("p_next_status='out_for_delivery'"),'estados intermedios históricos de pedidos'],
       [s.includes('grant execute on function public.place_order'),'RPC de pedido autorizado']
     );
   }
@@ -59,9 +52,7 @@ for(const f of files){
       [s.includes('from anon, public'),'sin privilegios heredados para invitados']
     );
   }
-  if(f.includes('011_deduplicate_open_demand_requests')){
-    checks.push([s.includes('demand_requests_one_open_per_product_uidx'),'solicitudes abiertas sin duplicados']);
-  }
+  if(f.includes('011_deduplicate_open_demand_requests')) checks.push([s.includes('demand_requests_one_open_per_product_uidx'),'solicitudes abiertas sin duplicados']);
   if(f.includes('012_preserve_order_history_for_participants')){
     checks.push(
       [s.includes('where o.technician_id = public.users.id and s.user_id = auth.uid()'),'datos de contacto solo en pedidos propios de la tienda'],
@@ -81,8 +72,29 @@ for(const f of files){
     checks.push(
       [s.includes("current_setting('app.internal_stock_change', true) = 'true'"),'solo RPC validadas pueden actualizar stock transaccional'],
       [s.includes("set_config('app.internal_stock_change','true',true)"),'pedido marca el descuento interno de stock'],
-      [s.includes("v_order.status='pending' and p_next_status='accepted'") && s.includes("v_order.status='out_for_delivery' and p_next_status='delivered'"),'transiciones de pedido protegidas'],
-      [s.includes("p_next_status='out_for_delivery'"),'flujo de despacho de pedidos']
+      [s.includes("v_order.status='pending' and p_next_status='accepted'") && s.includes("v_order.status='out_for_delivery' and p_next_status='delivered'"),'transiciones históricas de pedido protegidas'],
+      [s.includes("p_next_status='out_for_delivery'"),'flujo histórico de despacho de pedidos']
+    );
+  }
+  if(f.includes('015_simplify_order_statuses_and_require_rejection_reason')){
+    checks.push(
+      [s.includes('p_rejection_reason text default null'),'RPC admite motivo de rechazo'],
+      [s.includes("v_order.status='pending' and p_next_status='accepted'"),'aceptación desde pendiente'],
+      [s.includes("v_order.status='pending' and p_next_status='rejected'"),'rechazo desde pendiente'],
+      [s.includes("nullif(trim(coalesce(p_rejection_reason,'')), '') is null"),'motivo de rechazo obligatorio'],
+      [s.includes("rejection_reason=trim(p_rejection_reason)"),'motivo guardado en el pedido'],
+      [s.includes('revoke all on function public.update_order_status(uuid,text,text) from public,anon'),'permisos de la RPC final restringidos'],
+      [s.includes('grant execute on function public.update_order_status(uuid,text,text) to authenticated'),'RPC final solo para usuarios autenticados']
+    );
+  }
+  if(f.includes('016_remove_stock_return_on_order_rejection')){
+    checks.push(
+      [s.includes("v_order.status = 'pending' and p_next_status = 'rejected'"),'rechazo solo desde pendiente'],
+      [s.includes("nullif(trim(coalesce(p_rejection_reason, '')), '') is null"),'motivo obligatorio en rechazo'],
+      [s.includes("status = 'rejected'"),'pedido queda rechazado'],
+      [!(/update public\.inventory[\s\S]*?quantity\s*=\s*quantity\s*\+/i.test(s)),'rechazo sin devolución automática de inventario'],
+      [s.includes('revoke all on function public.update_order_status(uuid,text,text) from public, anon'),'RPC de estados sin acceso público/anon'],
+      [s.includes('grant execute on function public.update_order_status(uuid,text,text) to authenticated'),'RPC de estados accesible a usuarios autenticados']
     );
   }
   for(const [ok,label] of checks) if(!ok) throw new Error(f+': falta '+label);
