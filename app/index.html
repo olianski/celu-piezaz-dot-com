@@ -2697,9 +2697,23 @@ async function submitAuth(e){
       const self=x.id===A.uid, protectedAdmin=x.role==='admin';
       const edit=protectedAdmin
         ?'<span class="ac-badge ok">Administrador protegido</span>'
-        :'<div class="ac-role-editor"><select class="ac-select" aria-label="Rol de '+esc(x.name||'usuario')+'" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar rol</button><button class="ac-btn primary" onclick="adminConsoleEditUser(\''+x.id+'\')">Editar datos</button><div id="acUserEdit-'+x.id+'" class="ac-user-edit-slot"></div></div>';
+        :'<div class="ac-role-editor"><select class="ac-select" aria-label="Rol de '+esc(x.name||'usuario')+'" id="acRole-'+x.id+'" '+(self?'disabled':'')+'>'+['technician','shop'].map(r=>'<option value="'+r+'" '+(x.role===r?'selected':'')+'>'+esc(labelStatus(r))+'</option>').join('')+'</select><button class="ac-btn" '+(self?'disabled':'')+' onclick="adminConsoleUserRole(\''+x.id+'\')">Guardar rol</button><button class="ac-btn primary" onclick="adminConsoleEditUser(\''+x.id+'\')">Editar datos</button><button class="ac-btn" style="background:#fff0f0;color:#b42318;border-color:#fecaca" onclick="adminConsoleDeleteUser(\\''+x.id+'\\')">Eliminar definitivamente</button><div id="acUserEdit-'+x.id+'" class="ac-user-edit-slot"></div></div>';
       return item(esc(x.name||'Usuario sin nombre'),esc(x.phone||'Sin teléfono')+' · Creado '+esc(date(x.created_at)),badge(x.role),'',edit);
     }).join(''):empty('Sin perfiles','Prueba otra búsqueda o cambia el filtro.');
+  }
+  async function deleteUser(id){
+    const user=A.users.find(x=>x.id===id);
+    if(!user||!['technician','shop'].includes(user.role)){notice('Solo puedes eliminar técnicos o tiendas.',true);return;}
+    if(id===A.uid||user.role==='admin'){notice('Los administradores están protegidos.',true);return;}
+    const roleName=user.role==='shop'?'la tienda':'el técnico';
+    const warning='ELIMINACIÓN DEFINITIVA\\n\\nVas a eliminar '+roleName+' "'+(user.name||'Sin nombre')+'".\\n\\nSe borrarán su acceso, perfil, publicaciones, solicitudes y todos los pedidos asociados. Esta acción no se puede deshacer.\\n\\n¿Deseas continuar?';
+    if(!confirm(warning))return;
+    const confirmation=prompt('Para confirmar, escribe ELIMINAR exactamente:');
+    if(confirmation!=='ELIMINAR'){notice('Eliminación cancelada.');return;}
+    notice('Eliminando cuenta y datos asociados…');
+    await checked(CeluPiezazBackend.adminDeleteAccount(id));
+    notice('La cuenta y sus datos asociados fueron eliminados definitivamente.');
+    await refresh();
   }
   async function editUser(id){
     const box=$('acUserEdit-'+id);if(!box)return;
@@ -2816,6 +2830,7 @@ async function submitAuth(e){
   window.adminConsoleCreateAccount=e=>createAccount(e).catch(e2=>notice(errorText(e2),true));
   window.adminConsoleFilterUsers=filterUsers;
   window.adminConsoleUserRole=id=>userRole(id).catch(e=>notice(errorText(e),true));
+  window.adminConsoleDeleteUser=id=>deleteUser(id).catch(e=>notice(errorText(e),true));
   window.adminConsoleEditUser=id=>editUser(id).catch(e=>notice(errorText(e),true));
   window.adminConsoleSaveUser=(e,id,role)=>saveUser(e,id,role);
   window.adminConsoleFilterOrders=filterOrders;
