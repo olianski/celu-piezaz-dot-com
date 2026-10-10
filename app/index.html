@@ -2061,7 +2061,8 @@ async function renderMarket(){
   let rows=activeInventory().map(i=>({...i,p:catalogProduct(i.productId),s:i.s||shop(i.shopId)}))
     .filter(x=>x.p&&normalize(x.p.model)===normalize(techSelectedModel))
     .filter(x=>!techSelectedPart||normalize(x.p.type)===normalize(techSelectedPart))
-    .filter(x=>!techSelectedVariant||normalize(x.p.variant)===normalize(techSelectedVariant))\n    .filter(x=>!isScreenDisplayType(x.p.type)||/\\biphone\\b/i.test(techSelectedModel)||x.p.frameType===techSelectedFrame);
+    .filter(x=>!techSelectedVariant||normalize(x.p.variant)===normalize(techSelectedVariant))
+    .filter(x=>!isScreenDisplayType(x.p.type)||normalize(techSelectedModel).includes("iphone")||x.p.frameType===techSelectedFrame)
   rows.sort((a,b)=>a.price-b.price);
   document.getElementById("count").textContent=rows.length+" opciones";
   if(!techSelectedPart){
