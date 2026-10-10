@@ -1894,7 +1894,7 @@ async function renderMarket(){
       rows.map((x,idx)=>'<article class="card" onclick="openProduct('+inlineArg(x.productId)+')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
       '<div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||'Tienda')+'</div><div class="sub">'+escapeHtml(x.p.type)+' · '+escapeHtml(x.p.variant)+'</div></div>'+
       '<span class="badge '++'">'+'Disponible'+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="event.stopPropagation();startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></article>').join('');
   }else{
     results.innerHTML='<div class="card empty"><b>No encontramos ese repuesto disponible.</b><div class="tiny" style="margin-top:6px">Puedes solicitar que te avisemos cuando una tienda lo publique.</div><button class="save" style="margin-top:12px;width:100%" onclick="requestDemand()">Avisarme cuando aparezca</button></div>';
@@ -1921,7 +1921,7 @@ function openProduct(productId){
     '<div class="section"><h2>Tiendas disponibles</h2><small>'+offers.length+' opción(es)</small></div>'+
     (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||"Tienda")+'</div><div class="sub">'+escapeHtml(p.type)+' · '+escapeHtml(p.variant)+'</div></div>'+
       '<span class="badge '++'">'+'Disponible'+'</span></div>'+
-      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">'+Number(x.qty)+' unidad(es)</div></div>'+
+      '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></div>').join(''):
       '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
 }
@@ -1933,7 +1933,7 @@ function startCheckout(shopId,productId,priorOrderId=null){
   if(!p||!inv){toast("La disponibilidad cambió. Vuelve a buscar el repuesto.");openPage("market");return;}
   selectedInventoryId=inv.id;
   const sh=inv.s||shop(shopId);
-  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">'+Number(inv.qty)+' disponible(s)</div></div>';
+  document.getElementById("checkoutCard").innerHTML='<div class="card"><div class="title">'+escapeHtml(p.type)+' '+escapeHtml(p.model)+'</div><div class="sub">'+escapeHtml(p.variant)+' · '+escapeHtml(sh?.name||"Tienda")+'</div><div class="price" style="margin-top:12px">'+money(inv.price)+'</div><div class="tiny" style="margin-top:6px">Producto disponible</div></div>';
   const delivery=document.getElementById("delivery");if(delivery)delivery.value="local";
   deliveryChanged();
   openPage("checkout");
