@@ -126,3 +126,9 @@ assert(html.includes('id="custom-dropdown-design"'), "Todos los desplegables deb
 assert(html.includes('id="custom-dropdown-behavior"'), "Falta el componente de desplegables personalizados.");
 assert(html.includes('MutationObserver'), "Los desplegables creados dinámicamente por administración también deben personalizarse.");
 assert(html.includes('custom-dropdown-option'), "Las opciones deben usar el menú visual personalizado.");
+
+assert(html.includes('admin-friendly-redesign'), "Falta el rediseño amigable del panel de administración.");
+assert(html.includes('¿No encuentras el modelo? Crear uno nuevo'), "El administrador debe poder crear un modelo desde el formulario de producto.");
+assert(html.includes('acProductNewBrand') && html.includes('acProductNewModel'), "Faltan los campos para crear un modelo desde productos.");
+assert(html.includes('Pedidos por atender'), "El resumen de administración debe priorizar las tareas pendientes.");
+assert(!html.includes('window.addEventListener("scroll",close,true)'), "Los menús personalizados no deben cerrarse al deslizar dentro de las opciones.");
