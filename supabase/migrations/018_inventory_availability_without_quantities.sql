@@ -110,14 +110,14 @@ declare
   v_inventory public.inventory%rowtype;
   v_count integer;
   v_distinct integer;
+  v_technician public.users%rowtype;
 begin
   if auth.uid() is null then raise exception 'No autenticado'; end if;
-  if not exists(select 1 from public.users where id = auth.uid() and role = 'technician') then
-    raise exception 'Solo un técnico puede crear pedidos';
-  end if;
+  select * into v_technician from public.users where id = auth.uid() and role = 'technician';
+  if not found then raise exception 'Solo un técnico puede crear pedidos'; end if;
   if p_delivery_type not in ('local', 'outside_zone', 'pickup') then raise exception 'Tipo de entrega inválido'; end if;
-  if p_delivery_type <> 'pickup' and nullif(trim(coalesce(p_delivery_address, '')), '') is null then
-    raise exception 'La dirección es obligatoria para entrega';
+  if p_delivery_type <> 'pickup' and nullif(trim(coalesce(v_technician.address, '')), '') is null then
+    raise exception 'Tu perfil no tiene dirección de entrega. Contacta al administrador.';
   end if;
   if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
     raise exception 'El pedido debe contener productos';
@@ -128,11 +128,9 @@ begin
   from jsonb_array_elements(p_items) x;
   if v_count <> v_distinct then raise exception 'El pedido contiene productos repetidos o inválidos'; end if;
 
-  select case p_delivery_type when 'local' then delivery_local_fee when 'outside_zone' then delivery_outside_fee else 0 end
-  into v_fee
-  from public.shops
-  where id = p_shop_id and active = true and status = 'approved';
+  perform 1 from public.shops where id = p_shop_id and active = true and status = 'approved';
   if not found then raise exception 'La tienda no está disponible'; end if;
+  v_fee := case when p_delivery_type = 'pickup' then 0 else coalesce(v_technician.delivery_fee, 0) end;
 
   -- Cada elemento del pedido representa un producto; no se solicitan ni descuentan unidades.
   for v_item in select * from jsonb_array_elements(p_items) loop
@@ -150,7 +148,7 @@ begin
 
   insert into public.orders(technician_id, shop_id, status, delivery_type, delivery_fee, delivery_address, total)
   values(auth.uid(), p_shop_id, 'pending', p_delivery_type, v_fee,
-    case when p_delivery_type = 'pickup' then null else trim(p_delivery_address) end,
+    case when p_delivery_type = 'pickup' then null else trim(v_technician.address) end,
     v_subtotal + v_fee)
   returning id into v_order_id;
 
