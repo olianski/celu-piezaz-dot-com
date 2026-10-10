@@ -1976,12 +1976,8 @@ function renderTechFlow(){
   partStep.classList.remove("is-disabled");
   partsEl.innerHTML='<div class="selection-summary"><span>Repuesto</span><strong>'+escapeHtml(techSelectedPart)+'</strong><button onclick="changeTechPart()">Cambiar</button></div>';
   const variants=techVariantsForSelection();
-  if(variants.length<=1){
-    techSelectedVariant=variants[0]||"";
-    variantStep.classList.add("is-disabled");
-    return;
-  }
-  if(!techSelectedVariant){
+  if(variants.length<=1) techSelectedVariant=variants[0]||"";
+  if(variants.length>1&&!techSelectedVariant){
     variantStep.classList.remove("is-disabled");
     variantTitle.textContent="¿Qué tipo necesitas?";
     variantsEl.innerHTML=variants.map(v=>
@@ -1989,7 +1985,9 @@ function renderTechFlow(){
     ).join("");
   }else{
     variantStep.classList.remove("is-disabled");
-    variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant)+'</strong><button onclick="changeTechVariant()">Cambiar</button></div>';
+    variantTitle.textContent="¿La pantalla viene con marco?";
+    variantsEl.innerHTML='<div class="selection-summary"><span>Tipo</span><strong>'+escapeHtml(techSelectedVariant||"Estándar")+'</strong>'+(variants.length>1?'<button onclick="changeTechVariant()">Cambiar</button>':'')+'</div>'+
+      ['sin_marco','con_marco'].map(f=>'<button class="part-option" onclick="selectTechFrame(\''+f+'\')" style="'+(techSelectedFrame===f?'border:2px solid #2563eb;':'')+'"><span>'+(f==='sin_marco'?'Sin marco (opción habitual)':'Con marco')+'</span><span class="part-arrow">'+(techSelectedFrame===f?'✓':'›')+'</span></button>').join("");
   }
 }
 function changeTechPart(){
