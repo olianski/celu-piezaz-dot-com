@@ -3188,7 +3188,7 @@ initRealBackend();
     if(spaceBelow<220&&spaceAbove>spaceBelow){menu.style.top="auto";menu.style.bottom="calc(100% + 6px)";}else{menu.style.top="calc(100% + 6px)";menu.style.bottom="auto";}
   }
   function enhance(select){
-    if(select._customDropdown||select.multiple||select.size>1||select.dataset.nativeDropdown==="true")return;
+    if(select._customDropdown||select.multiple||select.size>1||select.dataset.nativeDropdown==="true"||select.hidden||select.style.display==="none")return;
     const host=document.createElement("div");host.className="custom-dropdown";host.dataset.forSelect=select.id||("dropdown-"+(++sequence));
     const trigger=document.createElement("button");trigger.type="button";trigger.className="custom-dropdown-trigger";trigger.setAttribute("aria-haspopup","listbox");trigger.setAttribute("aria-expanded","false");trigger.id="custom-"+host.dataset.forSelect;
     const value=document.createElement("span");value.className="custom-dropdown-value";const chevron=document.createElement("span");chevron.className="custom-dropdown-chevron";chevron.setAttribute("aria-hidden","true");trigger.append(value,chevron);
