@@ -41,6 +41,14 @@ const counts = ids.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{});
 const duplicateIds = Object.entries(counts).filter(([,n])=>n>1);
 assert.deepStrictEqual(duplicateIds, [], "Hay IDs HTML duplicados.");
 
+assert(script.includes("function startOrderUpdates()"), "Falta la sincronización de pedidos.");
+assert(script.includes('filter="shop_id=eq."+currentShop.id'), "La tienda debe suscribirse a cambios de sus propios pedidos.");
+assert(script.includes('setInterval(()=>{if(orderScreenIsVisible())refreshCurrentOrderViews();},7000)'), "Debe existir respaldo periódico cuando realtime falle.");
+assert(script.includes('document.addEventListener("visibilitychange"'), "Debe resincronizar pedidos al volver a la pestaña.");
+assert(script.includes('window.addEventListener("online"'), "Debe resincronizar pedidos al recuperar conexión.");
+assert(script.includes("window.renderShopOrdersV38=renderShopOrdersV38"), "La vista de pedidos de tienda debe poder refrescarse desde realtime.");
+assert(script.includes('if(btn?.disabled)return;'), "El envío debe ignorar dobles clics mientras el pedido se guarda.");
+
 assert(script.includes("function bootAuthenticated"),
   "Falta el arranque autenticado de la aplicación.");
 
