@@ -94,6 +94,7 @@ assert(html.includes('Empieza buscando un modelo'), "Debe mostrarse un estado va
 assert(html.includes('if(step)step.style.display="none"'), "El contador de disponibilidad debe ocultarse hasta seleccionar modelo.");
 assert(html.includes('Finalizar pedido')&&html.includes('Marcar entregado'), "La tienda debe poder finalizar pedidos aceptados.");
 assert(!html.includes('Iniciar preparación')&&!html.includes('Marcar en camino'), "La interfaz no debe ofrecer estados intermedios eliminados.");
+assert(!html.includes('devolver las cantidades al inventario'), "El rechazo no debe prometer una devolución de cantidades que ya no se realiza.");
 assert(html.includes("function escapeHtml(value)"), "Falta escapar texto dinámico del catálogo.");
 assert(html.includes("function inlineArg(value)"), "Falta codificar de forma segura los argumentos de los selectores.");
 assert(html.includes("chooseStoreModelV38('+inlineArg(m)+')"), "El selector de modelo de tienda debe escapar los argumentos.");
