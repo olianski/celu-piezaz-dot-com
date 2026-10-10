@@ -1893,7 +1893,7 @@ async function renderMarket(){
     results.innerHTML='<div class="section" style="margin-top:4px"><div><h2>Tiendas que lo tienen</h2><small>'+rows.length+' opciones · ordenadas por precio</small></div></div>'+
       rows.map((x,idx)=>'<article class="card" onclick="openProduct('+inlineArg(x.productId)+')" style="'+(idx===0?'border:2px solid #c7dcff;':'')+'">'+
       '<div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||'Tienda')+'</div><div class="sub">'+escapeHtml(x.p.type)+' · '+escapeHtml(x.p.variant)+'</div></div>'+
-      '<span class="badge '++'">'+'Disponible'+'</span></div>'+
+      '<span class="badge">Disponible</span></div>'+
       '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="event.stopPropagation();startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></article>').join('');
   }else{
@@ -1920,7 +1920,7 @@ function openProduct(productId){
     '<div class="panel"><div class="tiny">'+escapeHtml(p.type)+'</div><h1 style="font-size:26px;margin:4px 0">'+escapeHtml(p.model)+'</h1><div class="sub">'+escapeHtml(p.variant)+'</div></div>'+
     '<div class="section"><h2>Tiendas disponibles</h2><small>'+offers.length+' opción(es)</small></div>'+
     (offers.length?offers.map(x=>'<div class="card"><div class="cardtop"><div><div class="title">'+escapeHtml(x.s?.name||"Tienda")+'</div><div class="sub">'+escapeHtml(p.type)+' · '+escapeHtml(p.variant)+'</div></div>'+
-      '<span class="badge '++'">'+'Disponible'+'</span></div>'+
+      '<span class="badge">Disponible</span></div>'+
       '<div class="meta"><div><div class="price">'+money(x.price)+'</div><div class="shop">Disponible en tienda</div></div>'+
       '<button class="buy" onclick="startCheckout('+inlineArg(x.shopId)+','+inlineArg(x.productId)+')">Pedir</button></div></div>').join(''):
       '<div class="card empty"><b>Sin disponibilidad.</b><br><button class="back" style="margin-top:12px" onclick="requestDemand()">Avisarme cuando aparezca</button></div>');
@@ -2129,7 +2129,7 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     try{
       const r=await CeluPiezazBackend.saveInventoryItem(i.productId,Number(i.price),next);if(r.error)throw r.error;
       await loadCurrentShop();renderInventorySearch();
-      toast(next>0?'Producto activado como disponible.':'Producto marcado como agotado.');
+      toast(next?'Producto activado como disponible.':'Producto marcado como agotado.');
     }catch(e){toast(e.message||'No se pudo cambiar la disponibilidad.');}
   };
 
