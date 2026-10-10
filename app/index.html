@@ -2227,7 +2227,7 @@ document.addEventListener("keydown",function(event){
   const actions={
     q:()=>{if(typeof renderMarket==="function")renderMarket();},
     inventorySearch:()=>{if(typeof renderInventorySearch==="function")renderInventorySearch();},
-    spSearch:()=>{if(typeof renderStoreModels==="function")renderStoreModels();const first=document.querySelector("#spModels .picker-option");if(first)first.click();},
+    spSearch:()=>{if(typeof renderStoreModels==="function")renderStoreModels();},
     acShopSearch:()=>{if(typeof adminConsoleFilterShops==="function")adminConsoleFilterShops();},
     acProductSearch:()=>{if(typeof adminConsoleFindProducts==="function")adminConsoleFindProducts();},
     acModelSearch:()=>{if(typeof adminConsoleFilterModels==="function")adminConsoleFilterModels();},
