@@ -2291,8 +2291,18 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       '<button class="inventory-edit-btn" onclick="editInventoryV38(\''+x.id+'\')">Editar precio</button></div>'+
       '<div class="inventory-price">'+money(x.price)+'</div><div class="inventory-stock"><b>'+ (available?'Disponible':'Agotado') +'</b></div>'+ 
       '<button class="inventory-edit-btn" style="width:100%;margin-top:10px" onclick="toggleStoreAvailabilityV38(\''+x.id+'\')">'+(available?'Marcar como agotado':'Volver a activar')+'</button>'+
+      '<button class="inventory-remove-btn" style="width:100%;margin-top:8px;color:#b42318;border-color:#fecdca;background:#fff" onclick="unpublishInventoryV39(\''+x.id+'\')">Eliminar publicación</button>'+
       '<div id="edit-'+esc(x.id)+'"></div></article>';
   }
+
+  window.unpublishInventoryV39=async function(id){
+    const item=state.inventory.find(x=>String(x.id)===String(id));if(!item)return;
+    if(!confirm("¿Retirar esta publicación de tu inventario? Dejará de aparecer disponible para técnicos. Los pedidos anteriores se conservarán."))return;
+    try{
+      const r=await CeluPiezazBackend.unpublishInventoryItem(id);if(r.error)throw r.error;
+      await loadCurrentShop();renderInventorySearch();toast("Publicación retirada. El historial de pedidos se conservó.");
+    }catch(e){toast(e.message||"No se pudo retirar la publicación.");}
+  };
 
   window.toggleStoreAvailabilityV38=async function(id){
     const i=state.inventory.find(x=>String(x.id)===String(id));if(!i)return;
