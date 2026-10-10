@@ -1747,7 +1747,7 @@ function normalize(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function inlineArg(value){return escapeHtml(JSON.stringify(String(value??"")).replace(/</g,"\\u003c").replace(/>/g,"\\u003e").replace(/&/g,"\\u0026"));}
 
-function statusLabel(s){return ({pending:"Pendiente",accepted:"Aceptado",preparing:"Preparando",out_for_delivery:"En camino",delivered:"Entregado",rejected:"Rechazado",cancelled:"Cancelado"})[s]||s;}
+function statusLabel(s){return ({pending:"Pendiente de respuesta",accepted:"Aceptado",preparing:"Aceptado",out_for_delivery:"Aceptado",delivered:"Finalizado",rejected:"Rechazado",cancelled:"Cancelado"})[s]||s;}
 let techSelectedModel="";
 let techSelectedPart="";
 let techSelectedVariant="";
@@ -2271,11 +2271,8 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
       box.innerHTML=orders.length?orders.map(o=>{
         const p=orderProduct(o),u=orderTechnician(o),line=orderPrimaryItem(o);
         let action="";
-        if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
-        else if(o.status==="accepted")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'preparing\')">Iniciar preparación</button>';
-        else if(o.status==="preparing")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'out_for_delivery\')">Marcar en camino</button>';
-        else if(o.status==="out_for_delivery")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
-        else action='<span class="tiny">Pedido '+statusLabel(o.status).toLowerCase()+'</span>';
+        if(o.status==="pending")action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'accepted\')">Aceptar pedido</button><button class="shop-remove" onclick="rejectOrderV38(\''+o.id+'\')">Rechazar</button>';
+        else if(["accepted","preparing","out_for_delivery"].includes(o.status))action='<button class="buy" onclick="advanceOrderV38(\''+o.id+'\',\'delivered\')">Finalizar pedido</button>';
         return '<article class="shop-order-card"><div class="shop-order-top"><div><b>Pedido '+esc(String(o.id).slice(0,8))+'</b><div class="tiny">'+esc(p.model)+' · '+esc(p.type)+' · '+esc(p.variant)+'</div></div><span class="badge">'+esc(statusLabel(o.status))+'</span></div>'+
           '<div class="shop-order-items"><div class="shop-order-item"><span>Técnico</span><b>'+esc(u.name||"Técnico")+'</b></div><div class="shop-order-item"><span>Cantidad</span><b>'+Number(line.quantity||1)+'</b></div><div class="shop-order-item"><span>Total</span><b>'+money(o.total)+'</b></div><div class="shop-order-item"><span>Entrega</span><b>'+esc(o.delivery_type==="pickup"?"Recoger en tienda":o.delivery_address||"Domicilio")+'</b></div></div><div class="shop-order-actions">'+action+'</div></article>';
       }).join(""):'<div class="inventory-empty-state"><b>No hay pedidos todavía.</b><span>Los pedidos reales aparecerán aquí.</span></div>';
@@ -2286,11 +2283,18 @@ function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style
     try{
       const r=await CeluPiezazBackend.updateOrderStatus(id,next);if(r.error)throw r.error;
       toast(next==="accepted"?"Pedido aceptado.":"Pedido finalizado.");
-      await renderShopOrdersV38();await renderOrders();
-      offersLoadedForModel="";
+      await renderShopOrdersV38();await renderOrders();offersLoadedForModel="";
     }catch(e){toast(e.message||"No se pudo actualizar el pedido.");}
   };
-  window.rejectOrderV38=async function(id){await window.advanceOrderV38(id,"rejected");};
+  window.rejectOrderV38=async function(id){
+    const reason=prompt("Indica el motivo del rechazo (obligatorio):");
+    if(reason===null)return;
+    if(!reason.trim()){toast("Debes indicar el motivo del rechazo.");return;}
+    try{
+      const r=await CeluPiezazBackend.updateOrderStatus(id,"rejected",reason.trim());if(r.error)throw r.error;
+      toast("Pedido rechazado y motivo registrado.");await renderShopOrdersV38();await renderOrders();
+    }catch(e){toast(e.message||"No se pudo rechazar el pedido.");}
+  };
 
   async function renderShopSales(){
     const el=document.getElementById("shopSales");
@@ -2740,10 +2744,8 @@ async function submitAuth(e){
     $('acOrderList').innerHTML=rows.length?rows.map(x=>{
       const u=obj(x.users),sh=obj(x.shops);
       let actions='';
-      if(x.status==='pending')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+x.id+'\',\'rejected\')">Rechazar y devolver stock</button>';
-      else if(x.status==='accepted')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'preparing\')">Iniciar preparación</button>';
-      else if(x.status==='preparing')actions='<button class="ac-btn primary" onclick="adminConsoleOrder(\''+x.id+'\',\'out_for_delivery\')">Marcar en camino</button>';
-      else if(x.status==='out_for_delivery')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'delivered\')">Marcar entregado</button>';
+      if(x.status==='pending')actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'accepted\')">Aceptar pedido</button><button class="ac-btn danger" onclick="adminConsoleOrder(\''+x.id+'\',\'rejected\')">Rechazar</button>';
+      else if(['accepted','preparing','out_for_delivery'].includes(x.status))actions='<button class="ac-btn success" onclick="adminConsoleOrder(\''+x.id+'\',\'delivered\')">Finalizar pedido</button>';
       return item('Pedido · '+cash(x.total),esc(sh.name||'Tienda')+' · '+esc(u.name||'Técnico')+' · '+esc(date(x.created_at)),badge(x.status),
         '<span class="ac-muted">Entrega: '+esc(x.delivery_type==='pickup'?'Recoger en tienda':x.delivery_type==='outside_zone'?'Fuera de zona':'Local')+' · '+cash(x.delivery_fee)+'</span>'+(x.delivery_address?'<span class="ac-muted">Dirección: '+esc(x.delivery_address)+'</span>':''),actions);
     }).join(''):empty('No hay pedidos','Los pedidos aparecerán aquí cuando se registren.');
